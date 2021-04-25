@@ -1,4 +1,4 @@
-export default class Workout {
+export default class {
     constructor({ name = '', duration = 0 }) {
         this.id =crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
 

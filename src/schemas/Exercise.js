@@ -14,7 +14,7 @@ export class ExerciseSet {
     }
 }
 
-export default class Exercise {
+export default class {
     constructor(options) {
         const {
             name = '', targetReps = 0, targetWeight = null, targetDuration = 0,

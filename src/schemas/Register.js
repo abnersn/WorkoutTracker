@@ -14,7 +14,7 @@ export class WorkoutLog {
     }
 }
 
-export default class Register {
+export default class {
     constructor() {
         this.logs = new Map();
     }
