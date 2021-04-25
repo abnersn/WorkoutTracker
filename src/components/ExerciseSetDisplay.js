@@ -55,29 +55,26 @@ export default function ExerciseSetDisplay(props) {
 
     const restTotal = rest > 0 ? rest : targetRest - rest;
 
-    const onFocusExerciseSet = () => {
-        if (isComplete || isResting) {
-            setIsResting(false);
-            setIsComplete(false);
-            setIsActive(false);
-        } else {
-            setIsActive(true);
-        }
+    const startSet = () => {
+        setIsResting(false);
+        setIsComplete(false);
+        setIsActive(true);
     }
 
-    if (isComplete || isResting) {
-        return (
-            <div className='set' onClick={onFocusExerciseSet}>
-                <span className='duration'>{formatSeconds(duration)}</span>
-                <span className='weight'>{weight}</span>
-                <span className='reps'>{reps}</span>
-                <span className='rest'>{restTotal}</span>
-            </div>
-        )
+    const finishSet = () => {
+        setIsResting(true);
+        setIsComplete(false);
+        setIsActive(false);
+    }
+
+    const completeSet = () => {
+        setIsResting(false);
+        setIsComplete(true);
+        setIsActive(false);
     }
 
     return (
-        <div className='set' onClick={onFocusExerciseSet}>
+        <div className='set' tabIndex={0} onFocus={startSet}>
             {isActive &&
                 <span className='duration'>{formatSeconds(duration)}</span>}
             <form>
@@ -99,6 +96,7 @@ export default function ExerciseSetDisplay(props) {
                 </input>
             </form>
             <span className='rest'>{formatSeconds(rest)}</span>
+            {isActive && <button onClick={finishSet}>Finish</button>}
         </div>
     )
 }

@@ -44,12 +44,12 @@ it ('activates on focus', () => {
         $set.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    console.log(container.innerHTML);
     const $duration = container.querySelector('.duration');
     expect($duration.textContent).toBe('0');
 
     act(() => {
         jest.advanceTimersByTime(100);
     });
+
     expect($duration.textContent).toBe('1:40');
 })
