@@ -1,7 +1,7 @@
 export class ExerciseSet {
     constructor(options) {
         const {
-            reps = 8, weight = null, duration = 30, rest = 120, rpe = 8
+            reps = 8, weight = null, duration = 30, rest = 120
         } = options;
 
         this.id =crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
@@ -10,15 +10,14 @@ export class ExerciseSet {
         this.weight = weight;
         this.duration = duration;
         this.rest = rest;
-        this.rpe = rpe;
     }
 }
 
-export default class {
+export default class Exercise{
     constructor(options) {
         const {
             name = '', targetReps = 0, targetWeight = null, targetDuration = 0,
-            targetRest = 0, targetRPE = 0
+            targetRest = 0, rpe = 8
         } = options;
 
         this.id =crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
@@ -28,9 +27,9 @@ export default class {
             reps: targetReps,
             weight: targetWeight,
             duration: targetDuration,
-            rest: targetRest,
-            rpe: targetRPE
+            rest: targetRest
         }
+        this.rpe = rpe;
 
         this.sets = [];
     }

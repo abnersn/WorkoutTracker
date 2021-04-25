@@ -1,4 +1,4 @@
-export class WorkoutLog {
+export class ExerciseLog {
     constructor() {
         this.startTime = Date.now();
         this.endTime = null;
@@ -14,19 +14,22 @@ export class WorkoutLog {
     }
 }
 
-export default class {
+export class WorkoutLog {
+    constructor() {
+        this.logs = [];
+    }
+    get duration() {
+        const startTime = this.logs[0].startTime;
+        const endTime = this.logs[this.logs.length - 1].endTime;
+        return Math.floor(endTime - startTime);
+    }
+}
+
+export default class Register {
     constructor() {
         this.logs = new Map();
     }
     addLog(workoutId) {
         this.logs.set(workoutId, new WorkoutLog());
-    }
-    completeLog(workoutId) {
-        const log = this.logs.get(workoutId);
-        if (!log) {
-            console.warn(`Log not found for workout ${workoutId}`);
-            return;
-        }
-        log.setEndTime(Date.now());
     }
 }
