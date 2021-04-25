@@ -1,5 +1,27 @@
 import { useState } from "react";
 
+class Exercise {
+    constructor(name = '') {
+        this.id =crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+        this.reps = [];
+        this.name = name;
+    }
+}
+
+class Workout {
+    constructor(name = '') {
+        this.id =crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+        this.exercises = [];
+        this.name = name;
+    }
+    addExercise(exercise) {
+        this.exercises = this.exercises.concat(exercise);
+    }
+    removeExercise(id) {
+        this.exercises = this.exercises.filter(e => e.id !== id);
+    }
+}
+
 function Workout({ data, id, onUpdate }) {
     const [isEdit, setIsEdit] = useState(false);
     const [editName, setEditName] = useState('');
@@ -38,6 +60,18 @@ function Workout({ data, id, onUpdate }) {
 }
 
 function App() {
+    const [workouts, setWorkouts] = useState([]);
+
+    function addNewWorkout() {
+        const workout = generateNewWorkout();
+        setWorkouts(workouts.concat(workout));
+    }
+
+    function removeWorkout(id) {
+        setWorkouts(workouts.filter(w => w.id !== id));
+    }
+
+    function updateWorkout()
     return (
         <div class="bg-purple-100 w-full h-full">
             <h1>Workouts</h1>
