@@ -6,17 +6,17 @@ import SetDisplay from '../components/SetDisplay';
 
 let container = null;
 
-jest.useFakeTimers();
-
 beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
+    jest.useFakeTimers();
 });
 
 afterEach(() => {
     unmountComponentAtNode(container);
     container.remove();
     container = null;
+    jest.useRealTimers();
 });
 
 describe('SetDisplay component', () => {
@@ -129,19 +129,34 @@ describe('SetDisplay component', () => {
             stage = 'RESTING'
         ></SetDisplay>;
 
-        it('increments rest timer', () => {
+        it('decrements rest timer', () => {
             act(() => {
                 render(component, container);
             });
             const $value = container.querySelector('.rest .value');
 
+            expect($value.textContent).toBe('1:30');
+
+            act(() => {
+                jest.advanceTimersByTime(90000);
+            });
+
             expect($value.textContent).toBe('0');
+        });
+
+        it('continues rest timer after end', () => {
+            act(() => {
+                render(component, container);
+            });
+            const $value = container.querySelector('.rest .value');
+
+            expect($value.textContent).toBe('1:30');
 
             act(() => {
                 jest.advanceTimersByTime(100000);
             });
 
-            expect($value.textContent).toBe('1:40');
+            expect($value.textContent).toBe('-10');
         });
 
         it('only increments rest timer if not editing', () => {

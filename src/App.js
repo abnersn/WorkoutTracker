@@ -1,9 +1,15 @@
-import { useState } from "react";
-import ExerciseSetDisplay from "./components/ExerciseSetDisplay";
+import SetDisplay from "./components/SetDisplay";
 
 function App() {
     return (
-        <div>Ok</div>
+        <div>
+            <SetDisplay
+                defaultRestTime={90}
+                defaultReps={8}
+                defaultWeight={10}
+                stage = 'ACTIVE'
+            ></SetDisplay>
+        </div>
     );
 }
 

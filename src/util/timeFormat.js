@@ -1,4 +1,7 @@
 export default function timeFormat(seconds) {
+    if (seconds < 0) {
+        return `-${timeFormat(Math.abs(seconds))}`;
+    }
     const pad = (val) => `${val % 60}`.padStart(2, '0');
     const minutes = Math.floor(seconds / 60);
     if (minutes === 0) {
