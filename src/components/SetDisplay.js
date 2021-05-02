@@ -16,11 +16,8 @@ function SetInputField(props) {
     } = props;
 
     return (
-        <label
-            tabIndex={0}
-            onFocus={() => isEdit || onToggleEdit(true)}
-        >
-            <span className={`flex mb-1 items-center tracking-wider text-sm text-${color}-600 uppercase`}>{labelText} {Icon && <Icon className={`inline-block ml-1 text-${color}-600`} />}</span>
+        <label>
+            <span className={`flex mb-1 items-center tracking-wider text-sm text-${color}-800 uppercase`}>{labelText} {Icon && <Icon className={`inline-block ml-1 text-${color}-600`} />}</span>
             {
                 isEdit ? (
                     <input
@@ -33,7 +30,7 @@ function SetInputField(props) {
                         onChange={ev => onChange(Number(ev.target.value))}
                     ></input>
                 ) : (
-                    <span className={`value block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200`}>
+                    <span tabIndex={0} onFocus={() => isEdit || onToggleEdit(true)} className={`value block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200`}>
                         {formatFunction(Number(value))}
                     </span>
                 )
@@ -47,7 +44,7 @@ export default function SetDisplay(props) {
         defaultRestTime = 30,
         defaultReps = 8,
         defaultWeight = 10,
-        onReset = () => {},
+        onClick = () => {},
         isActive = true,
         stage = 'IDLE'
     } = props;
@@ -120,8 +117,10 @@ export default function SetDisplay(props) {
 
     return (
         <div
-            onClick={() => onReset()}
-            className={`flex p-2 m-3 bg-white rounded-md shadow space-x-2 ${isActive ? 'ring-4 ring-indigo-200' : ''}`}
+            onClick={() => onClick()}
+            className={`flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
+                isActive ? `ring-4 ring-indigo-200 border-indigo-400` : ''
+            }`}
         >
             <div className='time flex-1'>
                 <SetInputField
