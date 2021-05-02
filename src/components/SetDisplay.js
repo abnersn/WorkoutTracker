@@ -75,21 +75,22 @@ export default function SetDisplay(props) {
         }
     }, [stage, defaultRestTime, isEditRest]);
 
+    const numericInputProps = {
+        type: 'number',
+        pattern: '\\d+',
+        min: '0',
+        inputMode: 'numeric',
+    }
+
     return (
         <div>
             <div className='time'>
                 <SetInputField
-                    inputProps={{
-                        name: 'time-input',
-                        type: 'number',
-                        pattern: '\\d+',
-                        min: '0',
-                        inputMode: 'numeric',
-                        isEdit: isEditTime,
-                        onToggleEdit: setIsEditTime,
-                        value: durationTime,
-                        onChange: setDurationTime
-                    }}
+                    inputProps={numericInputProps}
+                    isEdit={isEditTime}
+                    onToggleEdit={setIsEditTime}
+                    onChange={setDurationTime}
+                    value={durationTime}
                     formatFunction={timeFormat}
                     labelText='Time'
                     defaultValue='0'
@@ -97,51 +98,36 @@ export default function SetDisplay(props) {
             </div>
             <div className='reps'>
                 <SetInputField
-                    inputProps={{
-                        name: 'reps-input',
-                        type: 'number',
-                        pattern: '\\d+',
-                        min: '0',
-                        inputMode: 'numeric',
-                        isEdit: isEditReps,
-                        onToggleEdit: setIsEditReps,
-                        value: reps,
-                        onChange: setReps
-                    }}
+                    inputProps={numericInputProps}
+                    isEdit={isEditReps}
+                    onToggleEdit={setIsEditReps}
+                    onChange={setReps}
+                    value={reps}
+                    formatFunction={timeFormat}
                     labelText='Reps'
                     defaultValue='8'
                 />
             </div>
             <div className='weight'>
                 <SetInputField
-                    inputProps={{
-                        name: 'weight-input',
-                        type: 'number',
-                        pattern: '\\d+',
-                        min: '0',
-                        inputMode: 'numeric',
-                        isEdit: isEditWeight,
-                        onToggleEdit: setIsEditWeight,
-                        value: weight,
-                        onChange: setWeight
-                    }}
+                    inputProps={numericInputProps}
+                    isEdit={isEditWeight}
+                    onToggleEdit={setIsEditWeight}
+                    onChange={setWeight}
+                    value={weight}
+                    formatFunction={timeFormat}
                     labelText='Weight'
                     defaultValue='10'
                 />
             </div>
             <div className='rest'>
                 <SetInputField
-                    inputProps={{
-                        name: 'rest-input',
-                        type: 'number',
-                        pattern: '\\d+',
-                        min: '0',
-                        inputMode: 'numeric',
-                        isEdit: isEditRest,
-                        onToggleEdit: setIsEditRest,
-                        value: restTime,
-                        onChange: setRestTime
-                    }}
+                    inputProps={numericInputProps}
+                    isEdit={isEditRest}
+                    onToggleEdit={setIsEditRest}
+                    onChange={setRestTime}
+                    value={restTime}
+                    formatFunction={timeFormat}
                     labelText='Rest'
                     defaultValue={defaultRestTime}
                 />
