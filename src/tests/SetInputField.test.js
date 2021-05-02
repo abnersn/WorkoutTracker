@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 const component = <SetInputField
-    defaultValue={30}
+    defaultValue={90}
     formatFunction={timeFormat}
 ></SetInputField>;
 
@@ -53,5 +53,13 @@ describe('SetInputField component', () => {
         const $input = container.querySelector('input');
     
         expect($input).toBeFalsy();
+    });
+
+    it('applies format function properly', () => {
+        act(() => {
+            render(component, container);
+        });
+        const $value = container.querySelector('.value');
+        expect($value.textContent).toBe('1:30');
     });
 });
