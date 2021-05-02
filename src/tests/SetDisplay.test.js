@@ -115,10 +115,62 @@ describe('SetDisplay component', () => {
             const $value = container.querySelector('.rest .value');
 
             act(() => {
-                jest.advanceTimersByTime(100);
+                jest.advanceTimersByTime(100000);
             })
 
             expect($value.textContent).toBe('1:30');
+        });
+    });
+    describe('Resting stage', () => {
+        const component = <SetDisplay
+            defaultRestTime={90}
+            defaultReps={8}
+            defaultWeight={10}
+            stage = 'RESTING'
+        ></SetDisplay>;
+
+        it('increments rest timer', () => {
+            act(() => {
+                render(component, container);
+            });
+            const $value = container.querySelector('.rest .value');
+
+            expect($value.textContent).toBe('0');
+
+            act(() => {
+                jest.advanceTimersByTime(100000);
+            });
+
+            expect($value.textContent).toBe('1:40');
+        });
+
+        it('only increments rest timer if not editing', () => {
+            act(() => {
+                render(component, container);
+            });
+            const $value = container.querySelector('.rest .value');
+
+            expect($value.textContent).toBe('1:30');
+            Simulate.focus($value.parentNode);
+
+            act(() => {
+                jest.advanceTimersByTime(100000);
+            });
+
+            expect($value.textContent).toBe('1:30');
+        });
+
+        it('does not change duration timer', () => {
+            act(() => {
+                render(component, container);
+            });
+            const $value = container.querySelector('.time .value');
+
+            act(() => {
+                jest.advanceTimersByTime(100000);
+            })
+
+            expect($value.textContent).toBe('0');
         });
     });
 });
