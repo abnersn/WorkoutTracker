@@ -104,11 +104,14 @@ export default function SetDisplay(props) {
         inputMode: 'numeric',
     }
 
+    const baseColor = stage === 'COMPLETE' ? 'green' : 'indigo';
+    const highlightColor = 'cyan';
+
     const getRestingColor = () => {
         if (stage === 'RESTING') {
-            return restTime < 0 ? 'red' : 'green';
+            return restTime < 0 ? 'red' : highlightColor;
         }
-        return 'indigo';
+        return baseColor;
     }
 
     return (
@@ -121,7 +124,7 @@ export default function SetDisplay(props) {
                     onChange={setDurationTime}
                     value={durationTime}
                     formatFunction={timeFormat}
-                    color={stage === 'ACTIVE' ? 'green' : 'indigo'}
+                    color={stage === 'ACTIVE' ? highlightColor : baseColor}
                     labelText='Time'
                     defaultValue='0'
                 />
@@ -134,6 +137,7 @@ export default function SetDisplay(props) {
                     onChange={setReps}
                     value={reps}
                     formatFunction={timeFormat}
+                    color={baseColor}
                     labelText='Reps'
                     defaultValue='8'
                 />
@@ -145,6 +149,7 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditWeight}
                     onChange={setWeight}
                     value={weight}
+                    color={baseColor}
                     formatFunction={timeFormat}
                     labelText='Weight'
                     defaultValue='10'
