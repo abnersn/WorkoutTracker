@@ -26,6 +26,7 @@ function SetInputField(props) {
                         className={`block tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-4 focus:ring-${color}-100`}
                         value={value}
                         autoFocus
+                        onFocus={ev => ev.target.select()}
                         onBlur={() => isEdit && onToggleEdit(false)}
                         onChange={ev => onChange(Number(ev.target.value))}
                     ></input>
