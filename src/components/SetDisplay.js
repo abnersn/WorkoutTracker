@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import timeFormat from "../util/timeFormat";
 
 function SetInputField(props) {
     const {
         inputProps,
         labelText,
-        isEdit = false,
         value = null,
         formatFunction = val => val,
+        color = 'indigo',
+        isEdit = false,
         onToggleEdit = () => {},
         onChange = () => {}
     } = props;
@@ -17,19 +18,20 @@ function SetInputField(props) {
             tabIndex={0}
             onFocus={() => isEdit || onToggleEdit(true)}
         >
-            <span>{labelText}</span>
+            <span className={`block mb-1 tracking-wide text-sm text-${color}-600 uppercase`}>{labelText}</span>
             {
                 isEdit ? (
                     <input
                         {...inputProps}
+                        className={`block tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-4 focus:ring-${color}-100`}
                         value={value}
                         autoFocus
                         onBlur={() => isEdit && onToggleEdit(false)}
-                        onChange={ev => onChange(ev.target.value)}
+                        onChange={ev => onChange(Number(ev.target.value))}
                     ></input>
                 ) : (
-                    <span className='value'>
-                        {formatFunction(value)}
+                    <span className={`value block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200`}>
+                        {formatFunction(Number(value))}
                     </span>
                 )
             }
@@ -42,6 +44,7 @@ export default function SetDisplay(props) {
         defaultRestTime = 30,
         defaultReps = 8,
         defaultWeight = 10,
+        onReset = () => {},
         stage = 'IDLE'
     } = props;
 
@@ -55,14 +58,27 @@ export default function SetDisplay(props) {
     const [isEditWeight, setIsEditWeight] = useState(false);
     const [isEditRest, setIsEditRest] = useState(false);
 
+    const prevStageRef = useRef();
+
+    useEffect(() => {
+        if (stage === 'IDLE' && prevStageRef.current === 'COMPLETE') {
+            setDurationTime(0);
+            setRestTime(defaultRestTime);
+            setReps(defaultReps);
+            setWeight(defaultWeight);
+        }
+    }, [defaultRestTime, defaultReps, defaultWeight, stage]);
+
+    useEffect(() => {
+        prevStageRef.current = stage;        
+    }, [stage]);
+
     useEffect(() => {
         if (stage === 'ACTIVE' && !isEditTime) {
             const interval = setInterval(() => {
                 setDurationTime((t) => Number(t) + 1);
             }, 1000);
             return () => clearInterval(interval);
-        } else if (stage === 'IDLE') {
-            setDurationTime(0);
         }
     }, [stage, isEditTime]);
 
@@ -72,8 +88,6 @@ export default function SetDisplay(props) {
                 setRestTime((t) => Number(t) - 1);
             }, 1000);
             return () => clearInterval(interval);
-        } else if (stage === 'IDLE') {
-            setRestTime(defaultRestTime);
         }
     }, [stage, defaultRestTime, isEditRest]);
 
@@ -90,9 +104,16 @@ export default function SetDisplay(props) {
         inputMode: 'numeric',
     }
 
+    const getRestingColor = () => {
+        if (stage === 'RESTING') {
+            return restTime < 0 ? 'red' : 'green';
+        }
+        return 'indigo';
+    }
+
     return (
-        <div>
-            <div className='time'>
+        <div onClick={() => onReset()} className='flex p-2 m-3 bg-white rounded-md shadow space-x-2'>
+            <div className='time flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
                     isEdit={isEditTime}
@@ -100,11 +121,12 @@ export default function SetDisplay(props) {
                     onChange={setDurationTime}
                     value={durationTime}
                     formatFunction={timeFormat}
+                    color={stage === 'ACTIVE' ? 'green' : 'indigo'}
                     labelText='Time'
                     defaultValue='0'
                 />
             </div>
-            <div className='reps'>
+            <div className='reps flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
                     isEdit={isEditReps}
@@ -116,7 +138,7 @@ export default function SetDisplay(props) {
                     defaultValue='8'
                 />
             </div>
-            <div className='weight'>
+            <div className='weight flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
                     isEdit={isEditWeight}
@@ -128,13 +150,14 @@ export default function SetDisplay(props) {
                     defaultValue='10'
                 />
             </div>
-            <div className='rest'>
+            <div className='rest flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
                     isEdit={isEditRest}
                     onToggleEdit={setIsEditRest}
                     onChange={setRestTime}
                     value={restTime}
+                    color={getRestingColor()}
                     formatFunction={timeFormat}
                     labelText='Rest'
                     defaultValue={defaultRestTime}

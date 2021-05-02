@@ -7,7 +7,7 @@ function App() {
     const [stageIndex, setStageIndex] = useState(0);
 
     const updateStage = () => {
-        setStageIndex(s => s + 1 % 4);
+        setStageIndex(s => (s + 1) % STAGES.length);
     }
 
     return (
@@ -17,7 +17,8 @@ function App() {
                 defaultRestTime={90}
                 defaultReps={8}
                 defaultWeight={10}
-                stage = {STAGES[stageIndex]}
+                onReset={() => setStageIndex(0)}
+                stage={STAGES[stageIndex]}
             ></SetDisplay>
             <button onClick={updateStage}>Next stage</button>
         </div>
