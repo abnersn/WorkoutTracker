@@ -21,7 +21,7 @@ export default function SetInputField(props) {
                         onChange={ev => setValue(ev.target.value)}
                     ></input>
                 ) : (
-                    <span>
+                    <span className='value'>
                         {formatFunction(value)}
                     </span>
                 )
