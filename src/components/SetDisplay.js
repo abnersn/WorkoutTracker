@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import timeFormat from "../util/timeFormat";
+import { useEffect, useRef, useState } from 'react';
+import timeFormat from '../util/timeFormat';
+import { AiOutlineClockCircle } from 'react-icons/ai';
 
 function SetInputField(props) {
     const {
@@ -9,6 +10,7 @@ function SetInputField(props) {
         formatFunction = val => val,
         color = 'indigo',
         isEdit = false,
+        Icon = null,
         onToggleEdit = () => {},
         onChange = () => {}
     } = props;
@@ -18,7 +20,7 @@ function SetInputField(props) {
             tabIndex={0}
             onFocus={() => isEdit || onToggleEdit(true)}
         >
-            <span className={`block mb-1 tracking-wide text-sm text-${color}-600 uppercase`}>{labelText}</span>
+            <span className={`flex mb-1 items-center tracking-wider text-sm text-${color}-600 uppercase`}>{labelText} {Icon && <Icon className={`inline-block ml-1 text-${color}-600`} />}</span>
             {
                 isEdit ? (
                     <input
@@ -46,6 +48,7 @@ export default function SetDisplay(props) {
         defaultReps = 8,
         defaultWeight = 10,
         onReset = () => {},
+        isActive = true,
         stage = 'IDLE'
     } = props;
 
@@ -116,7 +119,10 @@ export default function SetDisplay(props) {
     }
 
     return (
-        <div onClick={() => onReset()} className='flex p-2 m-3 bg-white rounded-md shadow space-x-2'>
+        <div
+            onClick={() => onReset()}
+            className={`flex p-2 m-3 bg-white rounded-md shadow space-x-2 ${isActive ? 'ring-4 ring-indigo-200' : ''}`}
+        >
             <div className='time flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
@@ -125,6 +131,7 @@ export default function SetDisplay(props) {
                     onChange={setDurationTime}
                     value={durationTime}
                     formatFunction={timeFormat}
+                    Icon={stage === 'ACTIVE' ? AiOutlineClockCircle : null}
                     color={stage === 'ACTIVE' ? highlightColor : baseColor}
                     labelText='Time'
                     defaultValue='0'
@@ -137,7 +144,6 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditReps}
                     onChange={setReps}
                     value={reps}
-                    formatFunction={timeFormat}
                     color={baseColor}
                     labelText='Reps'
                     defaultValue='8'
@@ -151,7 +157,6 @@ export default function SetDisplay(props) {
                     onChange={setWeight}
                     value={weight}
                     color={baseColor}
-                    formatFunction={timeFormat}
                     labelText='Weight'
                     defaultValue='10'
                 />
@@ -163,6 +168,7 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditRest}
                     onChange={setRestTime}
                     value={restTime}
+                    Icon={stage === 'RESTING' ? AiOutlineClockCircle : null}
                     color={getRestingColor()}
                     formatFunction={timeFormat}
                     labelText='Rest'
