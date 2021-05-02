@@ -1,6 +1,39 @@
 import { useEffect, useState } from "react";
 import timeFormat from "../util/timeFormat";
-import SetInputField from "./SetInputField";
+
+function SetInputField(props) {
+    const {
+        inputProps,
+        labelText,
+        isEdit = false,
+        value = null,
+        formatFunction = val => val,
+        onToggleEdit = () => {},
+        onChange = () => {}
+    } = props;
+
+    return (
+        <label
+            onFocus={() => onToggleEdit(true)}
+            onBlur={() => onToggleEdit(false)}
+        >
+            <span>{labelText}</span>
+            {
+                isEdit ? (
+                    <input
+                        {...inputProps}
+                        value={value}
+                        onChange={ev => onChange(ev.target.value)}
+                    ></input>
+                ) : (
+                    <span className='value'>
+                        {formatFunction(value)}
+                    </span>
+                )
+            }
+        </label>
+    )
+}
 
 export default function SetDisplay(props) {
     const {
@@ -15,8 +48,13 @@ export default function SetDisplay(props) {
     const [reps, setReps] = useState(defaultReps);
     const [weight, setWeight] = useState(defaultWeight);
 
+    const [isEditTime, setIsEditTime] = useState(false);
+    const [isEditReps, setIsEditReps] = useState(false);
+    const [isEditWeight, setIsEditWeight] = useState(false);
+    const [isEditRest, setIsEditRest] = useState(false);
+
     useEffect(() => {
-        if (stage === 'ACTIVE') {
+        if (stage === 'ACTIVE' && !isEditTime) {
             const interval = setInterval(() => {
                 setDurationTime((t) => t + 1);
             }, 1000);
@@ -24,10 +62,10 @@ export default function SetDisplay(props) {
         } else if (stage === 'IDLE') {
             setDurationTime(0);
         }
-    }, [stage]);
+    }, [stage, isEditTime]);
 
     useEffect(() => {
-        if (stage === 'RESTING') {
+        if (stage === 'RESTING' && !isEditRest) {
             const interval = setInterval(() => {
                 setRestTime((t) => t - 1);
             }, 1000);
@@ -35,7 +73,7 @@ export default function SetDisplay(props) {
         } else if (stage === 'IDLE') {
             setRestTime(defaultRestTime);
         }
-    }, [stage, defaultRestTime]);
+    }, [stage, defaultRestTime, isEditRest]);
 
     return (
         <div>
@@ -44,11 +82,13 @@ export default function SetDisplay(props) {
                     inputProps={{
                         name: 'time-input',
                         type: 'number',
-                        onChange: ev => setDurationTime(ev.target.value),
-                        pattern: '\d+',
+                        pattern: '\\d+',
                         min: '0',
                         inputMode: 'numeric',
-                        value: {durationTime}
+                        isEdit: isEditTime,
+                        onToggleEdit: setIsEditTime,
+                        value: durationTime,
+                        onChange: setDurationTime
                     }}
                     formatFunction={timeFormat}
                     labelText='Time'
@@ -60,11 +100,13 @@ export default function SetDisplay(props) {
                     inputProps={{
                         name: 'reps-input',
                         type: 'number',
-                        onChange: ev => setReps(ev.target.value),
-                        pattern: '\d+',
+                        pattern: '\\d+',
                         min: '0',
                         inputMode: 'numeric',
-                        value: {reps}
+                        isEdit: isEditReps,
+                        onToggleEdit: setIsEditReps,
+                        value: reps,
+                        onChange: setReps
                     }}
                     labelText='Reps'
                     defaultValue='8'
@@ -75,11 +117,13 @@ export default function SetDisplay(props) {
                     inputProps={{
                         name: 'weight-input',
                         type: 'number',
-                        onChange: ev => setWeight(ev.target.value),
-                        pattern: '\d+',
+                        pattern: '\\d+',
                         min: '0',
                         inputMode: 'numeric',
-                        value: {weight}
+                        isEdit: isEditWeight,
+                        onToggleEdit: setIsEditWeight,
+                        value: weight,
+                        onChange: setWeight
                     }}
                     labelText='Weight'
                     defaultValue='10'
@@ -90,11 +134,13 @@ export default function SetDisplay(props) {
                     inputProps={{
                         name: 'rest-input',
                         type: 'number',
-                        onChange: ev => setRestTime(ev.target.value),
-                        pattern: '\d+',
+                        pattern: '\\d+',
                         min: '0',
                         inputMode: 'numeric',
-                        value: {restTime}
+                        isEdit: isEditRest,
+                        onToggleEdit: setIsEditRest,
+                        value: restTime,
+                        onChange: setRestTime
                     }}
                     labelText='Rest'
                     defaultValue={defaultRestTime}
