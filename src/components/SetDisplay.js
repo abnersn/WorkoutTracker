@@ -14,8 +14,8 @@ function SetInputField(props) {
 
     return (
         <label
-            onFocus={() => onToggleEdit(true)}
-            onBlur={() => onToggleEdit(false)}
+            tabIndex={0}
+            onFocus={() => isEdit || onToggleEdit(true)}
         >
             <span>{labelText}</span>
             {
@@ -23,6 +23,8 @@ function SetInputField(props) {
                     <input
                         {...inputProps}
                         value={value}
+                        autoFocus
+                        onBlur={() => isEdit && onToggleEdit(false)}
                         onChange={ev => onChange(ev.target.value)}
                     ></input>
                 ) : (
@@ -56,7 +58,7 @@ export default function SetDisplay(props) {
     useEffect(() => {
         if (stage === 'ACTIVE' && !isEditTime) {
             const interval = setInterval(() => {
-                setDurationTime((t) => t + 1);
+                setDurationTime((t) => Number(t) + 1);
             }, 1000);
             return () => clearInterval(interval);
         } else if (stage === 'IDLE') {
@@ -67,13 +69,19 @@ export default function SetDisplay(props) {
     useEffect(() => {
         if (stage === 'RESTING' && !isEditRest) {
             const interval = setInterval(() => {
-                setRestTime((t) => t - 1);
+                setRestTime((t) => Number(t) - 1);
             }, 1000);
             return () => clearInterval(interval);
         } else if (stage === 'IDLE') {
             setRestTime(defaultRestTime);
         }
     }, [stage, defaultRestTime, isEditRest]);
+
+    useEffect(() => {
+        if (stage === 'COMPLETE' && restTime < 0) {
+            setRestTime(r => defaultRestTime - r);
+        }
+    }, [stage, defaultRestTime, restTime]);
 
     const numericInputProps = {
         type: 'number',

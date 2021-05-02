@@ -48,10 +48,6 @@ describe('SetDisplay component', () => {
                 Simulate.focus($label);
                 expect($label.querySelector('input')).toBeTruthy();
             }
-            for (const $label of $labels) {
-                Simulate.blur($label);
-                expect($label.querySelector('input')).toBeFalsy();
-            }
         });
 
         it('does not update timers', () => {
@@ -186,6 +182,57 @@ describe('SetDisplay component', () => {
             })
 
             expect($value.textContent).toBe('0');
+        });
+    });
+    describe('Complete stage', () => {
+        it('does not update timers', () => {
+            act(() => {
+                render(<SetDisplay
+                    defaultRestTime={90}
+                    defaultReps={8}
+                    defaultWeight={10}
+                    stage = 'COMPLETE'
+                ></SetDisplay>, container);
+            });
+
+            const $time = container.querySelector('.time');
+            const $rest = container.querySelector('.rest');
+
+            expect($time.querySelector('.value').textContent).toBe('0');
+            expect($rest.querySelector('.value').textContent).toBe('1:30');
+
+            act(() => {
+                jest.advanceTimersByTime(100000);
+            });
+
+            expect($time.querySelector('.value').textContent).toBe('0');
+            expect($rest.querySelector('.value').textContent).toBe('1:30');
+        });
+
+        it('shows negative rest time correctly', () => {
+            act(() => {
+                render(<SetDisplay
+                    defaultRestTime={90}
+                    defaultReps={8}
+                    defaultWeight={10}
+                    stage = 'RESTING'
+                ></SetDisplay>, container);
+            });
+            const $rest = container.querySelector('.rest');
+
+            expect($rest.querySelector('.value').textContent).toBe('1:30');
+
+            act(() => {
+                jest.advanceTimersByTime(180000);
+                render(<SetDisplay
+                    defaultRestTime={90}
+                    defaultReps={8}
+                    defaultWeight={10}
+                    stage = 'COMPLETE'
+                ></SetDisplay>, container);
+            });
+
+            expect($rest.querySelector('.value').textContent).toBe('3:00');
         });
     });
 });
