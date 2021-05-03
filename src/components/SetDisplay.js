@@ -45,6 +45,7 @@ export default function SetDisplay(props) {
         defaultReps = 8,
         defaultWeight = 10,
         onClick = () => {},
+        onComplete = () => {},
         isActive = true,
         stage = 'IDLE'
     } = props;
@@ -91,12 +92,6 @@ export default function SetDisplay(props) {
             return () => clearInterval(interval);
         }
     }, [stage, defaultRestTime, isEditRest]);
-
-    useEffect(() => {
-        if (stage === 'COMPLETE' && restTime < 0) {
-            setRestTime(r => defaultRestTime - r);
-        }
-    }, [stage, defaultRestTime, restTime]);
 
     const numericInputProps = {
         type: 'number',

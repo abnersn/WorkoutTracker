@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SetDisplay from "./components/SetDisplay";
-import { BiCheck, BiDumbbell, BiPause, BiPlay, BiTrash } from "react-icons/bi";
+import { BiCheck, BiDumbbell, BiPause, BiPlay, BiSkipNext } from "react-icons/bi";
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -9,26 +9,26 @@ function getNextStageFor(stage) {
     return stages[(index + 1) % stages.length];
 }
 
-function FooterButton({ stage, onClick = () => {} }) {
+function CycleButton({ stage, onClick = () => {} }) {
     const labels = {
         IDLE: 'Start',
         ACTIVE: 'Rest',
         RESTING: 'Complete',
-        COMPLETE: 'Clear'
+        COMPLETE: 'Next'
     }
 
     const icons = {
         IDLE: BiPlay,
         ACTIVE: BiPause,
         RESTING: BiCheck,
-        COMPLETE: BiTrash
+        COMPLETE: BiSkipNext
     }
 
     const colors = {
         IDLE: 'indigo',
         ACTIVE: 'blue',
         RESTING: 'green',
-        COMPLETE: 'red'
+        COMPLETE: 'green'
     }
 
     const label = labels[stage];
@@ -37,9 +37,20 @@ function FooterButton({ stage, onClick = () => {} }) {
 
     return (
         <button
-            className={`bg-${color}-500 flex uppercase focus:ring-4 focus:ring-${color}-200 active:bg-${color}-700 text-sm items-center text-white px-3 py-2 rounded-md`}
+            className={`bg-${color}-500 ml-auto border border-${color}-600 flex uppercase focus:ring-4 focus:ring-${color}-200 active:bg-${color}-700 text-sm items-center text-white px-3 py-2 rounded-md`}
             onClick={onClick}>
             {<Icon stage={stage} className='mr-1 text-lg' />}{label}
+        </button>
+    )
+}
+
+function CompleteExerciseButton({ onClickCompleteExercise = () => {} }) {
+    const color = 'indigo';
+    return (
+        <button
+            className={`bg-${color}-500 ml-auto border border-${color}-600 flex uppercase focus:ring-4 focus:ring-${color}-200 active:bg-${color}-700 text-sm items-center text-white px-3 py-2 rounded-md`}
+            onClick={onClickCompleteExercise}>
+            Finish Exercise
         </button>
     )
 }
@@ -57,26 +68,57 @@ function App() {
         setStages(stagesList);
     }
 
+    const exerciseName = 'Exercise 3';
+
+    const onFooterButtonClick = () => {
+        const stage = stages[activeSet];
+        if (stage === 'COMPLETE') {
+            // Move to next set
+            if (activeSet < stages.length) {
+                setActiveSet(activeSet + 1);
+            } else {
+                setActiveSet(null);
+            }
+        } else {
+            updateStage(activeSet);
+        }
+    }
+
+    let footerButton = null;
+    if (!stages.some(s => s !== 'COMPLETE')) {
+        footerButton = <CompleteExerciseButton />;
+    } else if (activeSet !== null) {
+        footerButton = <CycleButton stage={stages[activeSet]} onClick={onFooterButtonClick} />;
+    }
+
     return (
         <div className='bg-white p-2'>
-            <ul className='p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl m-3'>
+            <div>
+                <ul className='p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl m-3'>
+                    <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
+                        <BiDumbbell className='inline text-xl mb-1'/> {exerciseName}
+                    </h3>
+                    {stages.map((stage, index) =>
+                        <SetDisplay
+                            key={index}
+                            defaultRestTime={90}
+                            defaultReps={8}
+                            onClick={() => setActiveSet(index)}
+                            defaultWeight={10}
+                            isActive={index === activeSet}
+                            onReset={() => updateStage(index, 'IDLE')}
+                            onComplete={() => setActiveSet((index + 1) % stages.length)}
+                            stage={stage}
+                        ></SetDisplay>
+                    )}
+                </ul>
+            </div>
+            <div className='flex fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
                 <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
-                    <BiDumbbell className='inline text-xl mb-1'/> Exercise 3
+                    <BiDumbbell className='inline text-xl mb-1'/> {exerciseName}
                 </h3>
-                {stages.map((set, index) =>
-                    <SetDisplay
-                        key={index}
-                        defaultRestTime={90}
-                        defaultReps={8}
-                        onClick={() => setActiveSet(index)}
-                        defaultWeight={10}
-                        isActive={index === activeSet}
-                        onReset={() => updateStage(index, 'IDLE')}
-                        stage={stages[index]}
-                    ></SetDisplay>
-                )}
-            </ul>
-            {activeSet !== null && <FooterButton stage={stages[activeSet]} onClick={() => updateStage(activeSet)} />}
+                {footerButton}
+            </div>
         </div>
     );
 }
