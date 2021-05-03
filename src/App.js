@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SetDisplay from "./components/SetDisplay";
-import { BiDumbbell } from "react-icons/bi";
+import { BiCheck, BiDumbbell, BiPause, BiPlay, BiTrash } from "react-icons/bi";
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -9,14 +9,39 @@ function getNextStageFor(stage) {
     return stages[(index + 1) % stages.length];
 }
 
-function getButtonLabelForStage(stage) {
+function FooterButton({ stage, onClick = () => {} }) {
     const labels = {
         IDLE: 'Start',
         ACTIVE: 'Rest',
-        RESTING: 'Stop',
-        COMPLETE: 'Restart'
+        RESTING: 'Complete',
+        COMPLETE: 'Clear'
     }
-    return labels[stage];
+
+    const icons = {
+        IDLE: BiPlay,
+        ACTIVE: BiPause,
+        RESTING: BiCheck,
+        COMPLETE: BiTrash
+    }
+
+    const colors = {
+        IDLE: 'indigo',
+        ACTIVE: 'blue',
+        RESTING: 'green',
+        COMPLETE: 'red'
+    }
+
+    const label = labels[stage];
+    const Icon = icons[stage];
+    const color = colors[stage];
+
+    return (
+        <button
+            className={`bg-${color}-500 flex uppercase focus:ring-4 focus:ring-${color}-200 active:bg-${color}-700 text-sm items-center text-white px-3 py-2 rounded-md`}
+            onClick={onClick}>
+            {<Icon stage={stage} className='mr-1 text-lg' />}{label}
+        </button>
+    )
 }
 
 function App() {
@@ -51,11 +76,7 @@ function App() {
                     ></SetDisplay>
                 )}
             </ul>
-            {activeSet !== null && (
-                <button className='bg-pink-700 text-white px-2 py-1 rounded-md' onClick={() => updateStage(activeSet)}>
-                    {getButtonLabelForStage(stages[activeSet])}
-                </button>
-            )}
+            {activeSet !== null && <FooterButton stage={stages[activeSet]} onClick={() => updateStage(activeSet)} />}
         </div>
     );
 }
