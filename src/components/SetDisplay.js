@@ -22,7 +22,7 @@ function SetInputField(props) {
                 isEdit ? (
                     <input
                         {...inputProps}
-                        className={`block tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-4 focus:ring-${color}-100`}
+                        className={`block tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-2 focus:ring-${color}-100`}
                         value={value}
                         autoFocus
                         onFocus={ev => ev.target.select()}
@@ -114,7 +114,7 @@ export default function SetDisplay(props) {
         <div
             onClick={() => onClick()}
             className={`flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
-                isActive ? `ring-4 ring-indigo-200 border-indigo-400` : ''
+                isActive ? `ring-2 ring-indigo-200 border-indigo-400` : ''
             }`}
         >
             <div className='time flex-1'>

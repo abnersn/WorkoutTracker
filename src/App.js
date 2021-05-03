@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SetDisplay from "./components/SetDisplay";
-import { BiCheck, BiDumbbell, BiPause, BiPlay, BiSkipNext } from "react-icons/bi";
+import { BiCheck, BiDumbbell, BiPause, BiPlay, BiSkipNext, BiTrophy } from "react-icons/bi";
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -26,9 +26,9 @@ function CycleButton({ stage, onClick = () => {} }) {
 
     const colors = {
         IDLE: 'indigo',
-        ACTIVE: 'blue',
-        RESTING: 'green',
-        COMPLETE: 'green'
+        ACTIVE: 'indigo',
+        RESTING: 'indigo',
+        COMPLETE: 'blue'
     }
 
     const label = labels[stage];
@@ -37,7 +37,7 @@ function CycleButton({ stage, onClick = () => {} }) {
 
     return (
         <button
-            className={`bg-${color}-500 ml-auto border border-${color}-600 flex uppercase focus:ring-4 focus:ring-${color}-200 active:bg-${color}-700 text-sm items-center text-white px-3 py-2 rounded-md`}
+            className={`btn bg-${color}-500 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
             onClick={onClick}>
             {<Icon stage={stage} className='mr-1 text-lg' />}{label}
         </button>
@@ -45,12 +45,12 @@ function CycleButton({ stage, onClick = () => {} }) {
 }
 
 function CompleteExerciseButton({ onClickCompleteExercise = () => {} }) {
-    const color = 'indigo';
+    const color = 'green';
     return (
         <button
-            className={`bg-${color}-500 ml-auto border border-${color}-600 flex uppercase focus:ring-4 focus:ring-${color}-200 active:bg-${color}-700 text-sm items-center text-white px-3 py-2 rounded-md`}
+            className={`btn bg-${color}-500 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
             onClick={onClickCompleteExercise}>
-            Finish Exercise
+            <BiTrophy className='mr-1 text-lg' /> Finish Exercise
         </button>
     )
 }
@@ -115,7 +115,7 @@ function App() {
             </div>
             <div className='flex fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
                 <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
-                    <BiDumbbell className='inline text-xl mb-1'/> {exerciseName}
+                    {exerciseName}
                 </h3>
                 {footerButton}
             </div>
