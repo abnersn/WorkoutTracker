@@ -80,15 +80,12 @@ function reducer(state, action) {
     const workout = cloneDeep(state);
 
     switch(action.type) {
-        case 'ADD_SET': {
+        case 'ADD_SET':
             return addNewSet(workout, action.payload);
-        }
-        case 'REMOVE_SET': {
+        case 'REMOVE_SET':
             return removeSet(workout, action.payload);
-        }
-        case 'UPDATE_ACTIVE_SET': {
+        case 'UPDATE_ACTIVE_SET':
             return updateActiveSet(workout, action.payload);
-        }
         case 'UPDATE_SET_STAGE':
             return updateSetStage(workout);
         case 'ADD_EXERCISE':
