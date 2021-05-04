@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash";
-import { useReducer, useRef, useState } from "react";
+import { useReducer } from "react";
 
 import Actions from "./components/Actions";
 import Exercise from "./components/Exercise";
@@ -12,9 +12,10 @@ function getNextStageFor(stage) {
     return stages[(index + 1) % stages.length];
 }
 
-function addNewSet(workout, exerciseId) {
-    const newWorkout = cloneDeep(workout);
-    const exercise = newWorkout.exercises.find(
+function addNewSet(workout, payload) {
+    const { exerciseId } = payload;
+
+    const exercise = workout.exercises.find(
         ex => ex.id === exerciseId
     );
     const hash = genHash();
@@ -22,53 +23,80 @@ function addNewSet(workout, exerciseId) {
         ...exercise.sets,
         { id: hash, stage: 'IDLE' }
     ];
-    newWorkout.activeSetId = hash;
-    return newWorkout;
+    workout.activeSetId = hash;
+    return workout;
 }
 
-function removeSet(workout, exerciseId) {
-    const newWorkout = cloneDeep(workout);
-    const exercise = newWorkout.exercises.find(
+function removeSet(workout, payload) {
+    const { exerciseId } = payload;
+
+    const exercise = workout.exercises.find(
         ex => ex.id === exerciseId
     );
     const setIndex = exercise.sets.findIndex(s => s.id === workout.activeSetId);
     if (setIndex !== -1) {
         exercise.sets.splice(setIndex, 1);
-        newWorkout.activeSetId = null;
+        workout.activeSetId = null;
     }
-    return newWorkout;
+    return workout;
 }
 
-function updateActiveSet(workout, exerciseId, setId) {
-    const newWorkout = cloneDeep(workout);
-    newWorkout.activeSetId = setId;
-    newWorkout.activeExerciseId = exerciseId;
-    return newWorkout;
+function updateActiveSet(workout, payload) {
+    const { setId, exerciseId, stage } = payload;
+
+    workout.activeSetId = setId;
+    workout.activeExerciseId = exerciseId;
+
+    if (stage) {
+        updateSetStage(workout, stage)
+    }
+    return workout;
+}
+
+function updateSetStage(workout, stage) {
+    const exercise = workout.exercises.find(
+        ex => ex.id === workout.activeExerciseId
+    );
+    const setIndex = exercise.sets.findIndex(
+        s => s.id === workout.activeSetId
+    );
+    if (setIndex !== -1) {
+        const currentStage = exercise.sets[setIndex].stage;
+        if (currentStage === 'COMPLETE') {
+            workout.activeSetId = exercise.sets[
+                (setIndex + 1) % exercise.sets.length
+            ].id;
+        } else {
+            const nextStage = stage || getNextStageFor(
+                currentStage
+            );
+            exercise.sets[setIndex].stage = nextStage;
+        }
+    }
+    return workout;
 }
 
 function reducer(state, action) {
-    const newState = cloneDeep(state);
+    const workout = cloneDeep(state);
+
     switch(action.type) {
         case 'ADD_SET': {
-            const { exerciseId } = action.payload;
-            return addNewSet(state, exerciseId);
+            return addNewSet(workout, action.payload);
         }
         case 'REMOVE_SET': {
-            const { exerciseId } = action.payload;
-            return removeSet(state, exerciseId);
+            return removeSet(workout, action.payload);
         }
         case 'UPDATE_ACTIVE_SET': {
-            const { setId, exerciseId } = action.payload;
-            return updateActiveSet(state, exerciseId, setId);
+            return updateActiveSet(workout, action.payload);
         }
         case 'UPDATE_SET_STAGE':
-            return newState;
+            return updateSetStage(workout);
         case 'ADD_EXERCISE':
-            return newState;
+            return workout;
         case 'REMOVE_EXERCISE':
-            return newState;
+            return workout;
         case 'UPDATE_EXERCISE':
-            return newState;
+            return workout;
         default:
             throw new Error();
     }
@@ -95,6 +123,7 @@ function Workout() {
 
     return (
         <div className='bg-white p-2'>
+            <h2>{state.name}</h2>
             {
                 state.exercises.map(exercise => <Exercise
                     key={exercise.id}
@@ -106,7 +135,9 @@ function Workout() {
                     dispatch={dispatch}
                 />)
             }
+            <button>Add exercise</button>
             <Actions
+                state={state}
                 dispatch={dispatch}
             />
         </div>

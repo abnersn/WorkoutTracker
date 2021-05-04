@@ -5,7 +5,7 @@ function CompleteExerciseButton({ onClickCompleteExercise = () => {} }) {
     return (
         <button
             className={`btn bg-${color}-500 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
-            onClick={onClickCompleteExercise}>
+        >
             <BiTrophy className='mr-1 text-lg' /> Finish
         </button>
     )
@@ -39,42 +39,49 @@ function CycleButton({ stage, onClick = () => {} }) {
 
     return (
         <button
+            onClick={onClick}
             className={`btn bg-${color}-500 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
-            onClick={onClick}>
+        >
             {<Icon stage={stage} className='mr-1 text-lg' />}{label}
         </button>
     )
 }
 
+function hasIncompleteSets(exercise) {
+    return exercise.sets.some(s => s.stage !== 'COMPLETE');
+}
+
 export default function Actions(props) {
     const {
-        exercise,
-        set,
-        onActionButtonClick = () => {},
-        onCompleteExerciseClick = () => {}
+        state, dispatch
     } = props;
-
-    if (!exercise) {
-        return <></>;
-    }
 
     let footerButton = null;
 
-    if (!exercise.sets.some(s => s.stage !== 'COMPLETE')) {
-        footerButton = <CompleteExerciseButton
-            onCompleteExerciseClick={onCompleteExerciseClick}
-        />;
-    } else if (set !== null) {
-        footerButton = <CycleButton
-            stage={set.stage}
-            onClick={onActionButtonClick}
-        />;
+    const exercise = state.exercises.find(
+        e => e.id === state.activeExerciseId
+    );
+
+    const set = exercise ? exercise.sets.find(
+        s => s.id === state.activeSetId
+    ) : null;
+
+    const updateStage = () => {
+        dispatch({
+            type: 'UPDATE_SET_STAGE'
+        });
+    }
+
+    if (exercise && !hasIncompleteSets(exercise)) {
+        footerButton = <CompleteExerciseButton />;
+    } else if (set) {
+        footerButton = <CycleButton onClick={updateStage} stage={set.stage} />;
     }
 
     return (
         <div className='flex fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
-                {exercise.name}
+                {exercise?.name}
             </h3>
             {footerButton}
         </div>
