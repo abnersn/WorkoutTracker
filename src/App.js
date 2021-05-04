@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { BiDumbbell } from "react-icons/bi";
+import { useRef, useState } from "react";
 
-import SetDisplay from "./components/SetDisplay";
 import Actions from "./components/Actions";
+import Exercise from "./components/Exercise";
+import genHash from "./util/genHash";
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -12,77 +12,78 @@ function getNextStageFor(stage) {
 }
 
 function App() {
-    const [stages, setStages] = useState(['IDLE', 'IDLE', 'IDLE']);
+    const [workout, setWorkout] = useState({
+        id: genHash(),
+        name: 'Workout 1',
+        exercises: [
+            {
+                id: genHash(),
+                name: 'Exercise Name',
+                sets: [
+                    { id: genHash(), stage: 'IDLE' },
+                    { id: genHash(), stage: 'IDLE' },
+                    { id: genHash(), stage: 'IDLE' }
+                ]
+            }
+        ]
+    });
+    const exercise = useRef(null);
     const [activeSet, setActiveSet] = useState(null);
 
-    const updateStage = (index, newStage = null) => {
-        if (!newStage) {
-            newStage = getNextStageFor(stages[index]);
+    const advanceCurrentSetToNextStage = () => {
+        const newSet = {
+            ...activeSet,
+            stage: getNextStageFor(activeSet.stage)
         }
-        const stagesList = stages.slice();
-        stagesList.splice(index, 1, newStage);
-        setStages(stagesList);
+        const activeSetIndex = exercise.current.sets.findIndex(
+            s => s === activeSet
+        );
+        console.log(activeSet, activeSetIndex, newSet);
+        const setsArray = [...exercise.current.sets];
+        setsArray.splice(activeSetIndex, 1, newSet);
+        exercise.current.sets = setsArray;
+        setWorkout(workout);
     }
 
-    const exerciseName = 'Exercise 3';
-
-    const onActionButtonClick = () => {
-        const stage = stages[activeSet];
-        if (stage === 'COMPLETE') {
-            // Move to next set
-            if (activeSet < stages.length) {
-                setActiveSet(activeSet + 1);
-            } else {
-                setActiveSet(null);
-            }
-        } else {
-            updateStage(activeSet);
-        }
+    const updateActiveSet = (ex, set) => {
+        exercise.current = ex;
+        setActiveSet(set);
     }
 
     const addNewSet = () => {
-        setStages([...stages, 'IDLE']);
+        if (activeSet) {
+            return;
+        }
+        exercise.current.exercises = exercise.current.exercises.concat({
+            id: genHash(), stage: 'IDLE'
+        });
+        setWorkout(workout);
     }
 
     const removeSet = () => {
-        if (!Number.isFinite(activeSet)) {
-            return;
-        }
-        setStages(stages.filter((_, i) => i !== activeSet));
-        setActiveSet(activeSet < stages.length ? activeSet : null);
+        exercise.current.exercises = exercise.current.exercises.filter(
+            s => s.id !== activeSet
+        );
+        setWorkout(workout);
     }
 
     return (
         <div className='bg-white p-2'>
-            <div>
-                <ul className='p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl'>
-                    <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
-                        <BiDumbbell className='inline text-xl mb-1'/> {exerciseName}
-                    </h3>
-                    {stages.map((stage, index) =>
-                        <SetDisplay
-                            key={index}
-                            defaultRestTime={90}
-                            defaultReps={8}
-                            onClick={() => setActiveSet(index)}
-                            defaultWeight={10}
-                            isActive={index === activeSet}
-                            onReset={() => updateStage(index, 'IDLE')}
-                            onComplete={() => setActiveSet((index + 1) % stages.length)}
-                            stage={stage}
-                        ></SetDisplay>
-                    )}
-                </ul>
-                <div className='flex justify-end mt-1'>
-                    <button onClick={removeSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>
-                    <button onClick={addNewSet} className='text-blue-500 text-sm px-1'>Add set</button>
-                </div>
-            </div>
+            {
+                workout.exercises.map(exercise => <Exercise
+                    key={exercise.id}
+                    name={exercise.name}
+                    sets={exercise.sets}
+                    activeSet={activeSet}
+                    onClickSet={set => updateActiveSet(exercise, set)}
+                    onAddSet={addNewSet}
+                    onRemoveSet={removeSet}
+                />)
+            }
             <Actions
-                exerciseName={exerciseName}
-                onActionButtonClick={onActionButtonClick}
-                activeSet={activeSet}
-                stages={stages}
+                onActionButtonClick={advanceCurrentSetToNextStage}
+                exercise={exercise.current}
+                set={activeSet}
             />
         </div>
     );

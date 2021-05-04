@@ -45,7 +45,6 @@ export default function SetDisplay(props) {
         defaultReps = 8,
         defaultWeight = 10,
         onClick = () => {},
-        onComplete = () => {},
         isActive = true,
         stage = 'IDLE'
     } = props;

@@ -48,22 +48,25 @@ function CycleButton({ stage, onClick = () => {} }) {
 
 export default function Actions(props) {
     const {
-        stages,
-        activeSet,
-        exerciseName,
+        exercise,
+        set,
         onActionButtonClick = () => {},
         onCompleteExerciseClick = () => {}
     } = props;
 
+    if (!exercise) {
+        return <></>;
+    }
+
     let footerButton = null;
 
-    if (!stages.some(s => s !== 'COMPLETE')) {
+    if (!exercise.sets.some(s => s.stage !== 'COMPLETE')) {
         footerButton = <CompleteExerciseButton
             onCompleteExerciseClick={onCompleteExerciseClick}
         />;
-    } else if (activeSet !== null) {
+    } else if (set !== null) {
         footerButton = <CycleButton
-            stage={stages[activeSet]}
+            stage={set.stage}
             onClick={onActionButtonClick}
         />;
     }
@@ -71,7 +74,7 @@ export default function Actions(props) {
     return (
         <div className='flex fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
-                {exerciseName}
+                {exercise.name}
             </h3>
             {footerButton}
         </div>
