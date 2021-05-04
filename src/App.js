@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { cloneDeep } from "lodash";
+import { useReducer, useRef, useState } from "react";
 
 import Actions from "./components/Actions";
 import Exercise from "./components/Exercise";
@@ -11,10 +12,70 @@ function getNextStageFor(stage) {
     return stages[(index + 1) % stages.length];
 }
 
-function App() {
-    const [workout, setWorkout] = useState({
+function addNewSet(workout, exerciseId) {
+    const newWorkout = cloneDeep(workout);
+    const exercise = newWorkout.exercises.find(
+        ex => ex.id === exerciseId
+    );
+    exercise.sets = [
+        ...exercise.sets,
+        { id: genHash(), stage: 'IDLE' }
+    ];
+    return newWorkout;
+}
+
+function removeSet(workout, exerciseId) {
+    const newWorkout = cloneDeep(workout);
+    const exercise = newWorkout.exercises.find(
+        ex => ex.id === exerciseId
+    );
+    const setIndex = exercise.sets.findIndex(s => s.id === workout.activeSetId);
+    if (setIndex !== -1) {
+        exercise.sets.splice(setIndex, 1);
+        newWorkout.activeSetId = null;
+    }
+    return newWorkout;
+}
+
+function updateActiveSet(workout, setId) {
+    const newWorkout = cloneDeep(workout);
+    newWorkout.activeSetId = setId;
+    return newWorkout;
+}
+
+function reducer(state, action) {
+    const newState = cloneDeep(state);
+    switch(action.type) {
+        case 'ADD_SET': {
+            const { exerciseId } = action.payload;
+            return addNewSet(state, exerciseId);
+        }
+        case 'REMOVE_SET': {
+            const { exerciseId } = action.payload;
+            return removeSet(state, exerciseId);
+        }
+        case 'UPDATE_ACTIVE_SET': {
+            const { setId } = action.payload;
+            return updateActiveSet(state, setId);
+        }
+        case 'UPDATE_SET_STAGE':
+            return newState;
+        case 'ADD_EXERCISE':
+            return newState;
+        case 'REMOVE_EXERCISE':
+            return newState;
+        case 'UPDATE_EXERCISE':
+            return newState;
+        default:
+            throw new Error();
+    }
+}
+
+function Workout() {
+    const [state, dispatch] = useReducer(reducer, {
         id: genHash(),
         name: 'Workout 1',
+        activeSetId: null,
         exercises: [
             {
                 id: genHash(),
@@ -27,66 +88,28 @@ function App() {
             }
         ]
     });
-    const exercise = useRef(null);
-    const [activeSet, setActiveSet] = useState(null);
-
-    const advanceCurrentSetToNextStage = () => {
-        const newSet = {
-            ...activeSet,
-            stage: getNextStageFor(activeSet.stage)
-        }
-        const activeSetIndex = exercise.current.sets.findIndex(
-            s => s === activeSet
-        );
-        console.log(activeSet, activeSetIndex, newSet);
-        const setsArray = [...exercise.current.sets];
-        setsArray.splice(activeSetIndex, 1, newSet);
-        exercise.current.sets = setsArray;
-        setWorkout(workout);
-    }
-
-    const updateActiveSet = (ex, set) => {
-        exercise.current = ex;
-        setActiveSet(set);
-    }
-
-    const addNewSet = () => {
-        if (activeSet) {
-            return;
-        }
-        exercise.current.exercises = exercise.current.exercises.concat({
-            id: genHash(), stage: 'IDLE'
-        });
-        setWorkout(workout);
-    }
-
-    const removeSet = () => {
-        exercise.current.exercises = exercise.current.exercises.filter(
-            s => s.id !== activeSet
-        );
-        setWorkout(workout);
-    }
 
     return (
         <div className='bg-white p-2'>
             {
-                workout.exercises.map(exercise => <Exercise
+                state.exercises.map(exercise => <Exercise
                     key={exercise.id}
+                    id={exercise.id}
                     name={exercise.name}
                     sets={exercise.sets}
-                    activeSet={activeSet}
-                    onClickSet={set => updateActiveSet(exercise, set)}
-                    onAddSet={addNewSet}
-                    onRemoveSet={removeSet}
+                    activeSetId={state.activeSetId}
+                    dispatch={dispatch}
                 />)
             }
             <Actions
-                onActionButtonClick={advanceCurrentSetToNextStage}
-                exercise={exercise.current}
-                set={activeSet}
+                dispatch={dispatch}
             />
         </div>
     );
+}
+
+function App() {
+    return (<Workout />);
 }
 
 export default App;

@@ -4,19 +4,46 @@ import SetDisplay from "./SetDisplay";
 
 export default function Exercise(props) {
     const {
+        id,
         name,
         sets,
-        activeSet = null,
-        onClickSet = () => {},
-        onRemoveSet = () => {},
-        onAddSet = () => {},
+        activeSetId = null,
+        dispatch = () => {},
     } = props;
 
-    const isActive = sets.some(s => s.id === activeSet);
+    const isActive = sets.some(s => s.id === activeSetId);
+
+    const onRemoveSet = () => {
+        dispatch({
+            type: 'REMOVE_SET',
+            payload: {
+                exerciseId: id
+            }
+        })
+    }
+
+    const onAddSet = () => {
+        dispatch({
+            type: 'ADD_SET',
+            payload: {
+                exerciseId: id
+            }
+        })
+    }
+
+    const onClickSet = (setId) => {
+        dispatch({
+            type: 'UPDATE_ACTIVE_SET',
+            payload: {
+                exerciseId: id,
+                setId
+            }
+        })
+    }
 
     return (
         <div>
-            <ul className='p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl'>
+            <ul className={`p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl ${isActive ? 'ring-2 ring-indigo-200' : ''}`}>
                 <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
                     <BiDumbbell className='inline text-xl mb-1'/> {name}
                 </h3>
@@ -25,9 +52,9 @@ export default function Exercise(props) {
                         key={set.id}
                         defaultRestTime={90}
                         defaultReps={8}
-                        onClick={() => onClickSet(set)}
+                        onClick={() => onClickSet(set.id)}
                         defaultWeight={10}
-                        isActive={set === activeSet}
+                        isActive={set.id === activeSetId}
                         stage={set.stage}
                     ></SetDisplay>
                 ) : (
@@ -35,7 +62,7 @@ export default function Exercise(props) {
                 )}
             </ul>
             <div className='flex justify-end mt-1'>
-                {sets.length > 0 && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
+                {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
                 <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>Add set</button>
             </div>
         </div>
