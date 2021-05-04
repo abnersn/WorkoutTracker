@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    input[type=range] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+    }
+
+    input[type=range]:focus {
+        outline: none;
+    }
+
+    input[type=range]::-ms-track {
+        width: 100%;
+        cursor: pointer;
+        background: transparent; 
+        border-color: transparent;
+        color: transparent;
+    }
+
+    input[type=range].val-1 { --border-color: #49b364 }
+    input[type=range].val-2 { --border-color: #68ac48 }
+    input[type=range].val-3 { --border-color: #81a42d }
+    input[type=range].val-4 { --border-color: #999a0f }
+    input[type=range].val-5 { --border-color: #af8e00 }
+    input[type=range].val-6 { --border-color: #c37f00 }
+    input[type=range].val-7 { --border-color: #d66f13 }
+    input[type=range].val-8 { --border-color: #e55b2c }
+    input[type=range].val-9 { --border-color: #e55b2c }
+    input[type=range].val-10 { --border-color: #ef4444 }
+
+    .tracks {
+        padding: 0 .4rem;
+    }
+
+    input[type=range]:focus::-moz-range-thumb {
+        @apply shadow;
+    }
+    input[type=range]::-moz-range-thumb {
+        border: 2px solid var(--border-color);
+        @apply block rounded-full shadow-sm bg-white;
+    }
+
+    input[type=range]::-moz-range-track {
+        background: linear-gradient(
+            90deg,
+            #10b981,
+            #49b364,
+            #68ac48,
+            #81a42d,
+            #999a0f,
+            #af8e00,
+            #c37f00,
+            #d66f13,
+            #e55b2c,
+            #ef4444
+        );
+        height: 6px;
+        border-radius: 3px;
+    }
+}

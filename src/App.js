@@ -135,6 +135,7 @@ function Workout() {
                     key={exercise.id}
                     id={exercise.id}
                     isActive={exercise.id === state.activeExerciseId}
+                    isComplete={!hasIncompleteSets(exercise)}
                     name={exercise.name}
                     sets={exercise.sets}
                     activeSetId={state.activeSetId}
