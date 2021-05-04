@@ -41,10 +41,12 @@ function SetInputField(props) {
 
 export default function SetDisplay(props) {
     const {
+        id,
         defaultRestTime = 30,
         defaultReps = 8,
         defaultWeight = 10,
         onClick = () => {},
+        dispatch = () => {},
         isActive = true,
         stage = 'IDLE'
     } = props;
@@ -60,6 +62,17 @@ export default function SetDisplay(props) {
     const [isEditRest, setIsEditRest] = useState(false);
 
     const prevStageRef = useRef();
+
+    useEffect(() => {
+        if (isEditTime || isEditReps || isEditWeight || isEditRest) {
+            dispatch({
+                type: 'UPDATE_ACTIVE_SET',
+                payload: {
+                    setId: id
+                }
+            })
+        }
+    }, [dispatch, isEditTime, isEditReps, isEditRest, isEditWeight, id]);
 
     useEffect(() => {
         if (stage === 'IDLE' && prevStageRef.current === 'COMPLETE') {

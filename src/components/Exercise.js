@@ -50,12 +50,14 @@ export default function Exercise(props) {
                 {sets.length ? sets.map((set) =>
                     <SetDisplay
                         key={set.id}
+                        id={set.id}
                         defaultRestTime={90}
                         defaultReps={8}
                         onClick={() => onClickSet(set.id)}
                         defaultWeight={10}
                         isActive={set.id === activeSetId}
                         stage={set.stage}
+                        dispatch={dispatch}
                     ></SetDisplay>
                 ) : (
                     <p className='text-indigo-500 text-sm pb-1'>No sets for this exercise.</p>
