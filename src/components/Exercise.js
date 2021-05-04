@@ -7,11 +7,10 @@ export default function Exercise(props) {
         id,
         name,
         sets,
+        isActive = false,
         activeSetId = null,
         dispatch = () => {},
     } = props;
-
-    const isActive = sets.some(s => s.id === activeSetId);
 
     const onRemoveSet = () => {
         dispatch({
@@ -31,7 +30,7 @@ export default function Exercise(props) {
         })
     }
 
-    const onClickSet = (setId) => {
+    const onActivateSet = (setId) => {
         dispatch({
             type: 'UPDATE_ACTIVE_SET',
             payload: {
@@ -51,9 +50,11 @@ export default function Exercise(props) {
                     <SetDisplay
                         key={set.id}
                         id={set.id}
+                        exerciseId={id}
                         defaultRestTime={90}
                         defaultReps={8}
-                        onClick={() => onClickSet(set.id)}
+                        onClick={() => onActivateSet(set.id)}
+                        onActivateSet={onActivateSet}
                         defaultWeight={10}
                         isActive={set.id === activeSetId}
                         stage={set.stage}

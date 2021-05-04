@@ -17,10 +17,12 @@ function addNewSet(workout, exerciseId) {
     const exercise = newWorkout.exercises.find(
         ex => ex.id === exerciseId
     );
+    const hash = genHash();
     exercise.sets = [
         ...exercise.sets,
-        { id: genHash(), stage: 'IDLE' }
+        { id: hash, stage: 'IDLE' }
     ];
+    newWorkout.activeSetId = hash;
     return newWorkout;
 }
 
@@ -37,9 +39,10 @@ function removeSet(workout, exerciseId) {
     return newWorkout;
 }
 
-function updateActiveSet(workout, setId) {
+function updateActiveSet(workout, exerciseId, setId) {
     const newWorkout = cloneDeep(workout);
     newWorkout.activeSetId = setId;
+    newWorkout.activeExerciseId = exerciseId;
     return newWorkout;
 }
 
@@ -55,8 +58,8 @@ function reducer(state, action) {
             return removeSet(state, exerciseId);
         }
         case 'UPDATE_ACTIVE_SET': {
-            const { setId } = action.payload;
-            return updateActiveSet(state, setId);
+            const { setId, exerciseId } = action.payload;
+            return updateActiveSet(state, exerciseId, setId);
         }
         case 'UPDATE_SET_STAGE':
             return newState;
@@ -76,6 +79,7 @@ function Workout() {
         id: genHash(),
         name: 'Workout 1',
         activeSetId: null,
+        activeExerciseId: null,
         exercises: [
             {
                 id: genHash(),
@@ -95,6 +99,7 @@ function Workout() {
                 state.exercises.map(exercise => <Exercise
                     key={exercise.id}
                     id={exercise.id}
+                    isActive={exercise.id === state.activeExerciseId}
                     name={exercise.name}
                     sets={exercise.sets}
                     activeSetId={state.activeSetId}
