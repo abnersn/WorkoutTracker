@@ -1,10 +1,11 @@
-import { BiCheck, BiPause, BiPlay, BiSkipNext, BiTrophy } from "react-icons/bi";
+import { BiCheck, BiPause, BiPlay, BiRefresh, BiTrophy } from "react-icons/bi";
+import hasIncompleteSets from "../util/hasIncompleteSets";
 
 function CompleteExerciseButton({ onClickCompleteExercise = () => {} }) {
     const color = 'green';
     return (
         <button
-            className={`btn bg-${color}-500 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
+            className={`btn bg-${color}-500 ml-2 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
         >
             <BiTrophy className='mr-1 text-lg' /> Finish
         </button>
@@ -16,14 +17,14 @@ function CycleButton({ stage, onClick = () => {} }) {
         IDLE: 'Start',
         ACTIVE: 'Rest',
         RESTING: 'Complete',
-        COMPLETE: 'Next'
+        COMPLETE: 'Restart'
     }
 
     const icons = {
         IDLE: BiPlay,
         ACTIVE: BiPause,
         RESTING: BiCheck,
-        COMPLETE: BiSkipNext
+        COMPLETE: BiRefresh
     }
 
     const colors = {
@@ -47,16 +48,10 @@ function CycleButton({ stage, onClick = () => {} }) {
     )
 }
 
-function hasIncompleteSets(exercise) {
-    return exercise.sets.some(s => s.stage !== 'COMPLETE');
-}
-
 export default function Actions(props) {
     const {
         state, dispatch
     } = props;
-
-    let footerButton = null;
 
     const exercise = state.exercises.find(
         e => e.id === state.activeExerciseId
@@ -72,18 +67,10 @@ export default function Actions(props) {
         });
     }
 
-    if (exercise && !hasIncompleteSets(exercise)) {
-        footerButton = <CompleteExerciseButton />;
-    } else if (set) {
-        footerButton = <CycleButton onClick={updateStage} stage={set.stage} />;
-    }
-
     return (
-        <div className='flex fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
-            <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
-                {exercise?.name}
-            </h3>
-            {footerButton}
+        <div className='flex justify-end fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
+            {set && <CycleButton onClick={updateStage} stage={set.stage} />}
+            {exercise && !hasIncompleteSets(exercise) && <CompleteExerciseButton />}
         </div>
     )
 }

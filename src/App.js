@@ -4,6 +4,7 @@ import { useReducer } from "react";
 import Actions from "./components/Actions";
 import Exercise from "./components/Exercise";
 import genHash from "./util/genHash";
+import hasIncompleteSets from "./util/hasIncompleteSets";
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -42,14 +43,11 @@ function removeSet(workout, payload) {
 }
 
 function updateActiveSet(workout, payload) {
-    const { setId, exerciseId, stage } = payload;
+    const { setId, exerciseId } = payload;
 
     workout.activeSetId = setId;
     workout.activeExerciseId = exerciseId;
 
-    if (stage) {
-        updateSetStage(workout, stage)
-    }
     return workout;
 }
 
@@ -60,19 +58,30 @@ function updateSetStage(workout, stage) {
     const setIndex = exercise.sets.findIndex(
         s => s.id === workout.activeSetId
     );
-    if (setIndex !== -1) {
-        const currentStage = exercise.sets[setIndex].stage;
-        if (currentStage === 'COMPLETE') {
-            workout.activeSetId = exercise.sets[
-                (setIndex + 1) % exercise.sets.length
-            ].id;
-        } else {
-            const nextStage = stage || getNextStageFor(
-                currentStage
-            );
-            exercise.sets[setIndex].stage = nextStage;
-        }
+    if (setIndex === -1) {
+        return workout;
     }
+
+    const currentStage = exercise.sets[setIndex].stage;
+    const nextStage = stage || getNextStageFor(
+        currentStage
+    );
+
+    if (nextStage === 'COMPLETE' && !stage) {
+        const nextIndex = (setIndex + 1) % exercise.sets.length;
+        workout.activeSetId = nextIndex > 0 ?
+            exercise.sets[
+                (setIndex + 1) % exercise.sets.length
+            ].id :
+            null;
+    }
+
+    exercise.sets[setIndex].stage = nextStage;
+
+    if (!hasIncompleteSets(exercise)) {
+        workout.activeSetId = null;
+    }
+
     return workout;
 }
 

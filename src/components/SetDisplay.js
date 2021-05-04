@@ -70,8 +70,7 @@ export default function SetDisplay(props) {
                 type: 'UPDATE_ACTIVE_SET',
                 payload: {
                     setId: id,
-                    exerciseId,
-                    stage: 'IDLE'
+                    exerciseId
                 }
             });
 

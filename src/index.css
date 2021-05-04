@@ -4,5 +4,5 @@
 @tailwind utilities;
 
 .btn {
-    @apply ml-auto border flex uppercase focus:ring-2 text-sm items-center text-white px-3 py-2 rounded-md;
+    @apply border flex uppercase focus:ring-2 text-sm items-center text-white px-3 py-2 rounded-md;
 }
