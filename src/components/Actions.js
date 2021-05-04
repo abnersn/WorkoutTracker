@@ -102,7 +102,7 @@ export default function Actions(props) {
     }
 
     return (
-        <div className='flex justify-end fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
+        <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             {set && <CycleButton onClick={updateStage} stage={set.stage} />}
             {button}
         </div>

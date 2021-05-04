@@ -151,9 +151,9 @@ function Workout() {
     });
 
     return (
-        <div className='bg-white p-2'>
+        <div className='bg-white'>
             <h2>{state.name}</h2>
-            <ul className='flex flex-col space-y-4'>
+            <ul className='flex flex-col space-y-4 p-3'>
                 {
                     state.exercises.map(exercise =>
                     <li key={exercise.id}>
