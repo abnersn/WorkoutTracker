@@ -85,6 +85,18 @@ function updateSetStage(workout, stage) {
     return workout;
 }
 
+function updateActiveExercise(workout) {
+    const activeExerciseIdx = workout.exercises.findIndex(
+        ex => ex.id === workout.activeExerciseId
+    );
+    const nextExerciseIdx = (activeExerciseIdx + 1) % workout.exercises.length;
+    const nextExercise = workout.exercises[nextExerciseIdx];
+    workout.activeExerciseId = nextExercise.id;
+    workout.activeSetId = nextExercise.sets[0]?.id || null;
+
+    return workout;
+}
+
 function reducer(state, action) {
     const workout = cloneDeep(state);
 
@@ -97,6 +109,8 @@ function reducer(state, action) {
             return updateActiveSet(workout, action.payload);
         case 'UPDATE_SET_STAGE':
             return updateSetStage(workout);
+        case 'COMPLETE_EXERCISE':
+            return updateActiveExercise(workout);
         case 'ADD_EXERCISE':
             return workout;
         case 'REMOVE_EXERCISE':
@@ -123,6 +137,15 @@ function Workout() {
                     { id: genHash(), stage: 'IDLE' },
                     { id: genHash(), stage: 'IDLE' }
                 ]
+            },
+            {
+                id: genHash(),
+                name: 'Another exercise',
+                sets: [
+                    { id: genHash(), stage: 'IDLE' },
+                    { id: genHash(), stage: 'IDLE' },
+                    { id: genHash(), stage: 'IDLE' }
+                ]
             }
         ]
     });
@@ -130,18 +153,22 @@ function Workout() {
     return (
         <div className='bg-white p-2'>
             <h2>{state.name}</h2>
-            {
-                state.exercises.map(exercise => <Exercise
-                    key={exercise.id}
-                    id={exercise.id}
-                    isActive={exercise.id === state.activeExerciseId}
-                    isComplete={!hasIncompleteSets(exercise)}
-                    name={exercise.name}
-                    sets={exercise.sets}
-                    activeSetId={state.activeSetId}
-                    dispatch={dispatch}
-                />)
-            }
+            <ul className='flex flex-col space-y-4'>
+                {
+                    state.exercises.map(exercise =>
+                    <li key={exercise.id}>
+                        <Exercise
+                            id={exercise.id}
+                            isActive={exercise.id === state.activeExerciseId}
+                            isComplete={!hasIncompleteSets(exercise)}
+                            name={exercise.name}
+                            sets={exercise.sets}
+                            activeSetId={state.activeSetId}
+                            dispatch={dispatch}
+                        />
+                    </li>)
+                }
+            </ul>
             <button>Add exercise</button>
             <Actions
                 state={state}

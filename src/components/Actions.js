@@ -1,5 +1,18 @@
-import { BiCheck, BiPause, BiPlay, BiRefresh, BiTrophy } from "react-icons/bi";
+import { BiCheck, BiPause, BiPlay, BiRefresh, BiStar, BiTrophy } from "react-icons/bi";
+import hasIncompleteExercises from "../util/hasIncompleteExercises";
 import hasIncompleteSets from "../util/hasIncompleteSets";
+
+function CompleteWorkoutButton({ onClick = () => {} }) {
+    const color = 'green';
+    return (
+        <button
+            onClick={onClick}
+            className={`btn bg-${color}-500 ml-2 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
+        >
+            <BiTrophy className='mr-1 text-lg' /> Complete workout
+        </button>
+    )
+}
 
 function CompleteExerciseButton({ onClick = () => {} }) {
     const color = 'green';
@@ -8,7 +21,7 @@ function CompleteExerciseButton({ onClick = () => {} }) {
             onClick={onClick}
             className={`btn bg-${color}-500 ml-2 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
         >
-            <BiTrophy className='mr-1 text-lg' /> Finish
+            <BiStar className='mr-1 text-lg' /> Finish
         </button>
     )
 }
@@ -74,10 +87,24 @@ export default function Actions(props) {
         })
     }
 
+    const completeWorkout = () => {
+        console.log('COMPLETE!');
+    }
+
+    let button = null;
+
+    if (exercise) {
+        if (!hasIncompleteExercises(state)) {
+            button = <CompleteWorkoutButton onClick={completeWorkout} />;
+        } else if (!hasIncompleteSets(exercise)) {
+            button = <CompleteExerciseButton onClick={completeExercise} />;
+        }
+    }
+
     return (
         <div className='flex justify-end fixed items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             {set && <CycleButton onClick={updateStage} stage={set.stage} />}
-            {exercise && !hasIncompleteSets(exercise) && <CompleteExerciseButton onClick={completeExercise} />}
+            {button}
         </div>
     )
 }
