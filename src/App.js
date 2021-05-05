@@ -1,6 +1,5 @@
 import { cloneDeep } from "lodash";
 import { useReducer, useState } from "react";
-import { BiPlus } from "react-icons/bi";
 
 import Actions from "./components/Actions";
 import Exercise from "./components/Exercise";
@@ -158,12 +157,15 @@ function AddExercise(props) {
     }
 
     return (
-        <form onSubmit={onAddExercise} className='m-3 p-2 flex items-center bg-indigo-50 rounded-lg border border-indigo-200'>
-            <input required value={name} onChange={ev => setName(ev.target.value)} className='text-sm px-2 w-2 flex-1 mr-2 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200' type='text' placeholder='Exercise name' />
-            <button
-                className='bg-indigo-600 text-white px-2 py-1 rounded text-sm whitespace-nowrap'>
-                    <BiPlus className='inline -mt-1 mr-1' />Add exercise
-            </button>
+        <form onSubmit={onAddExercise} className='m-3'>
+            <div className='flex p-2 items-center bg-indigo-50 rounded-lg border border-indigo-200'>
+                <input required value={name} onChange={ev => setName(ev.target.value)} className='text-sm px-2 w-2 flex-1 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200' type='text' placeholder='Exercise name' />
+            </div>
+            <div className='flex justify-end mt-1'>
+                <button
+                    className='text-blue-500 text-sm px-1'> Add exercise
+                </button>
+            </div>
         </form>
     );
 }

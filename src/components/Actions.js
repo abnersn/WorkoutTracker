@@ -130,10 +130,10 @@ export default function Actions(props) {
 
     let button = null;
 
-    let shouldShowReset = true;
-    if (exercise) {
+    let shouldShowCycle = timerIsRunning;
+    if (exercise && timerIsRunning) {
         if (!hasIncompleteExercises(state)) {
-            shouldShowReset = false;
+            shouldShowCycle = false;
             button = <Button
                 color='green'
                 label='Finish Workout'
@@ -164,7 +164,7 @@ export default function Actions(props) {
     if (isComplete) {
         button = <Button
             color='indigo'
-            label='Restart workout'
+            label='Reset workout'
             onClick={onRestartWorkout}
             Icon={BiRefresh}
         />
@@ -178,7 +178,7 @@ export default function Actions(props) {
                 <BiStopwatch className='inline -mt-1' /> <time>{timeFormat(timer)}</time>
                 <p className='text-xs uppercase tracking-wider'>{format(new Date(), 'PP')}</p>
             </div>
-            {set && shouldShowReset && <CycleButton onClick={updateStage} stage={set.stage} />}
+            {set && shouldShowCycle && <CycleButton onClick={updateStage} stage={set.stage} />}
             {button}
         </div>
     )
