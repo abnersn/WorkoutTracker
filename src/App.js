@@ -124,6 +124,28 @@ function completeWorkout(workout) {
     return workout;
 }
 
+function moveExercise(workout, payload) {
+    const { exerciseId, factor } = payload;
+
+    const exerciseIndex = workout.exercises.findIndex(e => e.id === exerciseId);
+
+    if (exerciseIndex === -1) {
+        return workout;
+    }
+
+    const newIndex = Math.min(
+        Math.max(0, exerciseIndex + factor), workout.exercises.length - 1
+    );
+
+    const exerciseA = workout.exercises[exerciseIndex];
+    const exerciseB = workout.exercises[newIndex];
+
+    workout.exercises[exerciseIndex] = exerciseB;
+    workout.exercises[newIndex] = exerciseA;
+
+    return workout;
+}
+
 function reducer(state, action) {
     const workout = cloneDeep(state);
 
@@ -144,6 +166,8 @@ function reducer(state, action) {
             return restartWorkout(workout);
         case 'COMPLETE_WORKOUT':
             return completeWorkout(workout);
+        case 'MOVE_EXERCISE':
+            return moveExercise(workout, action.payload);
         default:
             throw new Error();
     }
@@ -196,10 +220,12 @@ function Workout() {
                     state.exercises.length > 0 ? (
                         <ul className='flex flex-col space-y-4 p-3'>
                             {
-                                state.exercises.map(exercise =>
+                                state.exercises.map((exercise, i) =>
                                 <li key={exercise.id}>
                                     <Exercise
                                         id={exercise.id}
+                                        isFirst={i === 0}
+                                        isLast={i === state.exercises.length - 1}
                                         isActive={exercise.id === state.activeExerciseId}
                                         isComplete={!hasIncompleteSets(exercise)}
                                         name={exercise.name}
