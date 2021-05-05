@@ -1,30 +1,19 @@
-import { BiCheck, BiPause, BiPlay, BiRefresh, BiStar, BiTrophy } from "react-icons/bi";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import {
+    BiCheck,
+    BiPause,
+    BiPlay,
+    BiRefresh,
+    BiStar,
+    BiStopwatch,
+    BiTrophy
+} from "react-icons/bi";
 import hasIncompleteExercises from "../util/hasIncompleteExercises";
 import hasIncompleteSets from "../util/hasIncompleteSets";
+import timeFormat from "../util/timeFormat";
 
-function CompleteWorkoutButton({ onClick = () => {} }) {
-    const color = 'green';
-    return (
-        <button
-            onClick={onClick}
-            className={`btn bg-${color}-500 ml-2 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
-        >
-            <BiTrophy className='mr-1 text-lg' /> Complete workout
-        </button>
-    )
-}
-
-function CompleteExerciseButton({ onClick = () => {} }) {
-    const color = 'green';
-    return (
-        <button
-            onClick={onClick}
-            className={`btn bg-${color}-500 ml-2 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
-        >
-            <BiStar className='mr-1 text-lg' /> Finish
-        </button>
-    )
-}
+import Button from './Button';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const labels = {
@@ -53,16 +42,30 @@ function CycleButton({ stage, onClick = () => {} }) {
     const color = colors[stage];
 
     return (
-        <button
+        <Button
             onClick={onClick}
-            className={`btn bg-${color}-500 border-${color}-600 focus:ring-${color}-200 active:bg-${color}-700`}
-        >
-            {<Icon stage={stage} className='mr-1 text-lg' />}{label}
-        </button>
+            color={color}
+            label={label}
+            Icon={Icon}
+        />
     )
 }
 
 export default function Actions(props) {
+    const [timer, setTimer] = useState(0);
+    const [isComplete, setIsComplete] = useState(false);
+    const [timerIsRunning, setTimerIsRunning] = useState(false);
+
+    useEffect(() => {
+        if (!timerIsRunning) {
+            return;
+        }
+        const interval = setInterval(() => {
+            setTimer(t => t + 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [timerIsRunning]);
+
     const {
         state, dispatch
     } = props;
@@ -88,22 +91,94 @@ export default function Actions(props) {
     }
 
     const completeWorkout = () => {
-        console.log('COMPLETE!');
+        const willSave = window.confirm(
+            'Would you like to save your progress?'
+        );
+        if (willSave) {
+            // Do save here
+        }
+        setIsComplete(true);
+        setTimerIsRunning(false);
+    }
+
+    const onStartWorkout = () => {
+        setTimerIsRunning(true);
+        dispatch({
+            type: 'UPDATE_ACTIVE_SET',
+            payload: {
+                exerciseId: state.exercises[0]?.id,
+                setId: state.exercises[0]?.sets[0]?.id,
+            }
+        });
+        dispatch({
+            type: 'UPDATE_SET_STAGE'
+        })
+    }
+
+    const onRestartWorkout = () => {
+        const willReset = window.confirm(
+            'Are you sure you want to erase the current workout?'
+        );
+        if (willReset) {
+            setTimer(0);
+            setIsComplete(false);
+            dispatch({
+                type: 'RESTART_WORKOUT'
+            });
+        }
     }
 
     let button = null;
 
+    let shouldShowReset = true;
     if (exercise) {
         if (!hasIncompleteExercises(state)) {
-            button = <CompleteWorkoutButton onClick={completeWorkout} />;
+            shouldShowReset = false;
+            button = <Button
+                color='green'
+                label='Finish Workout'
+                Icon={BiTrophy}
+                onClick={completeWorkout}
+            />;
         } else if (!hasIncompleteSets(exercise)) {
-            button = <CompleteExerciseButton onClick={completeExercise} />;
+            button = <Button
+                color='green'
+                label='Finish exercise'
+                Icon={BiStar}
+                onClick={completeExercise}
+            />;
         }
     }
+    
+    const hasExercises = state.exercises.length > 0;
+    const hasSets = state.exercises[0]?.sets.length > 0;
+    if (!timerIsRunning && hasExercises && hasSets && !isComplete) {
+        button = <Button
+            color='blue'
+            label='Start workout'
+            onClick={onStartWorkout}
+            Icon={BiPlay}
+        />
+    }
+
+    if (isComplete) {
+        button = <Button
+            color='indigo'
+            label='Restart workout'
+            onClick={onRestartWorkout}
+            Icon={BiRefresh}
+        />
+    }
+
+    const timerColor = timerIsRunning || !isComplete ? 'indigo' : 'green';
 
     return (
         <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
-            {set && <CycleButton onClick={updateStage} stage={set.stage} />}
+            <div className={`text-xl mr-auto border-l-2 border-${timerColor}-500 pl-2 bg-white text-${timerColor}-700`}>
+                <BiStopwatch className='inline -mt-1' /> <time>{timeFormat(timer)}</time>
+                <p className='text-xs uppercase tracking-wider'>{format(new Date(), 'PP')}</p>
+            </div>
+            {set && shouldShowReset && <CycleButton onClick={updateStage} stage={set.stage} />}
             {button}
         </div>
     )

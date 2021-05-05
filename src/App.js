@@ -1,5 +1,6 @@
 import { cloneDeep } from "lodash";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
+import { BiPlus } from "react-icons/bi";
 
 import Actions from "./components/Actions";
 import Exercise from "./components/Exercise";
@@ -97,6 +98,27 @@ function updateActiveExercise(workout) {
     return workout;
 }
 
+function addNewExercise(workout, payload) {
+    const { name } = payload;
+    workout.exercises.push({
+        id: genHash(),
+        name,
+        sets: []
+    })
+    return workout;
+}
+
+function restartWorkout(workout) {
+    for (const exercise of workout.exercises) {
+        for (const set of exercise.sets) {
+            set.stage = 'IDLE';
+        }
+    }
+    workout.activeExerciseId = null;
+    workout.activeSetId = null;
+    return workout;
+}
+
 function reducer(state, action) {
     const workout = cloneDeep(state);
 
@@ -112,14 +134,38 @@ function reducer(state, action) {
         case 'COMPLETE_EXERCISE':
             return updateActiveExercise(workout);
         case 'ADD_EXERCISE':
-            return workout;
-        case 'REMOVE_EXERCISE':
-            return workout;
+            return addNewExercise(workout, action.payload);
+        case 'RESTART_WORKOUT':
+            return restartWorkout(workout);
         case 'UPDATE_EXERCISE':
             return workout;
         default:
             throw new Error();
     }
+}
+
+function AddExercise(props) {
+    const [ name, setName ] = useState('');
+    const { dispatch } = props;
+
+    const onAddExercise = (ev) => {
+        ev.preventDefault();
+        setName('');
+        dispatch({
+            type: 'ADD_EXERCISE',
+            payload: { name }
+        });
+    }
+
+    return (
+        <form onSubmit={onAddExercise} className='m-3 p-2 flex items-center bg-indigo-50 rounded-lg border border-indigo-200'>
+            <input required value={name} onChange={ev => setName(ev.target.value)} className='text-sm px-2 w-2 flex-1 mr-2 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200' type='text' placeholder='Exercise name' />
+            <button
+                className='bg-indigo-600 text-white px-2 py-1 rounded text-sm whitespace-nowrap'>
+                    <BiPlus className='inline -mt-1 mr-1' />Add exercise
+            </button>
+        </form>
+    );
 }
 
 function Workout() {
@@ -128,48 +174,40 @@ function Workout() {
         name: 'Workout 1',
         activeSetId: null,
         activeExerciseId: null,
-        exercises: [
-            {
-                id: genHash(),
-                name: 'Exercise Name',
-                sets: [
-                    { id: genHash(), stage: 'IDLE' },
-                    { id: genHash(), stage: 'IDLE' },
-                    { id: genHash(), stage: 'IDLE' }
-                ]
-            },
-            {
-                id: genHash(),
-                name: 'Another exercise',
-                sets: [
-                    { id: genHash(), stage: 'IDLE' },
-                    { id: genHash(), stage: 'IDLE' },
-                    { id: genHash(), stage: 'IDLE' }
-                ]
-            }
-        ]
+        exercises: []
     });
 
     return (
-        <div className='bg-white'>
-            <h2>{state.name}</h2>
-            <ul className='flex flex-col space-y-4 p-3'>
+        <div className='bg-white max-w-lg m-auto border shadow-md place-self-center'>
+            <h2 className='text-2xl text-indigo-800 font-semibold text-center pt-4'>
+                {state.name}
+            </h2>
+            <div className='min-h-screen'>
                 {
-                    state.exercises.map(exercise =>
-                    <li key={exercise.id}>
-                        <Exercise
-                            id={exercise.id}
-                            isActive={exercise.id === state.activeExerciseId}
-                            isComplete={!hasIncompleteSets(exercise)}
-                            name={exercise.name}
-                            sets={exercise.sets}
-                            activeSetId={state.activeSetId}
-                            dispatch={dispatch}
-                        />
-                    </li>)
+                    state.exercises.length > 0 ? (
+                        <ul className='flex flex-col space-y-4 p-3'>
+                            {
+                                state.exercises.map(exercise =>
+                                <li key={exercise.id}>
+                                    <Exercise
+                                        id={exercise.id}
+                                        isActive={exercise.id === state.activeExerciseId}
+                                        isComplete={!hasIncompleteSets(exercise)}
+                                        name={exercise.name}
+                                        sets={exercise.sets}
+                                        activeSetId={state.activeSetId}
+                                        dispatch={dispatch}
+                                    />
+                                </li>)
+                            }
+                        </ul>
+                    ) : (
+                        <p className='px-3 my-2 text-indigo-500'>No exercises to list.</p>
+                    )
                 }
-            </ul>
-            <button>Add exercise</button>
+                <hr className='border-t border-indigo-200' />
+                <AddExercise dispatch={dispatch} />
+            </div>
             <Actions
                 state={state}
                 dispatch={dispatch}

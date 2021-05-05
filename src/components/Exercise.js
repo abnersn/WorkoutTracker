@@ -68,7 +68,7 @@ export default function Exercise(props) {
                 ) : (
                     <p className='text-indigo-500 text-sm pb-1'>No sets for this exercise.</p>
                 )}
-                {isComplete && <RPEScale />}
+                {isComplete && sets.length > 0 && <RPEScale />}
             </ul>
             <div className='flex justify-end mt-1'>
                 {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
