@@ -25,7 +25,7 @@ export default function Workout(props) {
 
     return (
         <div className='bg-white max-w-5xl m-auto border shadow-md place-self-center'>
-            <h2 className='text-2xl text-indigo-800 font-semibold px-3 pt-4'>
+            <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
                 {state.name}
             </h2>
             <main>

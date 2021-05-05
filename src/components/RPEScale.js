@@ -42,7 +42,7 @@ export default function RPEScale(props) {
                 <span className='uppercase text-sm tracking-wider text-indigo-700'>{t('rpe')}
                 <button onClick={() => setExpand(!expand)}><BiInfoCircle className='inline ml-1 mb-1' /></button></span>
                 <input
-                    className={`val-${value}`}
+                    className={`rpe val-${value}`}
                     type='range'
                     min='1'
                     value={value}

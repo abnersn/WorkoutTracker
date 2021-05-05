@@ -31,7 +31,7 @@ function SetInputField(props) {
                         onChange={ev => onChange(Number(ev.target.value))}
                     ></input>
                 ) : (
-                    <span tabIndex={0} onFocus={() => isEdit || onToggleEdit(true)} className={`value block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200`}>
+                    <span data-value={value} tabIndex={0} onFocus={() => isEdit || onToggleEdit(true)} className={`value block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200`}>
                         {formatFunction(Number(value))}
                     </span>
                 )
@@ -134,7 +134,8 @@ export default function SetDisplay(props) {
     return (
         <div
             onClick={() => onClick()}
-            className={`flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
+            data-id={id}
+            className={`set-display flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
                 isActive && !isReadOnly ? 'ring-2 ring-indigo-200 border-indigo-400' : ''
             }`}
         >

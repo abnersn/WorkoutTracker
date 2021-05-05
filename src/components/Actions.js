@@ -23,8 +23,59 @@ import timeFormat from '../util/timeFormat';
 
 import Button from './Button';
 
-function saveWorkout() {
-    
+function saveWorkout(id) {
+    const { localStorage } = window;
+
+    if (!localStorage) {
+        return;
+    }
+
+    const workout = {
+        id,
+        isComplete: true,
+        activeSetId: null,
+        activeExerciseId: null
+    };
+
+    workout.date = new Date();
+    workout.name = document.querySelector('.workout-name').textContent.trim();
+    workout.duration = Number(
+        document.querySelector('.workout-duration').dataset.value
+    );
+    workout.exercises = [];
+
+    const $exercises = document.querySelectorAll('.exercise');
+    for (const $exercise of $exercises) {
+        const exercise = {};
+        exercise.name = $exercise.querySelector(
+            '.exercise-name'
+        ).textContent.trim();
+        exercise.id = $exercise.dataset.id;
+        exercise.sets = [];
+
+        const $sets = $exercise.querySelectorAll('.set-display');
+        for (const $set of $sets) {
+            const set = {};
+            set.id = $set.dataset.id;
+            set.time = Number(
+                $set.querySelector('.time .value').dataset.value
+            );
+            set.reps = Number(
+                $set.querySelector('.reps .value').dataset.value
+            );
+            set.weight = Number(
+                $set.querySelector('.weight .value').dataset.value
+            );
+            set.rest = Number(
+                $set.querySelector('.rest .value').dataset.value
+            );
+            set.stage = 'COMPLETE';
+            exercise.sets.push(set);
+        }
+        exercise.rpe = Number($exercise.querySelector('.rpe').value);
+        workout.exercises.push(exercise);
+    }
+    console.log(workout);
 }
 
 function CycleButton({ stage, onClick = () => {} }) {
@@ -99,7 +150,7 @@ export default function Actions(props) {
             t('save_progress')
         );
         if (willSave) {
-            saveWorkout();
+            saveWorkout(state.id);
         }
         setIsComplete(true);
         setTimerIsRunning(false);
@@ -163,7 +214,7 @@ export default function Actions(props) {
     } else if (isComplete) {
         footerButtons[0] = <Button
             color='indigo'
-            label={t('reset_workout')}
+            label={t('reset')}
             onClick={onRestartWorkout}
             Icon={BiRefresh}
         />;
@@ -210,7 +261,7 @@ export default function Actions(props) {
     return (
         <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             <div className={`text-xl mr-auto border-l-2 border-${timerColor}-500 pl-2 bg-white text-${timerColor}-700`}>
-                <BiStopwatch className='inline -mt-1' /> <time>{timeFormat(timer)}</time>
+                <BiStopwatch className='inline -mt-1' /> <time className='workout-duration' data-value={timer}>{timeFormat(timer)}</time>
                 <p className='text-xs uppercase tracking-wider'>{format(date, 'PP', formatOptions)}</p>
             </div>
             {footerButtons[0]} {footerButtons[1]}

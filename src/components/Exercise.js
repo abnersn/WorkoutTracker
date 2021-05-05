@@ -63,7 +63,7 @@ export default function Exercise(props) {
     };
 
     return (
-        <div className='relative'>
+        <div className='exercise relative' data-id={id}>
             {isWorkoutComplete || isReadOnly || (
                 <div className='absolute top-1 right-1 text-indigo-500'>
                     <button disabled={isLast} onClick={() => moveExercise(1)} className='disabled:opacity-50 p-2'><BiChevronDown /></button>
@@ -71,7 +71,7 @@ export default function Exercise(props) {
                 </div>
             )}
             <ul className={`p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl ${isActive ? 'ring-2 ring-indigo-200' : ''}`}>
-                <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
+                <h3 className='exercise-name text-lg font-semibold text-indigo-800 -mb-1'>
                     <BiDumbbell className='inline text-xl mb-1'/> {name}
                 </h3>
                 {sets.length ? sets.map((set) =>
