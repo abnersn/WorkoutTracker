@@ -89,7 +89,7 @@ export default function Exercise(props) {
                 ) : (
                     <p className='text-indigo-500 text-sm pb-1'>No sets for this exercise.</p>
                 )}
-                {isComplete && sets.length > 0 && <RPEScale />}
+                {isComplete && sets.length > 0 && <RPEScale isReadOnly={isReadOnly} />}
             </ul>
             {isWorkoutComplete || isReadOnly || (
                 <div className='flex justify-end mt-1'>

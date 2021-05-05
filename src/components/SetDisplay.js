@@ -133,7 +133,7 @@ export default function SetDisplay(props) {
         <div
             onClick={() => onClick()}
             className={`flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
-                isActive ? 'ring-2 ring-indigo-200 border-indigo-400' : ''
+                isActive && !isReadOnly ? 'ring-2 ring-indigo-200 border-indigo-400' : ''
             }`}
         >
             <div className='time flex-1'>

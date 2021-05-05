@@ -9,7 +9,7 @@ import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 
 export default function Workout(props) {
-    const { isReadOnly = false } = props;
+    const { isReadOnly = true } = props;
 
     const [state, dispatch] = useReducer(reducer, {
         id: genHash(),
@@ -37,7 +37,7 @@ export default function Workout(props) {
                                         isFirst={i === 0}
                                         isWorkoutComplete={state.isComplete}
                                         isLast={i === state.exercises.length - 1}
-                                        isActive={exercise.id === state.activeExerciseId}
+                                        isActive={exercise.id === state.activeExerciseId && !isReadOnly}
                                         isComplete={!hasIncompleteSets(exercise)}
                                         isReadOnly={isReadOnly}
                                         name={exercise.name}

@@ -126,6 +126,10 @@ export default function Actions(props) {
         }
     };
 
+    const onGoBack = () => {
+
+    };
+
     let footerButtons = [null, null];
 
     const exercise = state.exercises.find(
@@ -144,7 +148,7 @@ export default function Actions(props) {
         footerButtons[0] = <Button
             color='blue'
             label='Back'
-            onClick={onRestartWorkout}
+            onClick={onGoBack}
             Icon={BiArrowBack}
         />;
     } else if (isComplete) {

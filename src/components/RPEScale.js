@@ -1,7 +1,9 @@
 import { BiInfoCircle } from 'react-icons/bi';
 import { useState } from 'react';
 
-export default function RPEScale() {
+export default function RPEScale(props) {
+    const { isReadOnly } = props;
+
     const [value, setValue] = useState(5);
     const [expand, setExpand] = useState(false);
 
@@ -42,7 +44,7 @@ export default function RPEScale() {
                     type='range'
                     min='1'
                     value={value}
-                    onChange={ev => setValue(ev.target.value)}
+                    onChange={ev => isReadOnly || setValue(ev.target.value)}
                     max='10'
                     step='1'
                 />
