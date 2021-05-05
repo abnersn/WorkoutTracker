@@ -184,7 +184,7 @@ function Workout() {
             <h2 className='text-2xl text-indigo-800 font-semibold text-center pt-4'>
                 {state.name}
             </h2>
-            <div className='min-h-screen'>
+            <main>
                 {
                     state.exercises.length > 0 ? (
                         <ul className='flex flex-col space-y-4 p-3'>
@@ -209,7 +209,7 @@ function Workout() {
                 }
                 <hr className='border-t border-indigo-200' />
                 <AddExercise dispatch={dispatch} />
-            </div>
+            </main>
             <Actions
                 state={state}
                 dispatch={dispatch}
