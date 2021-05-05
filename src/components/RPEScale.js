@@ -1,43 +1,45 @@
 import { BiInfoCircle } from 'react-icons/bi';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function RPEScale(props) {
     const { isReadOnly } = props;
 
+    const { t } = useTranslation();
     const [value, setValue] = useState(5);
     const [expand, setExpand] = useState(false);
 
     const rpeTitles = [
-        'Very light activity',
-        'Light activity',
-        'Light activity',
-        'Moderate activity',
-        'Moderate activity',
-        'Moderate activity',
-        'Vigorous activity',
-        'Vigorous activity',
-        'Very hard activity',
-        'Max effort activity',
+        t('rpe_title_1'),
+        t('rpe_title_2'),
+        t('rpe_title_3'),
+        t('rpe_title_4'),
+        t('rpe_title_5'),
+        t('rpe_title_6'),
+        t('rpe_title_7'),
+        t('rpe_title_8'),
+        t('rpe_title_9'),
+        t('rpe_title_10')
     ];
 
     const rpeDescriptions = [
-        'Hardly any exertion, but more than sleeping, watching TV, etc.',
-        'Could mantain for hours. Easy to breathe and carry a conversation.',
-        'Could mantain for hours. Easy to breathe and carry a conversation.',
-        'Breathing heavily, can mantain a conversation, but more challenging.',
-        'Breathing heavily, can mantain a conversation, but more challenging.',
-        'Breathing heavily, can mantain a conversation, but more challenging.',
-        'Almost uncofortable, short of breath, can speak a sentence.',
-        'Almost uncofortable, short of breath, can speak a sentence.',
-        'Very difficult to mantain, can barely breate, can speak a few words',
-        'Almost impossible to keep going. Out of breath, unable to talk.',
+        t('rpe_desc_1'),
+        t('rpe_desc_2'),
+        t('rpe_desc_3'),
+        t('rpe_desc_4'),
+        t('rpe_desc_5'),
+        t('rpe_desc_6'),
+        t('rpe_desc_7'),
+        t('rpe_desc_8'),
+        t('rpe_desc_9'),
+        t('rpe_desc_10')
     ];
 
     return (
         <>
             <hr className='border-t border-indigo-200'></hr>
             <div className='bg-white p-2 rounded-md shadow border border-indigo-200'>
-                <span className='uppercase text-sm tracking-wider text-indigo-700'>Rate of perceived exertion 
+                <span className='uppercase text-sm tracking-wider text-indigo-700'>{t('rpe')}
                 <button onClick={() => setExpand(!expand)}><BiInfoCircle className='inline ml-1 mb-1' /></button></span>
                 <input
                     className={`val-${value}`}

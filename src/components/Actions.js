@@ -1,5 +1,12 @@
 import { format } from 'date-fns';
+
+import pt from 'date-fns/locale/pt-BR';
+import en from 'date-fns/locale/en-US';
+
+const locales = { pt, en };
+
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     BiArrowBack,
     BiCheck,
@@ -59,6 +66,8 @@ function CycleButton({ stage, onClick = () => {} }) {
 export default function Actions(props) {
     const { state, dispatch, isReadOnly } = props;
 
+    const { t, i18n } = useTranslation();
+
     const [timer, setTimer] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [timerIsRunning, setTimerIsRunning] = useState(false);
@@ -87,7 +96,7 @@ export default function Actions(props) {
 
     const completeWorkout = () => {
         const willSave = window.confirm(
-            'Would you like to save your progress?'
+            t('save_progress')
         );
         if (willSave) {
             saveWorkout();
@@ -115,7 +124,7 @@ export default function Actions(props) {
 
     const onRestartWorkout = () => {
         const willReset = window.confirm(
-            'Are you sure you want to erase the current workout?'
+            t('erase_workout')
         );
         if (willReset) {
             setTimer(0);
@@ -147,14 +156,14 @@ export default function Actions(props) {
     if (isReadOnly) {
         footerButtons[0] = <Button
             color='blue'
-            label='Back'
+            label={t('back')}
             onClick={onGoBack}
             Icon={BiArrowBack}
         />;
     } else if (isComplete) {
         footerButtons[0] = <Button
             color='indigo'
-            label='Reset workout'
+            label={t('reset_workout')}
             onClick={onRestartWorkout}
             Icon={BiRefresh}
         />;
@@ -169,14 +178,14 @@ export default function Actions(props) {
         if (!hasIncompleteExercises(state)) {
             footerButtons[1] = <Button
                 color='green'
-                label='Finish Workout'
+                label={t('finish_workout')}
                 Icon={BiTrophy}
                 onClick={completeWorkout}
             />;
         } else if (!hasIncompleteSets(exercise)) {
             footerButtons[1] = <Button
                 color='green'
-                label='Finish exercise'
+                label={t('finish_exercise')}
                 Icon={BiStar}
                 onClick={completeExercise}
             />;
@@ -184,21 +193,26 @@ export default function Actions(props) {
     } else if (hasExercises && hasSets && !isComplete) {
         footerButtons[0] = <Button
             color='blue'
-            label='Start workout'
+            label={t('start_workout')}
             onClick={onStartWorkout}
             Icon={BiPlay}
         />;
     }
 
     const timerColor = timerIsRunning || !isComplete ? 'indigo' : 'green';
+    const locale = locales[i18n.language.split('-')[0]];
+    const formatOptions = {};
+    if (locale) {
+        formatOptions.locale = locale;
+    }
 
     return (
         <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             <div className={`text-xl mr-auto border-l-2 border-${timerColor}-500 pl-2 bg-white text-${timerColor}-700`}>
                 <BiStopwatch className='inline -mt-1' /> <time>{timeFormat(timer)}</time>
-                <p className='text-xs uppercase tracking-wider'>{format(new Date(), 'PP')}</p>
+                <p className='text-xs uppercase tracking-wider'>{format(new Date(), 'PP', formatOptions)}</p>
             </div>
-            {footerButtons}
+            {footerButtons[0]} {footerButtons[1]}
         </div>
     );
 }

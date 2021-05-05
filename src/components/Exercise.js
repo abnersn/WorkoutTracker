@@ -4,6 +4,7 @@ import SetDisplay from './SetDisplay';
 import RPEScale from './RPEScale';
 
 import '../range.css';
+import { useTranslation } from 'react-i18next';
 
 
 export default function Exercise(props) {
@@ -20,6 +21,8 @@ export default function Exercise(props) {
         activeSetId = null,
         dispatch = () => {},
     } = props;
+
+    const { t } = useTranslation();
 
     const onRemoveSet = () => {
         dispatch({
@@ -87,14 +90,14 @@ export default function Exercise(props) {
                         dispatch={dispatch}
                     ></SetDisplay>
                 ) : (
-                    <p className='text-indigo-500 text-sm pb-1'>No sets for this exercise.</p>
+                    <p className='text-indigo-500 text-sm pb-1'>{t('no_sets')}</p>
                 )}
                 {isComplete && sets.length > 0 && <RPEScale isReadOnly={isReadOnly} />}
             </ul>
             {isWorkoutComplete || isReadOnly || (
                 <div className='flex justify-end mt-1'>
-                    {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
-                    <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>Add set</button>
+                    {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>{t('remove_set')}</button>}
+                    <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>{t('add_set')}</button>
                 </div>
             )}
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import timeFormat from '../util/timeFormat';
 import { AiOutlineClockCircle } from 'react-icons/ai';
+import { useTranslation } from 'react-i18next';
 
 function SetInputField(props) {
     const {
@@ -65,6 +66,7 @@ export default function SetDisplay(props) {
 
     const prevStageRef = useRef();
 
+    const { t } = useTranslation();
     useEffect(() => {
         if (isEditTime || isEditReps || isEditWeight || isEditRest) {
             dispatch({
@@ -146,7 +148,7 @@ export default function SetDisplay(props) {
                     formatFunction={timeFormat}
                     Icon={stage === 'ACTIVE' ? AiOutlineClockCircle : null}
                     color={stage === 'ACTIVE' ? highlightColor : baseColor}
-                    labelText='Time'
+                    labelText={t('time')}
                     defaultValue='0'
                 />
             </div>
@@ -158,7 +160,7 @@ export default function SetDisplay(props) {
                     onChange={setReps}
                     value={reps}
                     color={baseColor}
-                    labelText='Reps'
+                    labelText={t('reps')}
                     defaultValue='8'
                 />
             </div>
@@ -170,7 +172,7 @@ export default function SetDisplay(props) {
                     onChange={setWeight}
                     value={weight}
                     color={baseColor}
-                    labelText='Weight'
+                    labelText={t('weight')}
                     defaultValue='10'
                 />
             </div>
@@ -184,7 +186,7 @@ export default function SetDisplay(props) {
                     Icon={stage === 'RESTING' ? AiOutlineClockCircle : null}
                     color={getRestingColor()}
                     formatFunction={timeFormat}
-                    labelText='Rest'
+                    labelText={t('rest')}
                     defaultValue={defaultRestTime}
                 />
             </div>

@@ -7,9 +7,11 @@ import Exercise from './Exercise';
 import genHash from '../util/genHash';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
+import { useTranslation } from 'react-i18next';
 
 export default function Workout(props) {
-    const { isReadOnly = true } = props;
+    const { t } = useTranslation();
+    const { isReadOnly = false } = props;
 
     const [state, dispatch] = useReducer(reducer, {
         id: genHash(),
@@ -49,7 +51,7 @@ export default function Workout(props) {
                             }
                         </ul>
                     ) : (
-                        <p className='px-3 my-2 text-indigo-500'>No exercises to list.</p>
+                        <p className='px-3 my-2 text-indigo-500'>{t('no_exercise')}</p>
                     )
                 }
                 {state.isComplete || isReadOnly || <AddExercise dispatch={dispatch} />}
