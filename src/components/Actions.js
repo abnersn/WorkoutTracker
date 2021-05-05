@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import {
+    BiArrowBack,
     BiCheck,
     BiPause,
     BiPlay,
@@ -14,6 +15,10 @@ import hasIncompleteSets from '../util/hasIncompleteSets';
 import timeFormat from '../util/timeFormat';
 
 import Button from './Button';
+
+function saveWorkout() {
+    
+}
 
 function CycleButton({ stage, onClick = () => {} }) {
     const labels = {
@@ -52,6 +57,8 @@ function CycleButton({ stage, onClick = () => {} }) {
 }
 
 export default function Actions(props) {
+    const { state, dispatch, isReadOnly } = props;
+
     const [timer, setTimer] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [timerIsRunning, setTimerIsRunning] = useState(false);
@@ -65,18 +72,6 @@ export default function Actions(props) {
         }, 1000);
         return () => clearInterval(interval);
     }, [timerIsRunning]);
-
-    const {
-        state, dispatch
-    } = props;
-
-    const exercise = state.exercises.find(
-        e => e.id === state.activeExerciseId
-    );
-
-    const set = exercise ? exercise.sets.find(
-        s => s.id === state.activeSetId
-    ) : null;
 
     const updateStage = () => {
         dispatch({
@@ -95,7 +90,7 @@ export default function Actions(props) {
             'Would you like to save your progress?'
         );
         if (willSave) {
-            // Do save here
+            saveWorkout();
         }
         setIsComplete(true);
         setTimerIsRunning(false);
@@ -131,45 +126,63 @@ export default function Actions(props) {
         }
     };
 
-    let button = null;
+    let footerButtons = [null, null];
 
-    let shouldShowCycle = timerIsRunning;
-    if (exercise && timerIsRunning) {
+    const exercise = state.exercises.find(
+        e => e.id === state.activeExerciseId
+    );
+
+    const set = exercise ? exercise.sets.find(
+        s => s.id === state.activeSetId
+    ) : null;
+
+    const hasActiveSet = Boolean(set);
+    const hasExercises = state.exercises.length > 0;
+    const hasSets = state.exercises[0]?.sets.length > 0;
+
+    if (isReadOnly) {
+        footerButtons[0] = <Button
+            color='blue'
+            label='Back'
+            onClick={onRestartWorkout}
+            Icon={BiArrowBack}
+        />;
+    } else if (isComplete) {
+        footerButtons[0] = <Button
+            color='indigo'
+            label='Reset workout'
+            onClick={onRestartWorkout}
+            Icon={BiRefresh}
+        />;
+    } else if (timerIsRunning) {
+        if (hasActiveSet) {
+            footerButtons[0] = <CycleButton
+                onClick={updateStage}
+                stage={set.stage}
+            />;
+        }
+    
         if (!hasIncompleteExercises(state)) {
-            shouldShowCycle = false;
-            button = <Button
+            footerButtons[1] = <Button
                 color='green'
                 label='Finish Workout'
                 Icon={BiTrophy}
                 onClick={completeWorkout}
             />;
         } else if (!hasIncompleteSets(exercise)) {
-            button = <Button
+            footerButtons[1] = <Button
                 color='green'
                 label='Finish exercise'
                 Icon={BiStar}
                 onClick={completeExercise}
             />;
         }
-    }
-    
-    const hasExercises = state.exercises.length > 0;
-    const hasSets = state.exercises[0]?.sets.length > 0;
-    if (!timerIsRunning && hasExercises && hasSets && !isComplete) {
-        button = <Button
+    } else if (hasExercises && hasSets && !isComplete) {
+        footerButtons[0] = <Button
             color='blue'
             label='Start workout'
             onClick={onStartWorkout}
             Icon={BiPlay}
-        />;
-    }
-
-    if (isComplete) {
-        button = <Button
-            color='indigo'
-            label='Reset workout'
-            onClick={onRestartWorkout}
-            Icon={BiRefresh}
         />;
     }
 
@@ -181,8 +194,7 @@ export default function Actions(props) {
                 <BiStopwatch className='inline -mt-1' /> <time>{timeFormat(timer)}</time>
                 <p className='text-xs uppercase tracking-wider'>{format(new Date(), 'PP')}</p>
             </div>
-            {set && shouldShowCycle && <CycleButton onClick={updateStage} stage={set.stage} />}
-            {button}
+            {footerButtons}
         </div>
     );
 }

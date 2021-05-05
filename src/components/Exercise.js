@@ -15,6 +15,7 @@ export default function Exercise(props) {
         isLast = false,
         isActive = false,
         isComplete = false,
+        isReadOnly=false,
         isWorkoutComplete = false,
         activeSetId = null,
         dispatch = () => {},
@@ -60,7 +61,7 @@ export default function Exercise(props) {
 
     return (
         <div className='relative'>
-            {isWorkoutComplete || (
+            {isWorkoutComplete || isReadOnly || (
                 <div className='absolute top-1 right-1 text-indigo-500'>
                     <button disabled={isLast} onClick={() => moveExercise(1)} className='disabled:opacity-50 p-2'><BiChevronDown /></button>
                     <button disabled={isFirst} onClick={() => moveExercise(-1)} className='disabled:opacity-50 p-2'><BiChevronUp /></button>
@@ -81,6 +82,7 @@ export default function Exercise(props) {
                         onActivateSet={onActivateSet}
                         defaultWeight={10}
                         isActive={set.id === activeSetId}
+                        isReadOnly={isReadOnly}
                         stage={set.stage}
                         dispatch={dispatch}
                     ></SetDisplay>
@@ -89,7 +91,7 @@ export default function Exercise(props) {
                 )}
                 {isComplete && sets.length > 0 && <RPEScale />}
             </ul>
-            {isWorkoutComplete || (
+            {isWorkoutComplete || isReadOnly || (
                 <div className='flex justify-end mt-1'>
                     {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
                     <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>Add set</button>

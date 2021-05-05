@@ -46,6 +46,7 @@ export default function SetDisplay(props) {
         defaultRestTime = 30,
         defaultReps = 8,
         defaultWeight = 10,
+        isReadOnly = false,
         onClick = () => {},
         dispatch = () => {},
         isActive = true,
@@ -138,7 +139,7 @@ export default function SetDisplay(props) {
             <div className='time flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
-                    isEdit={isEditTime}
+                    isEdit={isEditTime && !isReadOnly}
                     onToggleEdit={setIsEditTime}
                     onChange={setDurationTime}
                     value={durationTime}
@@ -152,7 +153,7 @@ export default function SetDisplay(props) {
             <div className='reps flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
-                    isEdit={isEditReps}
+                    isEdit={isEditReps && !isReadOnly}
                     onToggleEdit={setIsEditReps}
                     onChange={setReps}
                     value={reps}
@@ -164,7 +165,7 @@ export default function SetDisplay(props) {
             <div className='weight flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
-                    isEdit={isEditWeight}
+                    isEdit={isEditWeight && !isReadOnly}
                     onToggleEdit={setIsEditWeight}
                     onChange={setWeight}
                     value={weight}
@@ -176,7 +177,7 @@ export default function SetDisplay(props) {
             <div className='rest flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
-                    isEdit={isEditRest}
+                    isEdit={isEditRest && !isReadOnly}
                     onToggleEdit={setIsEditRest}
                     onChange={setRestTime}
                     value={restTime}

@@ -1,3 +1,5 @@
+import { useReducer } from 'react';
+
 import Actions from './Actions';
 import AddExercise from './AddExercise';
 import Exercise from './Exercise';
@@ -6,7 +8,9 @@ import genHash from '../util/genHash';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 
-export default function Workout() {
+export default function Workout(props) {
+    const { isReadOnly = false } = props;
+
     const [state, dispatch] = useReducer(reducer, {
         id: genHash(),
         isComplete: false,
@@ -35,6 +39,7 @@ export default function Workout() {
                                         isLast={i === state.exercises.length - 1}
                                         isActive={exercise.id === state.activeExerciseId}
                                         isComplete={!hasIncompleteSets(exercise)}
+                                        isReadOnly={isReadOnly}
                                         name={exercise.name}
                                         sets={exercise.sets}
                                         activeSetId={state.activeSetId}
@@ -47,9 +52,10 @@ export default function Workout() {
                         <p className='px-3 my-2 text-indigo-500'>No exercises to list.</p>
                     )
                 }
-                {state.isComplete || <AddExercise dispatch={dispatch} />}
+                {state.isComplete || isReadOnly || <AddExercise dispatch={dispatch} />}
             </main>
             <Actions
+                isReadOnly={isReadOnly}
                 state={state}
                 dispatch={dispatch}
             />

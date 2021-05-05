@@ -1,5 +1,6 @@
 import { cloneDeep } from 'lodash';
-import genHash from './util/genHash';
+import genHash from './genHash';
+import hasIncompleteSets from './hasIncompleteSets';
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
