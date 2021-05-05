@@ -113,8 +113,14 @@ function restartWorkout(workout) {
             set.stage = 'IDLE';
         }
     }
+    workout.isComplete = false;
     workout.activeExerciseId = null;
     workout.activeSetId = null;
+    return workout;
+}
+
+function completeWorkout(workout) {
+    workout.isComplete = true;
     return workout;
 }
 
@@ -136,8 +142,8 @@ function reducer(state, action) {
             return addNewExercise(workout, action.payload);
         case 'RESTART_WORKOUT':
             return restartWorkout(workout);
-        case 'UPDATE_EXERCISE':
-            return workout;
+        case 'COMPLETE_WORKOUT':
+            return completeWorkout(workout);
         default:
             throw new Error();
     }
@@ -157,7 +163,7 @@ function AddExercise(props) {
     }
 
     return (
-        <form onSubmit={onAddExercise} className='m-3'>
+        <form onSubmit={onAddExercise} className='m-3 pt-3 border-t border-indigo-200'>
             <div className='flex p-2 items-center bg-indigo-50 rounded-lg border border-indigo-200'>
                 <input required value={name} onChange={ev => setName(ev.target.value)} className='text-sm px-2 w-2 flex-1 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200' type='text' placeholder='Exercise name' />
             </div>
@@ -173,6 +179,7 @@ function AddExercise(props) {
 function Workout() {
     const [state, dispatch] = useReducer(reducer, {
         id: genHash(),
+        isComplete: false,
         name: 'Workout 1',
         activeSetId: null,
         activeExerciseId: null,
@@ -207,8 +214,7 @@ function Workout() {
                         <p className='px-3 my-2 text-indigo-500'>No exercises to list.</p>
                     )
                 }
-                <hr className='border-t border-indigo-200' />
-                <AddExercise dispatch={dispatch} />
+                {state.isComplete || <AddExercise dispatch={dispatch} />}
             </main>
             <Actions
                 state={state}

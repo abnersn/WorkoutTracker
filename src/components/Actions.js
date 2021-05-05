@@ -99,6 +99,9 @@ export default function Actions(props) {
         }
         setIsComplete(true);
         setTimerIsRunning(false);
+        dispatch({
+            type: 'COMPLETE_WORKOUT'
+        })
     }
 
     const onStartWorkout = () => {
@@ -112,7 +115,7 @@ export default function Actions(props) {
         });
         dispatch({
             type: 'UPDATE_SET_STAGE'
-        })
+        });
     }
 
     const onRestartWorkout = () => {
