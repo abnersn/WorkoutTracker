@@ -29,7 +29,12 @@
     input[type=range].val-10 { --border-color: #ef4444 }
 
     .tracks {
-        padding: 0 .4rem;
+        padding: 0 .1rem;
+    }
+
+    .tracks li {
+        text-align: center;
+        width: 1rem;
     }
 
     input[type=range]:focus::-webkit-slider-thumb {

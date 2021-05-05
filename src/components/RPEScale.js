@@ -48,7 +48,7 @@ export default function RPEScale() {
                 />
                 <ul className='tracks flex w-full justify-between text-xs -mt-1 text-indigo-700'>
                     {Array.from(Array(10).keys()).map((i) => 
-                        <li key={i}>{i}</li>
+                        <li key={i}>{i + 1}</li>
                     )}
                 </ul>
                 {
