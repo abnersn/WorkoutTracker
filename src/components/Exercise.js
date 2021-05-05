@@ -15,6 +15,7 @@ export default function Exercise(props) {
         isLast = false,
         isActive = false,
         isComplete = false,
+        isWorkoutComplete = false,
         activeSetId = null,
         dispatch = () => {},
     } = props;
@@ -59,10 +60,12 @@ export default function Exercise(props) {
 
     return (
         <div className='relative'>
-            <div className='absolute top-1 right-1 text-indigo-500'>
-                <button disabled={isLast} onClick={() => moveExercise(1)} className='disabled:opacity-50 p-2'><BiChevronDown /></button>
-                <button disabled={isFirst} onClick={() => moveExercise(-1)} className='disabled:opacity-50 p-2'><BiChevronUp /></button>
-            </div>
+            {isWorkoutComplete || (
+                <div className='absolute top-1 right-1 text-indigo-500'>
+                    <button disabled={isLast} onClick={() => moveExercise(1)} className='disabled:opacity-50 p-2'><BiChevronDown /></button>
+                    <button disabled={isFirst} onClick={() => moveExercise(-1)} className='disabled:opacity-50 p-2'><BiChevronUp /></button>
+                </div>
+            )}
             <ul className={`p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl ${isActive ? 'ring-2 ring-indigo-200' : ''}`}>
                 <h3 className='text-lg font-semibold text-indigo-800 -mb-1'>
                     <BiDumbbell className='inline text-xl mb-1'/> {name}
@@ -86,10 +89,12 @@ export default function Exercise(props) {
                 )}
                 {isComplete && sets.length > 0 && <RPEScale />}
             </ul>
-            <div className='flex justify-end mt-1'>
-                {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
-                <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>Add set</button>
-            </div>
+            {isWorkoutComplete || (
+                <div className='flex justify-end mt-1'>
+                    {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>Remove set</button>}
+                    <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>Add set</button>
+                </div>
+            )}
         </div>
     );
 }

@@ -225,6 +225,7 @@ function Workout() {
                                     <Exercise
                                         id={exercise.id}
                                         isFirst={i === 0}
+                                        isWorkoutComplete={state.isComplete}
                                         isLast={i === state.exercises.length - 1}
                                         isActive={exercise.id === state.activeExerciseId}
                                         isComplete={!hasIncompleteSets(exercise)}
