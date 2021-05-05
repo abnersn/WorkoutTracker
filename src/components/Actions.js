@@ -206,11 +206,12 @@ export default function Actions(props) {
         formatOptions.locale = locale;
     }
 
+    const date = state.date || new Date();
     return (
         <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
             <div className={`text-xl mr-auto border-l-2 border-${timerColor}-500 pl-2 bg-white text-${timerColor}-700`}>
                 <BiStopwatch className='inline -mt-1' /> <time>{timeFormat(timer)}</time>
-                <p className='text-xs uppercase tracking-wider'>{format(new Date(), 'PP', formatOptions)}</p>
+                <p className='text-xs uppercase tracking-wider'>{format(date, 'PP', formatOptions)}</p>
             </div>
             {footerButtons[0]} {footerButtons[1]}
         </div>

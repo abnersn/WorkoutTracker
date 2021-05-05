@@ -15,6 +15,7 @@ export default function Workout(props) {
 
     const [state, dispatch] = useReducer(reducer, {
         id: genHash(),
+        date: null,
         isComplete: false,
         name: 'Workout 1',
         activeSetId: null,
