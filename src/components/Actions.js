@@ -1,5 +1,5 @@
-import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 import {
     BiCheck,
     BiPause,
@@ -8,10 +8,10 @@ import {
     BiStar,
     BiStopwatch,
     BiTrophy
-} from "react-icons/bi";
-import hasIncompleteExercises from "../util/hasIncompleteExercises";
-import hasIncompleteSets from "../util/hasIncompleteSets";
-import timeFormat from "../util/timeFormat";
+} from 'react-icons/bi';
+import hasIncompleteExercises from '../util/hasIncompleteExercises';
+import hasIncompleteSets from '../util/hasIncompleteSets';
+import timeFormat from '../util/timeFormat';
 
 import Button from './Button';
 
@@ -21,21 +21,21 @@ function CycleButton({ stage, onClick = () => {} }) {
         ACTIVE: 'Rest',
         RESTING: 'Complete',
         COMPLETE: 'Reset'
-    }
+    };
 
     const icons = {
         IDLE: BiPlay,
         ACTIVE: BiPause,
         RESTING: BiCheck,
         COMPLETE: BiRefresh
-    }
+    };
 
     const colors = {
         IDLE: 'indigo',
         ACTIVE: 'indigo',
         RESTING: 'indigo',
         COMPLETE: 'blue'
-    }
+    };
 
     const label = labels[stage];
     const Icon = icons[stage];
@@ -48,7 +48,7 @@ function CycleButton({ stage, onClick = () => {} }) {
             label={label}
             Icon={Icon}
         />
-    )
+    );
 }
 
 export default function Actions(props) {
@@ -82,13 +82,13 @@ export default function Actions(props) {
         dispatch({
             type: 'UPDATE_SET_STAGE'
         });
-    }
+    };
 
     const completeExercise = () => {
         dispatch({
             type: 'COMPLETE_EXERCISE'
-        })
-    }
+        });
+    };
 
     const completeWorkout = () => {
         const willSave = window.confirm(
@@ -101,8 +101,8 @@ export default function Actions(props) {
         setTimerIsRunning(false);
         dispatch({
             type: 'COMPLETE_WORKOUT'
-        })
-    }
+        });
+    };
 
     const onStartWorkout = () => {
         setTimerIsRunning(true);
@@ -116,7 +116,7 @@ export default function Actions(props) {
         dispatch({
             type: 'UPDATE_SET_STAGE'
         });
-    }
+    };
 
     const onRestartWorkout = () => {
         const willReset = window.confirm(
@@ -129,7 +129,7 @@ export default function Actions(props) {
                 type: 'RESTART_WORKOUT'
             });
         }
-    }
+    };
 
     let button = null;
 
@@ -161,7 +161,7 @@ export default function Actions(props) {
             label='Start workout'
             onClick={onStartWorkout}
             Icon={BiPlay}
-        />
+        />;
     }
 
     if (isComplete) {
@@ -170,7 +170,7 @@ export default function Actions(props) {
             label='Reset workout'
             onClick={onRestartWorkout}
             Icon={BiRefresh}
-        />
+        />;
     }
 
     const timerColor = timerIsRunning || !isComplete ? 'indigo' : 'green';
@@ -184,5 +184,5 @@ export default function Actions(props) {
             {set && shouldShowCycle && <CycleButton onClick={updateStage} stage={set.stage} />}
             {button}
         </div>
-    )
+    );
 }

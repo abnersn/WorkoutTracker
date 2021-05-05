@@ -112,7 +112,7 @@ describe('SetDisplay component', () => {
 
             act(() => {
                 jest.advanceTimersByTime(100000);
-            })
+            });
 
             expect($value.textContent).toBe('1:30');
         });
@@ -179,7 +179,7 @@ describe('SetDisplay component', () => {
 
             act(() => {
                 jest.advanceTimersByTime(100000);
-            })
+            });
 
             expect($value.textContent).toBe('0');
         });

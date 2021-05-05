@@ -28,7 +28,7 @@ export default class Exercise{
             weight: targetWeight,
             duration: targetDuration,
             rest: targetRest
-        }
+        };
         this.rpe = rpe;
 
         this.sets = [];

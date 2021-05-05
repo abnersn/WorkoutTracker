@@ -1,5 +1,5 @@
-import { BiInfoCircle } from "react-icons/bi";
-import { useState } from "react";
+import { BiInfoCircle } from 'react-icons/bi';
+import { useState } from 'react';
 
 export default function RPEScale() {
     const [value, setValue] = useState(5);
@@ -16,7 +16,7 @@ export default function RPEScale() {
         'Vigorous activity',
         'Very hard activity',
         'Max effort activity',
-    ]
+    ];
 
     const rpeDescriptions = [
         'Hardly any exertion, but more than sleeping, watching TV, etc.',
@@ -29,7 +29,7 @@ export default function RPEScale() {
         'Almost uncofortable, short of breath, can speak a sentence.',
         'Very difficult to mantain, can barely breate, can speak a few words',
         'Almost impossible to keep going. Out of breath, unable to talk.',
-    ]
+    ];
 
     return (
         <>
@@ -62,5 +62,5 @@ export default function RPEScale() {
                 }
             </div>
         </>
-    )
+    );
 }

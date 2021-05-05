@@ -7,5 +7,5 @@ export default function Button(props) {
         >
             <Icon className='mr-1 text-lg' /> {label}
         </button>
-    )
+    );
 }

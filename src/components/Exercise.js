@@ -1,7 +1,7 @@
-import { BiChevronDown, BiChevronUp, BiDumbbell } from "react-icons/bi";
+import { BiChevronDown, BiChevronUp, BiDumbbell } from 'react-icons/bi';
 
-import SetDisplay from "./SetDisplay";
-import RPEScale from "./RPEScale";
+import SetDisplay from './SetDisplay';
+import RPEScale from './RPEScale';
 
 import '../range.css';
 
@@ -26,8 +26,8 @@ export default function Exercise(props) {
             payload: {
                 exerciseId: id
             }
-        })
-    }
+        });
+    };
 
     const onAddSet = () => {
         dispatch({
@@ -35,8 +35,8 @@ export default function Exercise(props) {
             payload: {
                 exerciseId: id
             }
-        })
-    }
+        });
+    };
 
     const onActivateSet = (setId) => {
         dispatch({
@@ -45,8 +45,8 @@ export default function Exercise(props) {
                 exerciseId: id,
                 setId
             }
-        })
-    }
+        });
+    };
 
     const moveExercise = (factor) => {
         dispatch({
@@ -55,8 +55,8 @@ export default function Exercise(props) {
                 exerciseId: id,
                 factor
             }
-        })
-    }
+        });
+    };
 
     return (
         <div className='relative'>

@@ -1,4 +1,4 @@
-import Exercise from "./Exercise";
+import Exercise from './Exercise';
 
 export default class Workout {
     constructor({ name = '', duration = 0 }) {

@@ -36,7 +36,7 @@ function SetInputField(props) {
                 )
             }
         </label>
-    )
+    );
 }
 
 export default function SetDisplay(props) {
@@ -53,7 +53,7 @@ export default function SetDisplay(props) {
     } = props;
 
     const [durationTime, setDurationTime] = useState(0);
-    const [restTime, setRestTime] = useState(defaultRestTime)
+    const [restTime, setRestTime] = useState(defaultRestTime);
     const [reps, setReps] = useState(defaultReps);
     const [weight, setWeight] = useState(defaultWeight);
 
@@ -116,7 +116,7 @@ export default function SetDisplay(props) {
         pattern: '\\d+',
         min: '0',
         inputMode: 'numeric',
-    }
+    };
 
     const baseColor = stage === 'COMPLETE' ? 'green' : 'indigo';
     const highlightColor = 'cyan';
@@ -126,13 +126,13 @@ export default function SetDisplay(props) {
             return restTime < 0 ? 'red' : highlightColor;
         }
         return baseColor;
-    }
+    };
 
     return (
         <div
             onClick={() => onClick()}
             className={`flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
-                isActive ? `ring-2 ring-indigo-200 border-indigo-400` : ''
+                isActive ? 'ring-2 ring-indigo-200 border-indigo-400' : ''
             }`}
         >
             <div className='time flex-1'>
@@ -188,5 +188,5 @@ export default function SetDisplay(props) {
                 />
             </div>
         </div>
-    )
+    );
 }
