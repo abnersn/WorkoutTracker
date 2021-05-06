@@ -12,8 +12,10 @@ import { addWorkoutToList, getLastRunDate, getWorkoutList, removeWorkoutFromList
 
 function Loading() {
     return(
-        <div className='bg-white p-2 m-3 rounded-lg shadow max-w-md mx-auto'>
-            Loading...
+        <div className='p-2'>
+            <p className='bg-white p-2 m-3 rounded-lg shadow max-w-md mx-auto'>
+               Loading...
+            </p>
         </div>
     );
 }
