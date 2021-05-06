@@ -39,6 +39,12 @@ export function removeWorkoutFromList(id) {
     localStorage.setItem('workouts', JSON.stringify(
         workouts.filter(w => w.id !== id)
     ));
+
+    for (const key of Object.keys(localStorage)) {
+        if (key.includes(id)) {
+            localStorage.removeItem(key);
+        }
+    }
 }
 
 export function getLastRunDate(id) {

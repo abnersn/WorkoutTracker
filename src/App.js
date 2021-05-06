@@ -23,6 +23,8 @@ function Loading() {
 function WorkoutDisplay(props) {
     const { name, onRemoveWorkout, id } = props;
 
+    const { t } = useTranslation();
+
     const lastRun = getLastRunDate(id);
 
     return (
@@ -36,7 +38,7 @@ function WorkoutDisplay(props) {
             )}
             <Link 
                 to={{ pathname: '/workout/new', search: `?id=${id}` }}
-                className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'>Start workout</Link>
+                className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'>{t('start')}</Link>
         </div>
     );
 }
@@ -54,8 +56,11 @@ function WorkoutList() {
     };
 
     const onRemoveWorkout = (id) => {
-        removeWorkoutFromList(id);
-        setWorkouts(workouts.filter(w => w.id !== id));
+        const willRemove = window.confirm(t('confirm_delete'));
+        if (willRemove) {
+            removeWorkoutFromList(id);
+            setWorkouts(workouts.filter(w => w.id !== id));
+        }
     };
 
     return (

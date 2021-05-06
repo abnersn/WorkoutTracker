@@ -9,6 +9,7 @@
     "time": "Tempo",
     "rest": "Descanso",
     "weight": "Peso",
+    "confirm_delete": "Tem certeza que deseja remover este treino e todos os registros dele?",
     "save_progress": "Você gostaria de salvar seu progresso?",
     "erase_workout": "Tem certeza que deseja apagar o treino atual?",
     "back": "Voltar",
