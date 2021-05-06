@@ -57,7 +57,7 @@ export function getLastRunDate(id) {
         return null;
     }
 
-    return new Date(lastLogKey.split('_')[0]);
+    return new Date(loadWorkout(lastLogKey).date);
 }
 
 export function loadWorkoutById(id) {
