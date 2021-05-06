@@ -21,9 +21,9 @@ import hasIncompleteExercises from '../util/hasIncompleteExercises';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import timeFormat from '../util/timeFormat';
 
-import Button from './Button';
 import { saveWorkout } from '../util/workoutPersistence';
 import { useHistory } from 'react-router';
+import { Button, DecoratedBlock, Footer, TextLabel } from '../ui';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const { t } = useTranslation();
@@ -209,12 +209,18 @@ export default function Actions(props) {
 
     const date = state.date || new Date();
     return (
-        <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>
-            <div className={`text-xl mr-auto border-l-2 border-${timerColor}-500 pl-2 bg-white text-${timerColor}-700`}>
-                <BiStopwatch className='inline -mt-1' /> <time className='workout-duration' data-value={timer}>{timeFormat(timer)}</time>
-                <p className='text-xs uppercase tracking-wider'>{format(date, 'PP', formatOptions)}</p>
-            </div>
+        <Footer>
+            <DecoratedBlock color={timerColor}>
+                <BiStopwatch className='inline -mt-1 mr-1 -ml-1' />
+                <time
+                    className='workout-duration'
+                    data-value={timer}
+                >{timeFormat(timer)}</time>
+                <TextLabel size='xs'>
+                    {format(date, 'PP', formatOptions)}
+                </TextLabel>
+            </DecoratedBlock>
             {footerButtons[0]} {footerButtons[1]}
-        </div>
+        </Footer>
     );
 }

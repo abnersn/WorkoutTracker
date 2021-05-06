@@ -8,6 +8,7 @@ import WorkoutList from './components/WorkoutList';
 import { loadWorkoutById } from './util/workoutPersistence';
 
 import './i18n';
+import { Container } from './ui';
 
 function Loading() {
     return(
@@ -18,7 +19,6 @@ function Loading() {
         </div>
     );
 }
-
 
 function App() {
     const renderWorkout = (routeProps) => {
@@ -32,7 +32,7 @@ function App() {
     };
     return (
         <Suspense fallback={<Loading />}>
-            <div className='bg-white max-w-5xl min-h-screen m-auto border shadow-md place-self-center'>
+            <Container>
                 <Router>
                     <Switch>
                         <Route exact path='/'>
@@ -43,7 +43,7 @@ function App() {
                         <Route path='/newWorkout' render={renderWorkout} />
                     </Switch>
                 </Router>
-            </div>
+            </Container>
         </Suspense>
     );
 }
