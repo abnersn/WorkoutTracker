@@ -67,7 +67,7 @@ export function getLastRunDate(id) {
     return new Date(loadWorkout(lastLogKey).date);
 }
 
-export function loadWorkoutById(id) {
+export function loadWorkoutById(id, createNew = true) {
     const { localStorage } = window;
 
     const lastLogKey = Object.keys(localStorage)
@@ -78,13 +78,18 @@ export function loadWorkoutById(id) {
     const workout = loadWorkout(lastLogKey) || getWorkoutList().find(
         entry => entry.id === id
     );
-    workout.date = new Date();
-    workout.isComplete = false;
-    workout.duration = 0;
+
+    if (createNew) {
+        workout.date = new Date();
+        workout.isComplete = false;
+        workout.duration = 0;
+    } else {
+        workout.date = new Date(workout.date);
+    }
 
     for (const exercise of workout.exercises) {
         for (const set of exercise.sets) {
-            set.stage = 'IDLE';
+            set.stage = createNew ? 'IDLE' : 'COMPLETE';
         }
     }
 

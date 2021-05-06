@@ -59,10 +59,11 @@ function App() {
     const renderWorkout = (routeProps) => {
         const id = new URLSearchParams(routeProps.location.search).get('id');
 
-        const readOnly = routeProps.match.path === '/viewWorkout';
-        const workout = loadWorkoutById(id, readOnly ? 'COMPLETE' : 'IDLE');
+        const createNew = routeProps.match.path === '/newWorkout';
+        const workout = loadWorkoutById(id, createNew);
+        console.log(workout);
 
-        return <Workout baseWorkout={workout} readOnly={readOnly} />;
+        return <Workout baseWorkout={workout} readOnly={!createNew} />;
     };
     return (
         <Suspense fallback={<Loading />}>
