@@ -40,5 +40,10 @@
     "rpe_desc_8": "Almost uncofortable, short of breath, can speak a sentence.",
     "rpe_desc_9": "Very difficult to mantain, can barely breathe, can speak a few words",
     "rpe_desc_10": "Almost impossible to keep going. Out of breath, unable to talk.",
-    "rpe": "Rate of perceived exertion "
+    "rpe": "Rate of perceived exertion ",
+    "workouts_list": "Workouts list",
+    "workout_name": "Workout name",
+    "add_workout": "Add workout",
+    "remove_workout": "Remove workout",
+    "no_workout": "No workout"
 }

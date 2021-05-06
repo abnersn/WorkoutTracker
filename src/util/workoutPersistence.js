@@ -1,5 +1,32 @@
 import serializeWorkout from '../util/serializeWorkout';
 
+export function addWorkoutToList(workout) {
+    const { localStorage } = window;
+
+    if (!localStorage) {
+        return;
+    }
+
+    const json = localStorage.getItem('workouts');
+    const workouts = json ? JSON.parse(json) : [];
+    workouts.push(workout);
+    localStorage.setItem('workouts', JSON.stringify(workouts));
+}
+
+export function removeWorkoutFromList(id) {
+    const { localStorage } = window;
+
+    if (!localStorage) {
+        return;
+    }
+
+    const json = localStorage.getItem('workouts');
+    const workouts = json ? JSON.parse(json) : [];
+    localStorage.setItem('workouts', JSON.stringify(
+        workouts.filter(w => w.id !== id)
+    ));
+}
+
 export function loadWorkout(logKey) {
     const { localStorage } = window;
 

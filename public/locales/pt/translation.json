@@ -40,5 +40,10 @@
     "rpe_desc_8": "Quase desconfortável, falta fôlego, consegue dizer uma frase no máximo.",
     "rpe_desc_9": "Muito difícil de manter, mal consegue respirar, consegue dizer apenas algumas palavras.",
     "rpe_desc_10": "Impossível continuar, totalmente sem fôlego, não consegue falar.",
-    "rpe": "Escala de esforço "
+    "rpe": "Escala de esforço ",
+    "workouts_list": "Lista de treinos",
+    "workout_name": "Nome do treino",
+    "add_workout": "Adicionar treino",
+    "remove_workout": "Remover treino",
+    "no_workout": "Nenhum treino disponível"
 }
