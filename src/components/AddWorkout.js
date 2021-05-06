@@ -23,7 +23,7 @@ export default function AddWorkout(props) {
             </div>
             <div className='flex justify-end mt-1'>
                 <button
-                    className='text-blue-500 text-sm px-1'> {t('add_workout')}
+                    className='text-indigo-500 text-sm px-1'> {t('add_workout')}
                 </button>
             </div>
         </form>

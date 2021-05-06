@@ -98,8 +98,8 @@ export default function Exercise(props) {
             </ul>
             {isWorkoutComplete || isReadOnly || (
                 <div className='flex justify-end mt-1'>
-                    {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-blue-500 text-sm px-1 mr-4'>{t('remove_set')}</button>}
-                    <button onClick={onAddSet} className='text-blue-500 text-sm px-1'>{t('add_set')}</button>
+                    {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-indigo-500 text-sm px-1 mr-4'>{t('remove_set')}</button>}
+                    <button onClick={onAddSet} className='text-indigo-500 text-sm px-1'>{t('add_set')}</button>
                 </div>
             )}
         </div>
