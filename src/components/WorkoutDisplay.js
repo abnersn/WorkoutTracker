@@ -4,12 +4,23 @@ import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
 import { getLastRunDate } from '../util/workoutPersistence';
 
+import pt from 'date-fns/locale/pt-BR';
+import en from 'date-fns/locale/en-US';
+
+const locales = { pt, en };
+
 export default function WorkoutDisplay(props) {
     const { name, onRemoveWorkout, id } = props;
 
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const lastRun = getLastRunDate(id);
+
+    const locale = locales[i18n.language.split('-')[0]];
+    const formatOptions = {};
+    if (locale) {
+        formatOptions.locale = locale;
+    }
 
     return (
         <div className='p-2 border border-indigo-200 relative flex flex-wrap bg-indigo-50 rounded-xl'>
@@ -17,7 +28,7 @@ export default function WorkoutDisplay(props) {
             <h2 className='text-indigo-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {name}</h2>
             {lastRun && (
                 <p className='text-indigo-600 text-sm'>
-                    Last run: {formatDistance(lastRun, new Date())}
+                    {t('last_run')}: {formatDistance(lastRun, new Date(), formatOptions)}
                 </p>
             )}
             <Link

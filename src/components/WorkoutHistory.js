@@ -1,11 +1,14 @@
 import { format } from 'date-fns';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
 import { eraseLogEntry, workoutHistoryList } from '../util/workoutPersistence';
 
 export default function WorkoutHistory() {
     const [workoutsList, setWorkoutsList] = useState(workoutHistoryList());
+
+    const { t } = useTranslation();
 
     const onClickRemove = (logKey) => {
         eraseLogEntry(logKey);
@@ -18,7 +21,7 @@ export default function WorkoutHistory() {
 
     return <div>
         <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
-            History
+            {t('history')}
         </h2>
         <ul className='flex flex-col space-y-4 p-3'>{
             workoutsList.map((workout) => 
@@ -34,7 +37,7 @@ export default function WorkoutHistory() {
                             pathname: '/viewWorkout',
                             search: `?id=${workout.id}`
                         }}
-                    >View</Link>
+                    >{t('view')}</Link>
                 </div>
             )
         }</ul>
