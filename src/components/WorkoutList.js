@@ -31,7 +31,7 @@ export default function WorkoutList() {
     };
 
     return (
-        <div className='bg-white max-w-5xl min-h-screen m-auto border shadow-md place-self-center'>
+        <div>
             <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
                 {t('workouts_list')}
             </h2>

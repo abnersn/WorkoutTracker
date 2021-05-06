@@ -23,6 +23,7 @@ import timeFormat from '../util/timeFormat';
 
 import Button from './Button';
 import { saveWorkout } from '../util/workoutPersistence';
+import { useHistory } from 'react-router';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const { t } = useTranslation();
@@ -66,6 +67,7 @@ export default function Actions(props) {
     const { state, dispatch, isReadOnly } = props;
 
     const { t, i18n } = useTranslation();
+    const history = useHistory();
 
     const [timer, setTimer] = useState(state.duration || 0);
     const [isComplete, setIsComplete] = useState(false);
@@ -135,7 +137,7 @@ export default function Actions(props) {
     };
 
     const onGoBack = () => {
-
+        history.push('/');
     };
 
     let footerButtons = [null, null];

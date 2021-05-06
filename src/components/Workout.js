@@ -7,21 +7,16 @@ import Exercise from './Exercise';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 import { useTranslation } from 'react-i18next';
-import { loadWorkoutById } from '../util/workoutPersistence';
 import { Link } from 'react-router-dom';
 
 export default function Workout(props) {
     const { t } = useTranslation();
-    const { savedWorkout = null, location } = props;
+    const { baseWorkout, readOnly = false } = props;
 
-    const id = new URLSearchParams(location.search).get('id');
-
-    const [state, dispatch] = useReducer(reducer, loadWorkoutById(id));
-
-    const isReadOnly = Boolean(savedWorkout);
+    const [state, dispatch] = useReducer(reducer, baseWorkout);
 
     return (
-        <div className='bg-white max-w-5xl m-auto border shadow-md place-self-center'>
+        <div>
             <header className='flex items-center'>
                 <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
                     {state.name}
@@ -40,9 +35,9 @@ export default function Workout(props) {
                                         isFirst={i === 0}
                                         isWorkoutComplete={state.isComplete}
                                         isLast={i === state.exercises.length - 1}
-                                        isActive={exercise.id === state.activeExerciseId && !isReadOnly}
+                                        isActive={exercise.id === state.activeExerciseId && !readOnly}
                                         isComplete={!hasIncompleteSets(exercise)}
-                                        isReadOnly={isReadOnly}
+                                        isReadOnly={readOnly}
                                         name={exercise.name}
                                         sets={exercise.sets}
                                         defaultRPE={exercise.rpe}
@@ -56,10 +51,10 @@ export default function Workout(props) {
                         <p className='px-3 my-2 text-indigo-500'>{t('no_exercise')}</p>
                     )
                 }
-                {state.isComplete || isReadOnly || <AddExercise dispatch={dispatch} />}
+                {state.isComplete || readOnly || <AddExercise dispatch={dispatch} />}
             </main>
             <Actions
-                isReadOnly={isReadOnly}
+                isReadOnly={readOnly}
                 state={state}
                 dispatch={dispatch}
             />

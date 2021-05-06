@@ -1,11 +1,24 @@
 import serializeWorkout from '../util/serializeWorkout';
 
-export function getWorkoutList() {
+export function workoutHistoryList() {
     const { localStorage } = window;
 
-    if (!localStorage) {
-        return [];
+    const list = [];
+    for (const key of Object.keys(localStorage)) {
+        const [date, id] = key.split('_');
+        if (!Date.parse(date) || !id) {
+            continue;
+        }
+        const workout = JSON.parse(localStorage.getItem(key));
+        workout.persistenceKey = key;
+        list.push(workout);
     }
+
+    return list;
+}
+
+export function getWorkoutList() {
+    const { localStorage } = window;
 
     const json = localStorage.getItem('workouts');
     if (!json) {
@@ -17,10 +30,6 @@ export function getWorkoutList() {
 export function addWorkoutToList(workout) {
     const { localStorage } = window;
 
-    if (!localStorage) {
-        return;
-    }
-
     const json = localStorage.getItem('workouts');
     const workouts = json ? JSON.parse(json) : [];
     workouts.push(workout);
@@ -29,10 +38,6 @@ export function addWorkoutToList(workout) {
 
 export function removeWorkoutFromList(id) {
     const { localStorage } = window;
-
-    if (!localStorage) {
-        return;
-    }
 
     const json = localStorage.getItem('workouts');
     const workouts = json ? JSON.parse(json) : [];
@@ -50,10 +55,6 @@ export function removeWorkoutFromList(id) {
 export function getLastRunDate(id) {
     const { localStorage } = window;
 
-    if (!localStorage) {
-        return;
-    }
-
     const lastLogKey = Object.keys(localStorage)
         .filter(entry => entry.includes(id))
         .sort()
@@ -68,10 +69,6 @@ export function getLastRunDate(id) {
 
 export function loadWorkoutById(id) {
     const { localStorage } = window;
-
-    if (!localStorage) {
-        return;
-    }
 
     const lastLogKey = Object.keys(localStorage)
         .filter(entry => entry.includes(id))
@@ -97,10 +94,6 @@ export function loadWorkoutById(id) {
 export function loadWorkout(logKey) {
     const { localStorage } = window;
 
-    if (!localStorage) {
-        return;
-    }
-
     const json = localStorage.getItem(logKey);
 
     if (!json) {
@@ -113,12 +106,16 @@ export function loadWorkout(logKey) {
     return workout;
 }
 
+
+export function eraseLogEntry(logKey) {
+    const { localStorage } = window;
+
+    localStorage.removeItem(logKey);
+}
+
 export function eraseWorkout(id) {
     const { localStorage } = window;
 
-    if (!localStorage) {
-        return;
-    }
     const logKey = `${(new Date()).toISOString().split('T')[0]}_${id}`;
     localStorage.removeItem(logKey);
 }
@@ -126,9 +123,6 @@ export function eraseWorkout(id) {
 export function saveWorkout(id) {
     const { localStorage } = window;
 
-    if (!localStorage) {
-        return;
-    }
     const logKey = `${(new Date()).toISOString().split('T')[0]}_${id}`;
 
     const json = serializeWorkout(id);

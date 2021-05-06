@@ -21,8 +21,10 @@ export default function WorkoutDisplay(props) {
                 </p>
             )}
             <Link
-                to={{ pathname: '/workout/new', search: `?id=${id}` }}
-                className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'>{t('start')}</Link>
+                to={{ pathname: '/newWorkout', search: `?id=${id}` }}
+                className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'>
+                    {t('start')}
+                </Link>
         </div>
     );
 }
