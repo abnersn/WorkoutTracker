@@ -1,12 +1,14 @@
+import { formatDistance } from 'date-fns';
 import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BiDumbbell, BiTrash } from 'react-icons/bi';
+import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import AddWorkout from './components/AddWorkout';
 import Workout from './components/Workout';
 
 import './i18n';
 import genHash from './util/genHash';
-import { addWorkoutToList, loadWorkout, removeWorkoutFromList } from './util/workoutPersistence';
+import { addWorkoutToList, getLastRunDate, getWorkoutList, removeWorkoutFromList } from './util/workoutPersistence';
 
 function Loading() {
     return(
@@ -16,20 +18,37 @@ function Loading() {
     );
 }
 
-function WorkoutDisplay() {
-    return (<div></div>);
+function WorkoutDisplay(props) {
+    const { name, onRemoveWorkout, id } = props;
+
+    const lastRun = getLastRunDate(id);
+
+    return (
+        <div className='p-2 border border-indigo-200 relative flex flex-wrap bg-indigo-50 rounded-xl'>
+            <button onClick={() => onRemoveWorkout(id)} className='absolute top-2 right-2 text-indigo-400'><BiTrash /></button>
+            <h2 className='text-indigo-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {name}</h2>
+            {lastRun && (
+                <p className='text-indigo-600 text-sm'>
+                    Last run: {formatDistance(lastRun, new Date())}
+                </p>
+            )}
+            <Link 
+                to={{ pathname: '/workout/new', search: `?id=${id}` }}
+                className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'>Start workout</Link>
+        </div>
+    );
 }
 
 function WorkoutList() {
     const { t } = useTranslation();
-    const [workouts, setWorkouts] = useState([]);
+    const [workouts, setWorkouts] = useState(getWorkoutList());
 
     const onAddWorkout = (name) => {
         const workout = {
             id: genHash(), name, exercises: []
         };
         addWorkoutToList(workout);
-        setWorkouts(workouts.concat(workouts, [workout]));
+        setWorkouts(workouts.concat([workout]));
     };
 
     const onRemoveWorkout = (id) => {
@@ -65,18 +84,14 @@ function WorkoutList() {
 }
 
 function App() {
-    const savedWorkout = loadWorkout('2021-05-06_379a0881');
-
     return (
         <Suspense fallback={<Loading />}>
             <Router>
                 <Switch>
-                    <Route path='/'>
+                    <Route exact path='/'>
                         <WorkoutList />
                     </Route>
-                    <Route path='/workout'>
-                        <Workout savedWorkout={savedWorkout} />
-                    </Route>
+                    <Route path='/workout/new' component={Workout} />
                 </Switch>
             </Router>
         </Suspense>

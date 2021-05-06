@@ -4,24 +4,18 @@ import Actions from './Actions';
 import AddExercise from './AddExercise';
 import Exercise from './Exercise';
 
-import genHash from '../util/genHash';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 import { useTranslation } from 'react-i18next';
+import { loadWorkoutById } from '../util/workoutPersistence';
 
 export default function Workout(props) {
     const { t } = useTranslation();
-    const { savedWorkout = null } = props;
+    const { savedWorkout = null, location } = props;
 
-    const [state, dispatch] = useReducer(reducer, savedWorkout || {
-        id: genHash(),
-        date: null,
-        isComplete: false,
-        name: 'Workout 1',
-        activeSetId: null,
-        activeExerciseId: null,
-        exercises: []
-    });
+    const id = new URLSearchParams(location.search).get('id');
+
+    const [state, dispatch] = useReducer(reducer, loadWorkoutById(id));
 
     const isReadOnly = Boolean(savedWorkout);
 
