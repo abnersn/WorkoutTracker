@@ -67,7 +67,7 @@ export default function Actions(props) {
 
     const { t, i18n } = useTranslation();
 
-    const [timer, setTimer] = useState(state.duration);
+    const [timer, setTimer] = useState(state.duration || 0);
     const [isComplete, setIsComplete] = useState(false);
     const [timerIsRunning, setTimerIsRunning] = useState(false);
 

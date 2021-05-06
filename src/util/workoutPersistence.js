@@ -7,10 +7,15 @@ export function loadWorkout(logKey) {
         return;
     }
 
-    const workout = JSON.parse(localStorage.getItem(logKey));
+    const json = localStorage.getItem(logKey);
+
+    if (!json) {
+        return null;
+    }
+
+    const workout = JSON.parse(json);
     workout.date = new Date(workout.date);
 
-    console.log(workout);
     return workout;
 }
 
