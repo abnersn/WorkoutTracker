@@ -79,11 +79,12 @@ export default function Exercise(props) {
                         key={set.id}
                         id={set.id}
                         exerciseId={id}
-                        defaultRestTime={90}
-                        defaultReps={8}
+                        defaultDurationTime={set.defaultDurationTime}
+                        defaultWeight={set.defaultWeight}
+                        defaultRestTime={set.defaultRestTime}
+                        defaultReps={set.defaultReps}
                         onClick={() => onActivateSet(set.id)}
                         onActivateSet={onActivateSet}
-                        defaultWeight={10}
                         isActive={set.id === activeSetId}
                         isReadOnly={isReadOnly}
                         stage={set.stage}

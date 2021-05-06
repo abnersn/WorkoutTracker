@@ -44,6 +44,7 @@ export default function SetDisplay(props) {
     const {
         id,
         exerciseId,
+        defaultDurationTime = 0,
         defaultRestTime = 30,
         defaultReps = 8,
         defaultWeight = 10,
@@ -54,7 +55,7 @@ export default function SetDisplay(props) {
         stage = 'IDLE'
     } = props;
 
-    const [durationTime, setDurationTime] = useState(0);
+    const [durationTime, setDurationTime] = useState(defaultDurationTime);
     const [restTime, setRestTime] = useState(defaultRestTime);
     const [reps, setReps] = useState(defaultReps);
     const [weight, setWeight] = useState(defaultWeight);
