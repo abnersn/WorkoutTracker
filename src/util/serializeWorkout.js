@@ -27,16 +27,16 @@ export default function serializeWorkout(id) {
         for (const $set of $sets) {
             const set = {};
             set.id = $set.dataset.id;
-            set.time = Number(
+            set.defaultDurationTime = Number(
                 $set.querySelector('.time .value').dataset.value
             );
-            set.reps = Number(
+            set.defaultReps = Number(
                 $set.querySelector('.reps .value').dataset.value
             );
-            set.weight = Number(
+            set.defaultWeight = Number(
                 $set.querySelector('.weight .value').dataset.value
             );
-            set.rest = Number(
+            set.defaultRestTime = Number(
                 $set.querySelector('.rest .value').dataset.value
             );
             set.stage = 'COMPLETE';

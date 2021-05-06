@@ -25,11 +25,13 @@ import Button from './Button';
 import { saveWorkout } from '../util/workoutPersistence';
 
 function CycleButton({ stage, onClick = () => {} }) {
+    const { t } = useTranslation();
+    
     const labels = {
-        IDLE: 'Start',
-        ACTIVE: 'Rest',
-        RESTING: 'Complete',
-        COMPLETE: 'Reset'
+        IDLE: t('start'),
+        ACTIVE: t('rest'),
+        RESTING: t('complete'),
+        COMPLETE: t('reset')
     };
 
     const icons = {
@@ -65,7 +67,7 @@ export default function Actions(props) {
 
     const { t, i18n } = useTranslation();
 
-    const [timer, setTimer] = useState(0);
+    const [timer, setTimer] = useState(state.duration);
     const [isComplete, setIsComplete] = useState(false);
     const [timerIsRunning, setTimerIsRunning] = useState(false);
 
@@ -160,7 +162,7 @@ export default function Actions(props) {
     } else if (isComplete) {
         footerButtons[0] = <Button
             color='indigo'
-            label={t('reset')}
+            label={t('reset_workout')}
             onClick={onRestartWorkout}
             Icon={BiRefresh}
         />;

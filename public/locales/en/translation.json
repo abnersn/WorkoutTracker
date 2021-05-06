@@ -1,5 +1,8 @@
 {
     "no_exercise": "No exercises to list.",
+    "start": "Start",
+    "complete": "Complete",
+    "reset": "Reset",
     "sets": "Sets",
     "reps": "Reps",
     "time": "Time",
@@ -8,7 +11,7 @@
     "save_progress": "Would you like to save your progress?",
     "erase_workout": "Are you sure you want to erase the current workout?",
     "back": "Back",
-    "reset": "Reset workout",
+    "reset_workout": "Reset workout",
     "finish_workout": "Finish Workout",
     "finish_exercise": "Finish exercise",
     "start_workout": "Start workout",

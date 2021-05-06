@@ -17,6 +17,7 @@ export default function Exercise(props) {
         isActive = false,
         isComplete = false,
         isReadOnly=false,
+        defaultRPE=5,
         isWorkoutComplete = false,
         activeSetId = null,
         dispatch = () => {},
@@ -93,7 +94,7 @@ export default function Exercise(props) {
                 ) : (
                     <p className='text-indigo-500 text-sm pb-1'>{t('no_sets')}</p>
                 )}
-                {isComplete && sets.length > 0 && <RPEScale isReadOnly={isReadOnly} />}
+                {isComplete && sets.length > 0 && <RPEScale defaultRPE={defaultRPE} isReadOnly={isReadOnly} />}
             </ul>
             {isWorkoutComplete || isReadOnly || (
                 <div className='flex justify-end mt-1'>

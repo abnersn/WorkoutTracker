@@ -1,5 +1,8 @@
 {
     "no_exercise": "Nenhum exercício para listar.",
+    "start": "Iniciar",
+    "complete": "Completar",
+    "reset": "Reiniciar",
     "sets": "Séries",
     "reps": "Repet.",
     "time": "Tempo",
@@ -8,7 +11,7 @@
     "save_progress": "Você gostaria de salvar seu progresso?",
     "erase_workout": "Tem certeza que deseja apagar o treino atual?",
     "back": "Voltar",
-    "reset": "Apagar treino",
+    "reset_workout": "Apagar treino",
     "finish_workout": "Concluir treino",
     "finish_exercise": "Concluir exercício",
     "start_workout": "Iniciar treino",

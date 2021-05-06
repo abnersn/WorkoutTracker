@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export default function RPEScale(props) {
-    const { isReadOnly } = props;
+    const { defaultRPE = 5, isReadOnly } = props;
 
     const { t } = useTranslation();
-    const [value, setValue] = useState(5);
+    const [value, setValue] = useState(defaultRPE);
     const [expand, setExpand] = useState(false);
 
     const rpeTitles = [

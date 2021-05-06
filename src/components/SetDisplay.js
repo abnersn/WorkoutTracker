@@ -23,7 +23,7 @@ function SetInputField(props) {
                 isEdit ? (
                     <input
                         {...inputProps}
-                        className={`block tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-2 focus:ring-${color}-100`}
+                        className={`block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-2 focus:ring-${color}-100`}
                         value={value}
                         autoFocus
                         onFocus={ev => ev.target.select()}

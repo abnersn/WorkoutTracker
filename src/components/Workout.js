@@ -11,9 +11,9 @@ import { useTranslation } from 'react-i18next';
 
 export default function Workout(props) {
     const { t } = useTranslation();
-    const { isReadOnly = false } = props;
+    const { savedWorkout = null } = props;
 
-    const [state, dispatch] = useReducer(reducer, {
+    const [state, dispatch] = useReducer(reducer, savedWorkout || {
         id: genHash(),
         date: null,
         isComplete: false,
@@ -22,6 +22,8 @@ export default function Workout(props) {
         activeExerciseId: null,
         exercises: []
     });
+
+    const isReadOnly = Boolean(savedWorkout);
 
     return (
         <div className='bg-white max-w-5xl m-auto border shadow-md place-self-center'>
@@ -45,6 +47,7 @@ export default function Workout(props) {
                                         isReadOnly={isReadOnly}
                                         name={exercise.name}
                                         sets={exercise.sets}
+                                        defaultRPE={exercise.rpe}
                                         activeSetId={state.activeSetId}
                                         dispatch={dispatch}
                                     />
