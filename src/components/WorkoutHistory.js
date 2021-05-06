@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { useState } from 'react';
+import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { eraseLogEntry, workoutHistoryList } from '../util/workoutPersistence';
 
 export default function WorkoutHistory() {
