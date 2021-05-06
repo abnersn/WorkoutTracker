@@ -20,22 +20,9 @@ import {
 import hasIncompleteExercises from '../util/hasIncompleteExercises';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import timeFormat from '../util/timeFormat';
-import serializeWorkout from '../util/serializeWorkout';
 
 import Button from './Button';
-
-function saveWorkout(id) {
-    const { localStorage } = window;
-
-    if (!localStorage) {
-        return;
-    }
-    const logKey = `${(new Date()).toISOString().split('T')[0]}_${id}`;
-
-    const json = serializeWorkout(id);
-
-    localStorage.setItem(logKey, json);
-}
+import { saveWorkout } from '../util/workoutPersistence';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const labels = {

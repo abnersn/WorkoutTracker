@@ -1,6 +1,7 @@
 import { cloneDeep } from 'lodash';
 import genHash from './genHash';
 import hasIncompleteSets from './hasIncompleteSets';
+import { eraseWorkout } from './workoutPersistence';
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -112,6 +113,7 @@ function restartWorkout(workout) {
     workout.isComplete = false;
     workout.activeExerciseId = null;
     workout.activeSetId = null;
+    eraseWorkout(workout.id);
     return workout;
 }
 
