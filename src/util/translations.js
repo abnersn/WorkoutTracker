@@ -52,6 +52,7 @@ export const en = {
     'remove_workout': 'Remove workout',
     'no_workout': 'No workout',
     'load_error': 'Could not load data',
+    'times_up': 'Rest time\'s up!',
     'persist_error': 'Could not save data'
 };
 
@@ -108,6 +109,7 @@ export const pt = {
     'add_workout': 'Adicionar treino',
     'remove_workout': 'Remover treino',
     'no_workout': 'Nenhum treino disponível',
+    'times_up': 'Tempo de descanso acabou!',
     'load_error': 'Não foi possível carregar os dados',
     'persist_error': 'Não foi possível salvar as alterações'
 };
