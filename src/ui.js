@@ -1,11 +1,13 @@
 export function Container(props) {
     const { children } = props;
-    return <div className='bg-white max-w-5xl min-h-screen m-auto border shadow-md place-self-center'>{children}</div>;
+    return <div className='container bg-white max-w-5xl min-h-screen m-auto border shadow-md place-self-center'>{children}</div>;
 }
 
 export function Footer(props) {
     const { children } = props;
-    return <div className='flex justify-end sticky items-center border-t border-indigo-200 bottom-0 bg-white w-full left-0 p-3'>{children}</div>;
+    return <div className='fixed flex justify-center bottom-0 w-screen left-0'>
+        <div className='flex justify-end items-center border-t border-indigo-200 bg-white w-full max-w-5xl p-3 pb-6'>{children}</div>
+    </div>;
 }
 
 export function Button(props) {
@@ -42,7 +44,7 @@ export function SingleInputForm(props) {
         <form onSubmit={onSubmit} className='m-3 pt-3 border-t border-indigo-200'>
             <div className='flex p-2 items-center bg-indigo-50 rounded-xl border border-indigo-200'>
                 <input required value={value} onChange={onChange}
-                    className='text-sm text-indigo-800 px-2 w-2 flex-1 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200'
+                    className='text-indigo-800 px-2 w-2 flex-1 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200'
                     type='text' placeholder={placeholder} />
             </div>
             <div className='flex justify-end mt-1'>
