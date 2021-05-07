@@ -20,5 +20,6 @@ export default function AddWorkout(props) {
         onChange={ev => setName(ev.target.value)}
         placeholder={t('workout_name')}
         label={t('add_workout')}
+        value={name}
     />;
 }
