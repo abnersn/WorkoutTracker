@@ -1,5 +1,5 @@
 import { formatDistance } from 'date-fns';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
 import { getLastRunDate } from '../util/workoutPersistence';
@@ -12,11 +12,11 @@ const locales = { pt, en };
 export default function WorkoutDisplay(props) {
     const { name, onRemoveWorkout, id } = props;
 
-    const { t, i18n } = useTranslation();
+    const { t, language } = useTranslation();
 
     const lastRun = getLastRunDate(id);
 
-    const locale = locales[i18n.language.split('-')[0]];
+    const locale = locales[language];
     const formatOptions = {};
     if (locale) {
         formatOptions.locale = locale;

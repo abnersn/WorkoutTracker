@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import timeFormat from '../util/timeFormat';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 import { ListItem, TextLabel } from '../ui';
 
 function SetInputField(props) {

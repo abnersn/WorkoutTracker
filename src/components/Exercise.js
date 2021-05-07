@@ -4,7 +4,7 @@ import SetDisplay from './SetDisplay';
 import RPEScale from './RPEScale';
 
 import '../range.css';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 import {
     Block,
     EmptyMessage,

@@ -6,7 +6,8 @@ import en from 'date-fns/locale/en-US';
 const locales = { pt, en };
 
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
+
 import {
     BiArrowBack,
     BiCheck,
@@ -66,7 +67,7 @@ function CycleButton({ stage, onClick = () => {} }) {
 export default function Actions(props) {
     const { state, dispatch, isReadOnly } = props;
 
-    const { t, i18n } = useTranslation();
+    const { t, language } = useTranslation();
     const history = useHistory();
 
     const [timer, setTimer] = useState(state.duration || 0);
@@ -188,7 +189,7 @@ export default function Actions(props) {
     }
 
     const timerColor = timerIsRunning || !isComplete ? 'indigo' : 'green';
-    const locale = locales[i18n.language.split('-')[0]];
+    const locale = locales[language];
     const formatOptions = {};
     if (locale) {
         formatOptions.locale = locale;

@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
 import { eraseLogEntry, workoutHistoryList } from '../util/workoutPersistence';

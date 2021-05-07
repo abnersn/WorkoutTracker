@@ -6,7 +6,7 @@ import Exercise from './Exercise';
 
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 
 export default function Workout(props) {
     const { t } = useTranslation();

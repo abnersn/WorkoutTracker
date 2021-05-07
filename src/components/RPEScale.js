@@ -1,6 +1,6 @@
 import { BiInfoCircle } from 'react-icons/bi';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 import { ListItem } from '../ui';
 
 export default function RPEScale(props) {
