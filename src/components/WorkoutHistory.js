@@ -39,11 +39,11 @@ export default function WorkoutHistory() {
                 <div key={workout.id} className='p-2 border border-blue-200 relative flex flex-wrap bg-blue-50 rounded-xl'>
                     <button
                         onClick={() => onClickRemove(workout.persistenceKey)}
-                        className='absolute top-2 right-2 text-blue-400'><BiTrash /></button>
+                        className='absolute p-2 top-0 right-0 text-blue-400'><BiTrash /></button>
                     <h2 className='text-blue-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {workout.name}</h2>
                     <p className='text-blue-600 text-sm'>{format(new Date(workout.date), 'PP', formatOptions)}</p>
                     <Link
-                        className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'
+                        className='bg-blue-600 text-white block px-3 py-2 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'
                         to={{
                             pathname: '/viewWorkout',
                             search: `?id=${workout.id}`

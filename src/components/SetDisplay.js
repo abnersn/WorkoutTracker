@@ -9,20 +9,36 @@ function SetInputField(props) {
         labelText,
         value = null,
         formatFunction = val => val,
-        color = 'indigo',
+        type = 'neutral',
         isEdit = false,
         onToggleEdit = () => {},
         onChange = () => {}
     } = props;
 
+    const labelColorClass = {
+        primary: 'text-blue-800',
+        neutral: 'text-indigo-800',
+        success: 'text-green-800',
+        danger: 'text-red-800',
+        highlight: 'text-cyan-800'
+    };
+    
+    const inputColorClass = {
+        primary: 'text-blue-800 bg-blue-50 border-blue-200 focus:ring-blue-100',
+        neutral: 'text-indigo-800 bg-indigo-50 border-indigo-200 focus:ring-indigo-100',
+        success: 'text-green-800 bg-green-50 border-green-200 focus:ring-green-100',
+        danger: 'text-red-800 bg-red-50 border-red-200 focus:ring-red-100',
+        highlight: 'text-cyan-800 bg-cyan-50 border-cyan-200 focus:ring-cyan-100'
+    };
+
     return (
-        <label className={`text-${color}-800`}>
+        <label className={labelColorClass[type]}>
             <TextLabel className='mb-1'>{labelText}</TextLabel>
             {
                 isEdit ? (
                     <input
                         {...inputProps}
-                        className={`block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200 focus:ring-2 focus:ring-${color}-100`}
+                        className={`block tabuler-nums w-full px-1 rounded shadow-sm border focus:ring-2 ${inputColorClass[type]}`}
                         value={value}
                         autoFocus
                         onFocus={ev => ev.target.select()}
@@ -30,7 +46,7 @@ function SetInputField(props) {
                         onChange={ev => onChange(Number(ev.target.value))}
                     ></input>
                 ) : (
-                    <span data-value={value} tabIndex={0} onFocus={() => isEdit || onToggleEdit(true)} className={`value block text-${color}-800 tabuler-nums w-full px-1 bg-${color}-50 rounded shadow-sm border border-${color}-200`}>
+                    <span data-value={value} tabIndex={0} onFocus={() => isEdit || onToggleEdit(true)} className={`value block tabuler-nums w-full px-1 rounded shadow-sm border ${inputColorClass[type]}`}>
                         {formatFunction(Number(value))}
                     </span>
                 )
@@ -121,14 +137,13 @@ export default function SetDisplay(props) {
         inputMode: 'numeric',
     };
 
-    const baseColor = stage === 'COMPLETE' ? 'green' : 'indigo';
-    const highlightColor = 'cyan';
+    const baseType = stage === 'COMPLETE' ? 'success' : 'neutral';
 
-    const getRestingColor = () => {
+    const getRestingType = () => {
         if (stage === 'RESTING') {
-            return restTime < 0 ? 'red' : highlightColor;
+            return restTime < 0 ? 'danger' : 'highlight';
         }
-        return baseColor;
+        return baseType;
     };
 
     return (
@@ -146,7 +161,7 @@ export default function SetDisplay(props) {
                     onChange={setDurationTime}
                     value={durationTime}
                     formatFunction={timeFormat}
-                    color={stage === 'ACTIVE' ? highlightColor : baseColor}
+                    type={stage === 'ACTIVE' ? 'highlight' : baseType}
                     labelText={t('time')}
                     defaultValue='0'
                 />
@@ -158,7 +173,7 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditReps}
                     onChange={setReps}
                     value={reps}
-                    color={baseColor}
+                    type={baseType}
                     labelText={t('reps')}
                     defaultValue='8'
                 />
@@ -170,7 +185,7 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditWeight}
                     onChange={setWeight}
                     value={weight}
-                    color={baseColor}
+                    type={baseType}
                     labelText={t('weight')}
                     defaultValue='10'
                 />
@@ -182,7 +197,7 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditRest}
                     onChange={setRestTime}
                     value={restTime}
-                    color={getRestingColor()}
+                    type={getRestingType()}
                     formatFunction={timeFormat}
                     labelText={t('rest')}
                     defaultValue={defaultRestTime}

@@ -43,21 +43,21 @@ function CycleButton({ stage, onClick = () => {} }) {
         COMPLETE: BiRefresh
     };
 
-    const colors = {
-        IDLE: 'indigo',
-        ACTIVE: 'indigo',
-        RESTING: 'indigo',
-        COMPLETE: 'blue'
+    const types = {
+        IDLE: 'neutral',
+        ACTIVE: 'neutral',
+        RESTING: 'neutral',
+        COMPLETE: 'primary'
     };
 
     const label = labels[stage];
     const Icon = icons[stage];
-    const color = colors[stage];
+    const type = types[stage];
 
     return (
         <Button
             onClick={onClick}
-            color={color}
+            type={type}
             label={label}
             Icon={Icon}
         />
@@ -144,14 +144,14 @@ export default function Actions(props) {
 
     if (isReadOnly) {
         footerButtons[0] = <Button
-            color='blue'
+            type='primary'
             label={t('back')}
             onClick={onGoBack}
             Icon={BiArrowBack}
         />;
     } else if (isComplete) {
         footerButtons[0] = <Button
-            color='blue'
+            type='primary'
             label={t('back')}
             onClick={onGoBack}
             Icon={BiArrowBack}
@@ -166,14 +166,14 @@ export default function Actions(props) {
     
         if (!hasIncompleteExercises(state)) {
             footerButtons[1] = <Button
-                color='green'
+                type='success'
                 label={t('finish_workout')}
                 Icon={BiTrophy}
                 onClick={completeWorkout}
             />;
         } else if (!hasIncompleteSets(exercise)) {
             footerButtons[1] = <Button
-                color='green'
+                type='success'
                 label={t('finish_exercise')}
                 Icon={BiStar}
                 onClick={completeExercise}
@@ -181,14 +181,14 @@ export default function Actions(props) {
         }
     } else if (hasExercises && hasSets && !isComplete) {
         footerButtons[0] = <Button
-            color='blue'
+            type='primary'
             label={t('start_workout')}
             onClick={onStartWorkout}
             Icon={BiPlay}
         />;
     }
 
-    const timerColor = timerIsRunning || !isComplete ? 'indigo' : 'green';
+    const timerType = timerIsRunning || !isComplete ? 'neutral' : 'success';
     const locale = locales[language];
     const formatOptions = {};
     if (locale) {
@@ -198,13 +198,13 @@ export default function Actions(props) {
     const date = state.date || new Date();
     return (
         <Footer>
-            <DecoratedBlock color={timerColor}>
+            <DecoratedBlock type={timerType}>
                 <BiStopwatch className='inline -mt-1 mr-1 -ml-1' />
                 <time
                     className='workout-duration'
                     data-value={timer}
                 >{timeFormat(timer)}</time>
-                <TextLabel size='xs'>
+                <TextLabel small>
                     {format(date, 'PP', formatOptions)}
                 </TextLabel>
             </DecoratedBlock>
