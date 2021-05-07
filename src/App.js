@@ -19,7 +19,7 @@ function App() {
     };
     return (
         <Container>
-            <Router>
+            <Router basename={process.env.PUBLIC_URL}>
                 <Switch>
                     <Route exact path='/'>
                         <WorkoutList />
