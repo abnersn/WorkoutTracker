@@ -7,7 +7,6 @@ import Exercise from './Exercise';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
 export default function Workout(props) {
     const { t } = useTranslation();
@@ -21,7 +20,6 @@ export default function Workout(props) {
                 <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
                     {state.name}
                 </h2>
-                <Link className='text-indigo-500 ml-auto px-3 pt-4' to='/'>{t('close')}</Link>
             </header>
             <main>
                 {

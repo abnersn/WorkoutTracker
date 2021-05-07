@@ -123,19 +123,6 @@ export default function Actions(props) {
         });
     };
 
-    const onRestartWorkout = () => {
-        const willReset = window.confirm(
-            t('erase_workout')
-        );
-        if (willReset) {
-            setTimer(0);
-            setIsComplete(false);
-            dispatch({
-                type: 'RESTART_WORKOUT'
-            });
-        }
-    };
-
     const onGoBack = () => {
         history.push('/');
     };
@@ -163,10 +150,10 @@ export default function Actions(props) {
         />;
     } else if (isComplete) {
         footerButtons[0] = <Button
-            color='indigo'
-            label={t('reset_workout')}
-            onClick={onRestartWorkout}
-            Icon={BiRefresh}
+            color='blue'
+            label={t('back')}
+            onClick={onGoBack}
+            Icon={BiArrowBack}
         />;
     } else if (timerIsRunning) {
         if (hasActiveSet) {
