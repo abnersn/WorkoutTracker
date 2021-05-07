@@ -22,9 +22,10 @@ import hasIncompleteExercises from '../util/hasIncompleteExercises';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import timeFormat from '../util/timeFormat';
 
-import { saveWorkout } from '../util/workoutPersistence';
 import { useHistory } from 'react-router';
 import { Button, DecoratedBlock, Footer, TextLabel } from '../ui';
+import usePersistence from '../hooks/usePersistence';
+import { getWorkout } from '../util/serializeWorkout';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const { t } = useTranslation();
@@ -68,6 +69,8 @@ export default function Actions(props) {
     const { state, dispatch, isReadOnly } = props;
 
     const { t, language } = useTranslation();
+    const db = usePersistence();
+
     const history = useHistory();
 
     const [timer, setTimer] = useState(state.duration || 0);
@@ -101,7 +104,8 @@ export default function Actions(props) {
             t('save_progress')
         );
         if (willSave) {
-            saveWorkout(state.id);
+            const workout = getWorkout(state.id);
+            db?.saveLogEntry(workout);
         }
         setIsComplete(true);
         setTimerIsRunning(false);

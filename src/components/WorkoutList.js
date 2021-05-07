@@ -1,31 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useTranslation from '../hooks/useTranslation';
 import AddWorkout from './AddWorkout';
 import WorkoutDisplay from './WorkoutDisplay';
 
 import genHash from '../util/genHash';
-import {
-    addWorkoutToList,
-    getWorkoutList,
-    removeWorkoutFromList
-} from '../util/workoutPersistence';
+import usePersistence from '../hooks/usePersistence';
 
 export default function WorkoutList() {
+    const db = usePersistence();
     const { t } = useTranslation();
-    const [workouts, setWorkouts] = useState(getWorkoutList());
+    const [workouts, setWorkouts] = useState([]);
 
-    const onAddWorkout = (name) => {
+    useEffect(() => {
+        db?.getAllData('workouts').then(setWorkouts);
+    }, [db]);
+
+    const onAddWorkout = async (name) => {
         const workout = {
             id: genHash(), name, exercises: []
         };
-        addWorkoutToList(workout);
+
+        if (db) {
+            await db.saveWorkout(workout);
+        }
+
         setWorkouts(workouts.concat([workout]));
     };
 
-    const onRemoveWorkout = (id) => {
+    const onRemoveWorkout = async (id) => {
         const willRemove = window.confirm(t('confirm_delete'));
         if (willRemove) {
-            removeWorkoutFromList(id);
+            if (db) {
+                await db.eraseWorkout(id);
+            }
+
             setWorkouts(workouts.filter(w => w.id !== id));
 
             // Lazy solution to refresh history list

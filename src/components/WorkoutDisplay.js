@@ -2,19 +2,28 @@ import { formatDistance } from 'date-fns';
 import useTranslation from '../hooks/useTranslation';
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
-import { getLastRunDate } from '../util/workoutPersistence';
 
 import pt from 'date-fns/locale/pt-BR';
 import en from 'date-fns/locale/en-US';
+import usePersistence from '../hooks/usePersistence';
+import { useEffect, useState } from 'react';
 
 const locales = { pt, en };
 
 export default function WorkoutDisplay(props) {
     const { name, onRemoveWorkout, id } = props;
 
+    const [lastRun, setLastRun] = useState(null);
+    const db = usePersistence();
     const { t, language } = useTranslation();
 
-    const lastRun = getLastRunDate(id);
+    useEffect(async () => {
+        db?.getLastLogEntry(id).then(lastEntry => {
+            if (lastEntry) {
+                setLastRun(lastEntry.date);
+            }
+        });
+    }, [db]);
 
     const locale = locales[language];
     const formatOptions = {};

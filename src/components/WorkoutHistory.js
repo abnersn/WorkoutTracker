@@ -4,20 +4,29 @@ import en from 'date-fns/locale/en-US';
 
 const locales = { pt, en };
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import useTranslation from '../hooks/useTranslation';
+import usePersistence from '../hooks/usePersistence';
+
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
-import { eraseLogEntry, workoutHistoryList } from '../util/workoutPersistence';
 
 export default function WorkoutHistory() {
-    const [workoutsList, setWorkoutsList] = useState(workoutHistoryList());
+    const [workoutsList, setWorkoutsList] = useState([]);
 
+    const db = usePersistence();
     const { t, language } = useTranslation();
 
-    const onClickRemove = (logKey) => {
-        eraseLogEntry(logKey);
-        setWorkoutsList(workoutsList.filter(w => w.persistenceKey !== logKey));
+    useEffect(() => {
+        db?.getAllData('logs').then(setWorkoutsList);
+    }, [db]);
+
+    const onClickRemove = async (logKey) => {
+        db?.eraseLogEntry(logKey);
+        setWorkoutsList(
+            workoutsList.filter(w => w.persistenceKey !== logKey)
+        );
     };
 
     if (!workoutsList.length) {
@@ -44,7 +53,7 @@ export default function WorkoutHistory() {
                         onClick={() => onClickRemove(workout.persistenceKey)}
                         className='absolute p-2 top-0 right-0 text-blue-400'><BiTrash /></button>
                     <h2 className='text-blue-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {workout.name}</h2>
-                    <p className='text-blue-600 text-sm'>{format(new Date(workout.date), 'PP', formatOptions)}</p>
+                    <p className='text-blue-600 text-sm'>{format(workout.date, 'PP', formatOptions)}</p>
                 </Link>
             )
         }</ul>

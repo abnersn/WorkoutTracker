@@ -134,6 +134,8 @@ export default function reducer(state, action) {
     const workout = cloneDeep(state);
 
     switch(action.type) {
+        case 'SET_WORKOUT':
+            return action.payload;
         case 'ADD_SET':
             return addNewSet(workout, action.payload);
         case 'REMOVE_SET':

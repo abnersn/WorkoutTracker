@@ -4,8 +4,6 @@ import Workout from './components/Workout';
 import WorkoutHistory from './components/WorkoutHistory';
 import WorkoutList from './components/WorkoutList';
 
-import { loadWorkoutById } from './util/workoutPersistence';
-
 import { Container } from './ui';
 
 function App() {
@@ -13,10 +11,10 @@ function App() {
         const id = new URLSearchParams(routeProps.location.search).get('id');
 
         const createNew = routeProps.match.path === '/newWorkout';
-        const workout = loadWorkoutById(id, createNew);
 
-        return <Workout baseWorkout={workout} readOnly={!createNew} />;
+        return <Workout id={id} createNew={createNew} />;
     };
+
     return (
         <Container>
             <Router basename={process.env.PUBLIC_URL}>

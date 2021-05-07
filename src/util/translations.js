@@ -50,7 +50,9 @@ export const en = {
     'workout_name': 'Workout name',
     'add_workout': 'Add workout',
     'remove_workout': 'Remove workout',
-    'no_workout': 'No workout'
+    'no_workout': 'No workout',
+    'load_error': 'Could not load data',
+    'persist_error': 'Could not save data'
 };
 
 export const pt = {
@@ -105,5 +107,7 @@ export const pt = {
     'workout_name': 'Nome do treino',
     'add_workout': 'Adicionar treino',
     'remove_workout': 'Remover treino',
-    'no_workout': 'Nenhum treino disponível'
+    'no_workout': 'Nenhum treino disponível',
+    'load_error': 'Não foi possível carregar os dados',
+    'persist_error': 'Não foi possível salvar as alterações'
 };

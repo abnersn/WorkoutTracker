@@ -1,5 +1,4 @@
-
-export default function serializeWorkout(id) {
+export function getWorkout(id) {
     const workout = {
         id,
         isComplete: true,
@@ -46,5 +45,9 @@ export default function serializeWorkout(id) {
         workout.exercises.push(exercise);
     }
 
-    return JSON.stringify(workout);
+    return workout;
+}
+
+export default function serializeWorkout(id) {
+    return JSON.stringify(getWorkout(id));
 }

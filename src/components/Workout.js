@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 
 import Actions from './Actions';
 import AddExercise from './AddExercise';
@@ -8,40 +8,55 @@ import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 import useTranslation from '../hooks/useTranslation';
 import { Link } from 'react-router-dom';
+import usePersistence from '../hooks/usePersistence';
 
 export default function Workout(props) {
     const { t } = useTranslation();
-    const { baseWorkout, readOnly = false } = props;
+    const { id, createNew = true } = props;
 
-    const [state, dispatch] = useReducer(reducer, baseWorkout);
+    const db = usePersistence();
+    const [workout, dispatch] = useReducer(reducer, null);
+
+    useEffect(() => {
+        db?.loadWorkoutLogById(id, createNew).then((workout) => {
+            dispatch({
+                type: 'SET_WORKOUT',
+                payload: workout
+            });
+        });
+    }, [db]);
+
+    if (!workout) {
+        return null;
+    }
 
     return (
         <div>
             <header className='flex items-center'>
                 <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
-                    {state.name}
+                    {workout.name}
                 </h2>
                 <Link className='text-blue-500 ml-auto px-3 pt-4' to='/'>{t('close')}</Link>
             </header>
             <main>
                 {
-                    state.exercises.length > 0 ? (
+                    workout.exercises.length > 0 ? (
                         <ul className='flex flex-col space-y-4 p-3'>
                             {
-                                state.exercises.map((exercise, i) =>
+                                workout.exercises.map((exercise, i) =>
                                 <li key={exercise.id}>
                                     <Exercise
                                         id={exercise.id}
                                         isFirst={i === 0}
-                                        isWorkoutComplete={state.isComplete}
-                                        isLast={i === state.exercises.length - 1}
-                                        isActive={exercise.id === state.activeExerciseId && !readOnly}
+                                        isWorkoutComplete={workout.isComplete}
+                                        isLast={i === workout.exercises.length - 1}
+                                        isActive={exercise.id === workout.activeExerciseId && createNew}
                                         isComplete={!hasIncompleteSets(exercise)}
-                                        isReadOnly={readOnly}
+                                        isReadOnly={!createNew}
                                         name={exercise.name}
                                         sets={exercise.sets}
                                         defaultRPE={exercise.rpe}
-                                        activeSetId={state.activeSetId}
+                                        activeSetId={workout.activeSetId}
                                         dispatch={dispatch}
                                     />
                                 </li>)
@@ -51,11 +66,11 @@ export default function Workout(props) {
                         <p className='px-3 my-2 text-indigo-500'>{t('no_exercise')}</p>
                     )
                 }
-                {state.isComplete || readOnly || <AddExercise dispatch={dispatch} />}
+                {workout.isComplete || !createNew || <AddExercise dispatch={dispatch} />}
             </main>
             <Actions
-                isReadOnly={readOnly}
-                state={state}
+                isReadOnly={!createNew}
+                state={workout}
                 dispatch={dispatch}
             />
         </div>

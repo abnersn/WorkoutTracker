@@ -1,28 +1,41 @@
-import serializeWorkout from '../util/serializeWorkout';
+import { openDB } from 'idb';
 
 export default class Database {
     constructor() {
         this.db = null;
     }
     async init() {
-        if (!('indexedDb' in window)) {
+        if (!('indexedDB' in window)) {
             alert('This app needs indexedDb support to run.');
             return;
         }
-        this.db = await indexedDB.open('workoutTracker', 1, (upgradeDb) => {
-            if (!upgradeDb.objectStoreNames.contains('workouts')) {
-                upgradeDb.createObjectStore('workouts', { keyPath: 'id' });
-            }
-            if (!upgradeDb.objectStoreNames.contains('logs')) {
-                upgradeDb.createObjectStore('logs', { autoIncrement: true });
+        this.db = await openDB('workoutTracker', 1, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains('workouts')) {
+                    db.createObjectStore('workouts', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('logs')) {
+                    db.createObjectStore('logs', { autoIncrement: true });
+                }
             }
         });
     }
 
-    getAllData(storeName) {
+    async getAllData(storeName) {
+        const data = [];
+
         const transaction = this.db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
-        return store.getAll();  
+
+        let cursor = await store.openCursor();
+        while(cursor) {
+            const value = cursor.value;
+            value.persistenceKey = cursor.key;
+            data.push(value);
+            cursor = await cursor.continue();
+        }
+
+        return data;  
     }
 
     getData(storeName, key) {
@@ -53,31 +66,39 @@ export default class Database {
         return this.runInLogs((store) => store.delete(key));
     }
 
+    saveWorkout(workout) {
+        return this.runInWorkouts((store) => store.add(workout));
+    }
+
     eraseWorkout(id) {
         return this.runInWorkouts((store) => store.delete(id));
     }
 
     async getLastLogEntry(workoutId) {
-        const lastLogEntry = (await this.getAllData('logs'))
+        const data = await this.getAllData('logs');
+
+        const lastLogEntry = data
             .filter(entry => entry.id === workoutId)
             .sort((a, b) => b.date - a.date);
 
-            return lastLogEntry;
+        return lastLogEntry[0];
     }
 
     async loadWorkoutLogById(id, createNew = true) {
         const lastLogEntry = await this.getLastLogEntry(id);
     
         const workout = lastLogEntry || await this.getData('workouts', id);
-    
+
         if (createNew) {
             workout.date = new Date();
             workout.isComplete = false;
             workout.duration = 0;
-        } else {
+        } else if (workout.date) {
             workout.date = new Date(workout.date);
+        } else {
+            workout.date = new Date();
         }
-    
+
         for (const exercise of workout.exercises) {
             for (const set of exercise.sets) {
                 set.stage = createNew ? 'IDLE' : 'COMPLETE';
@@ -86,139 +107,4 @@ export default class Database {
     
         return workout;
     }
-}
-
-export function workoutHistoryList() {
-    const { localStorage } = window;
-
-    const list = [];
-    for (const key of Object.keys(localStorage)) {
-        const [date, id] = key.split('_');
-        if (!Date.parse(date) || !id) {
-            continue;
-        }
-        const workout = JSON.parse(localStorage.getItem(key));
-        workout.persistenceKey = key;
-        list.push(workout);
-    }
-
-    return list;
-}
-
-export function getWorkoutList() {
-    const { localStorage } = window;
-
-    const json = localStorage.getItem('workouts');
-    if (!json) {
-        return [];
-    }
-    return JSON.parse(json);
-}
-
-export function addWorkoutToList(workout) {
-    const { localStorage } = window;
-
-    const json = localStorage.getItem('workouts');
-    const workouts = json ? JSON.parse(json) : [];
-    workouts.push(workout);
-    localStorage.setItem('workouts', JSON.stringify(workouts));
-}
-
-export function removeWorkoutFromList(id) {
-    const { localStorage } = window;
-
-    const json = localStorage.getItem('workouts');
-    const workouts = json ? JSON.parse(json) : [];
-    localStorage.setItem('workouts', JSON.stringify(
-        workouts.filter(w => w.id !== id)
-    ));
-
-    for (const key of Object.keys(localStorage)) {
-        if (key.includes(id)) {
-            localStorage.removeItem(key);
-        }
-    }
-}
-
-export function getLastRunDate(id) {
-    const { localStorage } = window;
-
-    const lastLogKey = Object.keys(localStorage)
-        .filter(entry => entry.includes(id))
-        .sort()
-        .reverse()[0];
-    
-    if (!lastLogKey) {
-        return null;
-    }
-
-    return new Date(loadWorkout(lastLogKey).date);
-}
-
-export function loadWorkoutById(id, createNew = true) {
-    const { localStorage } = window;
-
-    const lastLogKey = Object.keys(localStorage)
-        .filter(entry => entry.includes(id))
-        .sort()
-        .reverse()[0];
-
-    const workout = loadWorkout(lastLogKey) || getWorkoutList().find(
-        entry => entry.id === id
-    );
-
-    if (createNew) {
-        workout.date = new Date();
-        workout.isComplete = false;
-        workout.duration = 0;
-    } else {
-        workout.date = new Date(workout.date);
-    }
-
-    for (const exercise of workout.exercises) {
-        for (const set of exercise.sets) {
-            set.stage = createNew ? 'IDLE' : 'COMPLETE';
-        }
-    }
-
-    return workout;
-}
-
-export function loadWorkout(logKey) {
-    const { localStorage } = window;
-
-    const json = localStorage.getItem(logKey);
-
-    if (!json) {
-        return null;
-    }
-
-    const workout = JSON.parse(json);
-    workout.date = new Date(workout.date);
-
-    return workout;
-}
-
-
-export function eraseLogEntry(logKey) {
-    const { localStorage } = window;
-
-    localStorage.removeItem(logKey);
-}
-
-export function eraseWorkout(id) {
-    const { localStorage } = window;
-
-    const logKey = `${(new Date()).toISOString().split('T')[0]}_${id}`;
-    localStorage.removeItem(logKey);
-}
-
-export function saveWorkout(id) {
-    const { localStorage } = window;
-
-    const logKey = `${(new Date()).toISOString().split('T')[0]}_${id}`;
-
-    const json = serializeWorkout(id);
-
-    localStorage.setItem(logKey, json);
 }
