@@ -134,6 +134,7 @@ export default function SetDisplay(props) {
     return (
         <ListItem
             onClick={onClick}
+            data-id={id}
             className='set-display flex space-x-2'
             isActive={isActive && !isReadOnly}
         >
