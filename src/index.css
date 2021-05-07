@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    overscroll-behavior: none;
+}
+
 .container {
     min-height: -webkit-fill-available;
 }
