@@ -36,20 +36,16 @@ export default function WorkoutHistory() {
         </h2>
         <ul className='flex flex-col space-y-4 p-3'>{
             workoutsList.map((workout) => 
-                <div key={workout.id} className='p-2 border border-blue-200 relative flex flex-wrap bg-blue-50 rounded-xl'>
+                <Link to={{
+                    pathname: '/viewWorkout',
+                    search: `?id=${workout.id}`
+                }} key={workout.id} className='p-2 border border-blue-200 relative flex flex-wrap bg-blue-50 rounded-xl'>
                     <button
                         onClick={() => onClickRemove(workout.persistenceKey)}
                         className='absolute p-2 top-0 right-0 text-blue-400'><BiTrash /></button>
                     <h2 className='text-blue-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {workout.name}</h2>
                     <p className='text-blue-600 text-sm'>{format(new Date(workout.date), 'PP', formatOptions)}</p>
-                    <Link
-                        className='bg-blue-600 text-white block px-3 py-2 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'
-                        to={{
-                            pathname: '/viewWorkout',
-                            search: `?id=${workout.id}`
-                        }}
-                    >{t('view')}</Link>
-                </div>
+                </Link>
             )
         }</ul>
     </div>;
