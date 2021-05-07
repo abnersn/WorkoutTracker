@@ -1,7 +1,6 @@
 import { cloneDeep } from 'lodash';
 import genHash from './genHash';
 import hasIncompleteSets from './hasIncompleteSets';
-import { eraseWorkout } from './workoutPersistence';
 
 function getNextStageFor(stage) {
     const stages = ['IDLE', 'ACTIVE', 'RESTING', 'COMPLETE'];
@@ -104,19 +103,6 @@ function addNewExercise(workout, payload) {
     return workout;
 }
 
-function restartWorkout(workout) {
-    for (const exercise of workout.exercises) {
-        for (const set of exercise.sets) {
-            set.stage = 'IDLE';
-        }
-    }
-    workout.isComplete = false;
-    workout.activeExerciseId = null;
-    workout.activeSetId = null;
-    eraseWorkout(workout.id);
-    return workout;
-}
-
 function completeWorkout(workout) {
     workout.isComplete = true;
     return workout;
@@ -160,8 +146,6 @@ export default function reducer(state, action) {
             return updateActiveExercise(workout);
         case 'ADD_EXERCISE':
             return addNewExercise(workout, action.payload);
-        case 'RESTART_WORKOUT':
-            return restartWorkout(workout);
         case 'COMPLETE_WORKOUT':
             return completeWorkout(workout);
         case 'MOVE_EXERCISE':
