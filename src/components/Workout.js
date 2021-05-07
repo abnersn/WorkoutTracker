@@ -1,4 +1,5 @@
 import { useEffect, useReducer } from 'react';
+import { Link } from 'react-router-dom';
 
 import Actions from './Actions';
 import AddExercise from './AddExercise';
@@ -7,14 +8,19 @@ import Exercise from './Exercise';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import reducer from '../util/reducer';
 import useTranslation from '../hooks/useTranslation';
-import { Link } from 'react-router-dom';
+import useNotification from '../hooks/useNotification';
 import usePersistence from '../hooks/usePersistence';
+import { BiBell } from 'react-icons/bi';
 
 export default function Workout(props) {
     const { t } = useTranslation();
     const { id, createNew = true } = props;
 
     const db = usePersistence();
+    const {
+        requestNotificationPermission,
+        hasAskedPermission
+    } = useNotification();
     const [workout, dispatch] = useReducer(reducer, null);
 
     useEffect(() => {
@@ -32,11 +38,17 @@ export default function Workout(props) {
 
     return (
         <div>
-            <header className='flex items-center'>
-                <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pt-4'>
+            <header className='flex items-center pt-4'>
+                <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pr-2'>
                     {workout.name}
                 </h2>
-                <Link className='text-blue-500 ml-auto px-3 pt-4' to='/'>{t('close')}</Link>
+                <button
+                    onClick={requestNotificationPermission}
+                    className='p-1 text-base text-indigo-800'
+                >
+                    {hasAskedPermission || <BiBell className='inline' />}
+                </button>
+                <Link className='text-blue-500 ml-auto px-3' to='/'>{t('close')}</Link>
             </header>
             <main>
                 {

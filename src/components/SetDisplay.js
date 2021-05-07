@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import timeFormat from '../util/timeFormat';
 import useTranslation from '../hooks/useTranslation';
 import { ListItem, TextLabel } from '../ui';
+import useNotification from '../hooks/useNotification';
 
 function SetInputField(props) {
     const {
@@ -80,6 +81,7 @@ export default function SetDisplay(props) {
     const [isEditWeight, setIsEditWeight] = useState(false);
     const [isEditRest, setIsEditRest] = useState(false);
 
+    const { notify } = useNotification();
     const prevStageRef = useRef();
 
     const { t } = useTranslation();
@@ -129,6 +131,12 @@ export default function SetDisplay(props) {
             return () => clearInterval(interval);
         }
     }, [stage, defaultRestTime, isEditRest]);
+
+    useEffect(() => {
+        if (restTime === 0) {
+            notify(t('times_up'));
+        }
+    }, [restTime]);
 
     const numericInputProps = {
         type: 'number',
