@@ -204,7 +204,7 @@ export default function SetDisplay(props) {
                     isEdit={isEditRest && !isReadOnly}
                     onToggleEdit={setIsEditRest}
                     onChange={setRestTime}
-                    value={restTime}
+                    value={restTime > 0 ? restTime : - restTime}
                     type={getRestingType()}
                     formatFunction={timeFormat}
                     labelText={t('rest')}

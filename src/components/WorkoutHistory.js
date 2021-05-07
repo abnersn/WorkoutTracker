@@ -47,8 +47,8 @@ export default function WorkoutHistory() {
             workoutsList.map((workout) => 
                 <Link to={{
                     pathname: '/viewWorkout',
-                    search: `?id=${workout.id}`
-                }} key={workout.id} className='p-2 border border-blue-200 relative flex flex-wrap bg-blue-50 rounded-xl'>
+                    search: `?id=${workout.persistenceKey}`
+                }} key={workout.persistenceKey} className='p-2 border border-blue-200 relative flex flex-wrap bg-blue-50 rounded-xl'>
                     <button
                         onClick={(ev) => {
                             onClickRemove(workout.persistenceKey);

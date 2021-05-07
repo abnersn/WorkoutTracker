@@ -84,27 +84,41 @@ export default class Database {
         return lastLogEntry[0];
     }
 
-    async loadWorkoutLogById(id, createNew = true) {
+    async loadNewWorkout(id) {
         const lastLogEntry = await this.getLastLogEntry(id);
-    
         const workout = lastLogEntry || await this.getData('workouts', id);
 
-        if (createNew) {
-            workout.date = new Date();
-            workout.isComplete = false;
-            workout.duration = 0;
-        } else if (workout.date) {
-            workout.date = new Date(workout.date);
-        } else {
-            workout.date = new Date();
-        }
+        workout.date = new Date();
+        workout.isComplete = false;
+        workout.duration = 0;
 
         for (const exercise of workout.exercises) {
             for (const set of exercise.sets) {
-                set.stage = createNew ? 'IDLE' : 'COMPLETE';
+                set.stage = 'IDLE';
+            }
+        }
+
+        return workout;
+    }
+
+    async loadWorkoutFromLogs(id) {
+        const workout = await this.getData('logs', id);
+
+        workout.date = new Date(workout.date);
+
+        for (const exercise of workout.exercises) {
+            for (const set of exercise.sets) {
+                set.stage = 'COMPLETE';
             }
         }
     
         return workout;
+    }
+
+    loadWorkoutLogById(id, createNew = true) {
+        if (createNew) {
+            return this.loadNewWorkout(id);
+        }
+        return this.loadWorkoutFromLogs(id);
     }
 }

@@ -64,7 +64,7 @@ export default function Workout(props) {
                                         isLast={i === workout.exercises.length - 1}
                                         isActive={exercise.id === workout.activeExerciseId && createNew}
                                         isComplete={!hasIncompleteSets(exercise)}
-                                        isReadOnly={!createNew}
+                                        isReadOnly={!createNew || workout.isComplete}
                                         name={exercise.name}
                                         sets={exercise.sets}
                                         defaultRPE={exercise.rpe}
