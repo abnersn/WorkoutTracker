@@ -33,7 +33,10 @@ export default function WorkoutDisplay(props) {
 
     return (
         <Link to={{ pathname: '/newWorkout', search: `?id=${id}` }} className='p-2 border border-indigo-200 relative flex flex-wrap bg-indigo-50 rounded-xl'>
-            <button onClick={() => onRemoveWorkout(id)} className='p-2 absolute top-0 right-0 text-indigo-400'><BiTrash /></button>
+            <button onClick={(ev) => {
+                onRemoveWorkout(id);
+                ev.preventDefault();
+            }} className='p-2 absolute top-0 right-0 text-indigo-400'><BiTrash /></button>
             <h2 className='text-indigo-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {name}</h2>
             {lastRun && (
                 <p className='text-indigo-600 text-sm'>

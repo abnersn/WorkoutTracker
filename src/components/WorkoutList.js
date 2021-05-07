@@ -35,9 +35,6 @@ export default function WorkoutList() {
             }
 
             setWorkouts(workouts.filter(w => w.id !== id));
-
-            // Lazy solution to refresh history list
-            window.location.reload();
         }
     };
 

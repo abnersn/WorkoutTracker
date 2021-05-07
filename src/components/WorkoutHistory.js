@@ -50,7 +50,10 @@ export default function WorkoutHistory() {
                     search: `?id=${workout.id}`
                 }} key={workout.id} className='p-2 border border-blue-200 relative flex flex-wrap bg-blue-50 rounded-xl'>
                     <button
-                        onClick={() => onClickRemove(workout.persistenceKey)}
+                        onClick={(ev) => {
+                            onClickRemove(workout.persistenceKey);
+                            ev.preventDefault();
+                        }}
                         className='absolute p-2 top-0 right-0 text-blue-400'><BiTrash /></button>
                     <h2 className='text-blue-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {workout.name}</h2>
                     <p className='text-blue-600 text-sm'>{format(workout.date, 'PP', formatOptions)}</p>
