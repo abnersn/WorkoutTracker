@@ -1,4 +1,9 @@
 import { format } from 'date-fns';
+import pt from 'date-fns/locale/pt-BR';
+import en from 'date-fns/locale/en-US';
+
+const locales = { pt, en };
+
 import { useState } from 'react';
 import useTranslation from '../hooks/useTranslation';
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
@@ -8,7 +13,7 @@ import { eraseLogEntry, workoutHistoryList } from '../util/workoutPersistence';
 export default function WorkoutHistory() {
     const [workoutsList, setWorkoutsList] = useState(workoutHistoryList());
 
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
 
     const onClickRemove = (logKey) => {
         eraseLogEntry(logKey);
@@ -17,6 +22,12 @@ export default function WorkoutHistory() {
 
     if (!workoutsList.length) {
         return null;
+    }
+
+    const locale = locales[language];
+    const formatOptions = {};
+    if (locale) {
+        formatOptions.locale = locale;
     }
 
     return <div>
@@ -30,7 +41,7 @@ export default function WorkoutHistory() {
                         onClick={() => onClickRemove(workout.persistenceKey)}
                         className='absolute top-2 right-2 text-blue-400'><BiTrash /></button>
                     <h2 className='text-blue-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {workout.name}</h2>
-                    <p className='text-blue-600 text-sm'>{format(new Date(workout.date), 'PP')}</p>
+                    <p className='text-blue-600 text-sm'>{format(new Date(workout.date), 'PP', formatOptions)}</p>
                     <Link
                         className='bg-blue-600 text-white block px-2 py-1 rounded shadow focus:ring-2 focus:ring-blue-300 ml-auto mt-2 text-xs uppercase tracking-wider'
                         to={{
