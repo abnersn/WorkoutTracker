@@ -6,7 +6,7 @@ export function Container(props) {
 export function Footer(props) {
     const { children } = props;
     return <div className='fixed flex justify-center bottom-0 w-screen left-0'>
-        <div className='flex justify-end items-center border-t border-indigo-200 bg-white w-full max-w-5xl p-3 pb-6'>{children}</div>
+        <div className='flex justify-end items-center border-t border-indigo-200 bg-white w-full max-w-5xl p-3 pb-8'>{children}</div>
     </div>;
 }
 
