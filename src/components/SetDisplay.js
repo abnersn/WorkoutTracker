@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import timeFormat from '../util/timeFormat';
-import { AiOutlineClockCircle } from 'react-icons/ai';
 import { useTranslation } from 'react-i18next';
+import { ListItem, TextLabel } from '../ui';
 
 function SetInputField(props) {
     const {
@@ -11,14 +11,13 @@ function SetInputField(props) {
         formatFunction = val => val,
         color = 'indigo',
         isEdit = false,
-        Icon = null,
         onToggleEdit = () => {},
         onChange = () => {}
     } = props;
 
     return (
-        <label>
-            <span className={`flex mb-1 items-center tracking-wider text-sm text-${color}-800 uppercase`}>{labelText} {Icon && <Icon className={`inline-block ml-1 text-${color}-600`} />}</span>
+        <label className={`text-${color}-800`}>
+            <TextLabel className='mb-1'>{labelText}</TextLabel>
             {
                 isEdit ? (
                     <input
@@ -133,12 +132,10 @@ export default function SetDisplay(props) {
     };
 
     return (
-        <div
-            onClick={() => onClick()}
-            data-id={id}
-            className={`set-display flex p-2 bg-white rounded-md shadow space-x-2 border border-indigo-200 ${
-                isActive && !isReadOnly ? 'ring-2 ring-indigo-200 border-indigo-400' : ''
-            }`}
+        <ListItem
+            onClick={onClick}
+            className='set-display flex space-x-2'
+            isActive={isActive && !isReadOnly}
         >
             <div className='time flex-1'>
                 <SetInputField
@@ -148,7 +145,6 @@ export default function SetDisplay(props) {
                     onChange={setDurationTime}
                     value={durationTime}
                     formatFunction={timeFormat}
-                    Icon={stage === 'ACTIVE' ? AiOutlineClockCircle : null}
                     color={stage === 'ACTIVE' ? highlightColor : baseColor}
                     labelText={t('time')}
                     defaultValue='0'
@@ -185,13 +181,12 @@ export default function SetDisplay(props) {
                     onToggleEdit={setIsEditRest}
                     onChange={setRestTime}
                     value={restTime}
-                    Icon={stage === 'RESTING' ? AiOutlineClockCircle : null}
                     color={getRestingColor()}
                     formatFunction={timeFormat}
                     labelText={t('rest')}
                     defaultValue={defaultRestTime}
                 />
             </div>
-        </div>
+        </ListItem>
     );
 }

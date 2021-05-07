@@ -5,7 +5,14 @@ import RPEScale from './RPEScale';
 
 import '../range.css';
 import { useTranslation } from 'react-i18next';
-
+import {
+    Block,
+    EmptyMessage,
+    List,
+    TitleH3,
+    LightButton,
+    BlockActions
+} from '../ui';
 
 export default function Exercise(props) {
     const {
@@ -67,40 +74,61 @@ export default function Exercise(props) {
         <div className='exercise relative' data-id={id}>
             {isWorkoutComplete || isReadOnly || (
                 <div className='absolute top-1 right-1 text-indigo-500'>
-                    <button disabled={isLast} onClick={() => moveExercise(1)} className='disabled:opacity-50 p-2'><BiChevronDown /></button>
-                    <button disabled={isFirst} onClick={() => moveExercise(-1)} className='disabled:opacity-50 p-2'><BiChevronUp /></button>
+                    <button
+                        disabled={isLast}
+                        onClick={() => moveExercise(1)}
+                        className='disabled:opacity-50 p-2'
+                    ><BiChevronDown /></button>
+                    <button
+                        disabled={isFirst}
+                        onClick={() => moveExercise(-1)}
+                        className='disabled:opacity-50 p-2'
+                    ><BiChevronUp /></button>
                 </div>
             )}
-            <ul className={`p-2 border border-indigo-200 flex flex-col space-y-3 bg-indigo-50 rounded-xl ${isActive ? 'ring-2 ring-indigo-200' : ''}`}>
-                <h3 className='exercise-name text-lg font-semibold text-indigo-800 -mb-1'>
-                    <BiDumbbell className='inline text-xl mb-1'/> {name}
-                </h3>
-                {sets.length ? sets.map((set) =>
-                    <SetDisplay
-                        key={set.id}
-                        id={set.id}
-                        exerciseId={id}
-                        defaultDurationTime={set.defaultDurationTime}
-                        defaultWeight={set.defaultWeight}
-                        defaultRestTime={set.defaultRestTime}
-                        defaultReps={set.defaultReps}
-                        onClick={() => onActivateSet(set.id)}
-                        onActivateSet={onActivateSet}
-                        isActive={set.id === activeSetId}
-                        isReadOnly={isReadOnly}
-                        stage={set.stage}
-                        dispatch={dispatch}
-                    ></SetDisplay>
-                ) : (
-                    <p className='text-indigo-500 text-sm pb-1'>{t('no_sets')}</p>
-                )}
-                {isComplete && sets.length > 0 && <RPEScale defaultRPE={defaultRPE} isReadOnly={isReadOnly} />}
-            </ul>
+            <Block isActive={isActive}>
+                <List>
+                    <TitleH3 className='exercise-name'>
+                        <BiDumbbell className='inline text-xl mb-1'/> {name}
+                    </TitleH3>
+                    {sets.length ? sets.map((set) =>
+                        <SetDisplay
+                            key={set.id}
+                            id={set.id}
+                            exerciseId={id}
+                            defaultDurationTime={set.defaultDurationTime}
+                            defaultWeight={set.defaultWeight}
+                            defaultRestTime={set.defaultRestTime}
+                            defaultReps={set.defaultReps}
+                            onClick={() => onActivateSet(set.id)}
+                            onActivateSet={onActivateSet}
+                            isActive={set.id === activeSetId}
+                            isReadOnly={isReadOnly}
+                            stage={set.stage}
+                            dispatch={dispatch}
+                        ></SetDisplay>
+                    ) : (
+                        <EmptyMessage>{t('no_sets')}</EmptyMessage>
+                    )}
+                    {
+                        isComplete && sets.length > 0 &&
+                        <RPEScale
+                            defaultRPE={defaultRPE}
+                            isReadOnly={isReadOnly}
+                        />
+                    }
+                </List>
+            </Block>
             {isWorkoutComplete || isReadOnly || (
-                <div className='flex justify-end mt-1'>
-                    {isActive && activeSetId !== null && <button onClick={onRemoveSet} className='text-indigo-500 text-sm px-1 mr-4'>{t('remove_set')}</button>}
-                    <button onClick={onAddSet} className='text-indigo-500 text-sm px-1'>{t('add_set')}</button>
-                </div>
+                <BlockActions>
+                    {
+                        isActive && activeSetId !== null &&
+                        <LightButton onClick={onRemoveSet}>
+                            {t('remove_set')}
+                        </LightButton>
+                    }
+                    <LightButton onClick={onAddSet}>{t('add_set')}</LightButton>
+                </BlockActions>
             )}
         </div>
     );

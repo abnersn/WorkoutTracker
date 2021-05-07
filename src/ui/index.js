@@ -28,9 +28,65 @@ export function DecoratedBlock(props) {
 }
 
 export function TextLabel(props) {
-    const { size = 'sm', children } = props;
+    const { size = 'sm', className, children } = props;
 
     return (
-        <p className={`text-${size} uppercase tracking-wider`}>{children}</p>
+        <p className={`text-${size} uppercase tracking-wider ${className}`}>{children}</p>
     );
+}
+
+export function SingleInputForm(props) {
+    const { onSubmit, value, onChange, placeholder, label } = props;
+
+    return (
+        <form onSubmit={onSubmit} className='m-3 pt-3 border-t border-indigo-200'>
+            <div className='flex p-2 items-center bg-indigo-50 rounded-xl border border-indigo-200'>
+                <input required value={value} onChange={onChange}
+                    className='text-sm text-indigo-800 px-2 w-2 flex-1 py-1 rounded border border-indigo-200 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-200'
+                    type='text' placeholder={placeholder} />
+            </div>
+            <div className='flex justify-end mt-1'>
+                <button
+                    className='text-indigo-500 text-sm px-1'> {label}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+export function Block(props) {
+    const { isActive = false, color='indigo', children } = props;
+    const ring = isActive ? `ring-2 ring-${color}-200` : '';
+    return <div className={`p-2 border border-${color}-200 bg-${color}-50 rounded-xl ${ring}`}>{children}</div>;
+}
+
+export function List(props) {
+    const { children } = props;
+    return <ul className='flex flex-col space-y-3'>{children}</ul>;
+}
+
+export function ListItem(props) {
+    const { isActive, children, className, ...itemProps } = props;
+    const ring = isActive ? 'ring-2 ring-indigo-200 border-indigo-400' : '';
+    return <div {...itemProps} className={`bg-white p-2 rounded-md shadow border border-indigo-200 ${ring} ${className}`}>{children}</div>;
+}
+
+export function TitleH3(props) {
+    const { children, className } = props;
+    return <h3 className={`text-lg font-semibold text-indigo-800 ${className}`}>{children}</h3>;
+}
+
+export function EmptyMessage(props) {
+    const { children } = props;
+    return <p className='text-indigo-500 text-sm pb-1'>{children}</p>;
+}
+
+export function LightButton(props) {
+    const { children, ...buttonProps } = props;
+    return <button {...buttonProps} className='text-indigo-500 text-sm px-1'>{children}</button>;
+}
+
+export function BlockActions(props) {
+    const { children } = props;
+    return <div className='flex justify-end mt-1 space-x-4'>{children}</div>;
 }

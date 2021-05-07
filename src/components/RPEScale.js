@@ -1,6 +1,7 @@
 import { BiInfoCircle } from 'react-icons/bi';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListItem } from '../ui';
 
 export default function RPEScale(props) {
     const { defaultRPE = 5, isReadOnly } = props;
@@ -38,7 +39,7 @@ export default function RPEScale(props) {
     return (
         <>
             <hr className='border-t border-indigo-200'></hr>
-            <div className='bg-white p-2 rounded-md shadow border border-indigo-200'>
+            <ListItem>
                 <span className='uppercase text-sm tracking-wider text-indigo-700'>{t('rpe')}
                 <button onClick={() => setExpand(!expand)}><BiInfoCircle className='inline ml-1 mb-1' /></button></span>
                 <input
@@ -64,7 +65,7 @@ export default function RPEScale(props) {
                         </>
                     )
                 }
-            </div>
+            </ListItem>
         </>
     );
 }
