@@ -27,6 +27,9 @@ export default function WorkoutList() {
         if (willRemove) {
             removeWorkoutFromList(id);
             setWorkouts(workouts.filter(w => w.id !== id));
+
+            // Lazy solution to refresh history list
+            window.location.reload();
         }
     };
 
