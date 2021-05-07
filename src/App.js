@@ -14,7 +14,6 @@ function App() {
 
         const createNew = routeProps.match.path === '/newWorkout';
         const workout = loadWorkoutById(id, createNew);
-        console.log(workout);
 
         return <Workout baseWorkout={workout} readOnly={!createNew} />;
     };
