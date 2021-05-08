@@ -103,10 +103,11 @@ export default function Actions(props) {
         const willSave = window.confirm(
             t('save_progress')
         );
-        if (willSave) {
-            const workout = getWorkout(state.id);
-            db?.saveLogEntry(workout);
+        if (!willSave) {
+            return;
         }
+        const workout = getWorkout(state.id);
+        db?.saveLogEntry(workout);
         setIsComplete(true);
         setTimerIsRunning(false);
         dispatch({
