@@ -56,7 +56,7 @@ export default function WorkoutHistory() {
                         }}
                         className='absolute p-2 top-0 right-0 text-blue-400'><BiTrash /></button>
                     <h2 className='text-blue-700 w-full text-md'><BiDumbbell className='-mt-1 inline text-lg' /> {workout.name}</h2>
-                    <p className='text-blue-600 text-sm'>{format(workout.date, 'PP', formatOptions)}</p>
+                    <p className='text-blue-600 text-sm'>{format(workout.date, 'PPp', formatOptions)}</p>
                 </Link>
             )
         }</ul>
