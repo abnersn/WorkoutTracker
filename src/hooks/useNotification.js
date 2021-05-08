@@ -9,7 +9,8 @@ export default function useNotification() {
 
     if (!('Notification' in window)) {
         return {
-            hasAskedPermission,
+            // Behave as if permission was asked, but denied
+            hasAskedPermission: true,
             notify: () => {},
             hasNotificationPermission,
             requestNotificationPermission: () => {}
