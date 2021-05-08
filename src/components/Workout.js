@@ -42,12 +42,13 @@ export default function Workout(props) {
                 <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pr-2'>
                     {workout.name}
                 </h2>
+                {hasAskedPermission ||
                 <button
                     onClick={requestNotificationPermission}
                     className='p-1 text-base text-indigo-800'
                 >
-                    {hasAskedPermission || <BiBell className='inline' />}
-                </button>
+                    <BiBell className='inline' />
+                </button>}
                 <Link className='text-blue-500 ml-auto px-3' to='/'>{t('close')}</Link>
             </header>
             <main>
