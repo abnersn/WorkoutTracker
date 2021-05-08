@@ -7,6 +7,15 @@ export default function useNotification() {
         setHasNotificationPermission
     ] = useState(false);
 
+    if (!('Notification' in window)) {
+        return {
+            hasAskedPermission,
+            notify: () => {},
+            hasNotificationPermission,
+            requestNotificationPermission: () => {}
+        };
+    }
+
     useEffect(() => {
         setHasNotificationPermission(Notification.permission === 'granted');
         setHasAskedPermission(Notification.permission !== 'default');
