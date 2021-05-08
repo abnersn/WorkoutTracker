@@ -1,6 +1,6 @@
 export function Container(props) {
     const { children } = props;
-    return <div className='container bg-white max-w-5xl min-h-screen m-auto border shadow-md place-self-center'>{children}</div>;
+    return <div className='container bg-white max-w-5xl min-h-screen m-auto border shadow-md place-self-center pb-24'>{children}</div>;
 }
 
 export function Footer(props) {
