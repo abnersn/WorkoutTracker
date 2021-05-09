@@ -3,6 +3,7 @@ import timeFormat from '../util/timeFormat';
 import useTranslation from '../hooks/useTranslation';
 import { ListItem, TextLabel } from '../ui';
 import useNotification from '../hooks/useNotification';
+import useTimer from '../hooks/useTimer';
 
 function SetInputField(props) {
     const {
@@ -71,8 +72,9 @@ export default function SetDisplay(props) {
         stage = 'IDLE'
     } = props;
 
-    const [durationTime, setDurationTime] = useState(defaultDurationTime);
-    const [restTime, setRestTime] = useState(defaultRestTime);
+    const durationTimer = useTimer('durationTimer', defaultDurationTime);
+    const restTimer = useTimer('restTimer', defaultRestTime, -1);
+
     const [reps, setReps] = useState(defaultReps);
     const [weight, setWeight] = useState(defaultWeight);
 
@@ -103,8 +105,8 @@ export default function SetDisplay(props) {
 
     useEffect(() => {
         if (stage === 'IDLE' && prevStageRef.current === 'COMPLETE') {
-            setDurationTime(0);
-            setRestTime(defaultRestTime);
+            durationTimer.set(0);
+            restTimer.set(defaultRestTime);
             setReps(defaultReps);
             setWeight(defaultWeight);
         }
@@ -116,27 +118,25 @@ export default function SetDisplay(props) {
 
     useEffect(() => {
         if (stage === 'ACTIVE' && !isEditTime) {
-            const interval = setInterval(() => {
-                setDurationTime((t) => Number(t) + 1);
-            }, 1000);
-            return () => clearInterval(interval);
+            durationTimer.play();
+        } else {
+            durationTimer.pause();
         }
-    }, [stage, isEditTime]);
+    }, [stage, durationTimer, isEditTime]);
 
     useEffect(() => {
         if (stage === 'RESTING' && !isEditRest) {
-            const interval = setInterval(() => {
-                setRestTime((t) => Number(t) - 1);
-            }, 1000);
-            return () => clearInterval(interval);
+            restTimer.play();
+        } else {
+            restTimer.pause();
         }
-    }, [stage, defaultRestTime, isEditRest]);
+    }, [stage, restTimer, isEditRest]);
 
     useEffect(() => {
-        if (restTime === 0) {
+        if (restTimer.value === 0) {
             notify(t('times_up'));
         }
-    }, [restTime]);
+    }, [restTimer]);
 
     const numericInputProps = {
         type: 'number',
@@ -149,7 +149,7 @@ export default function SetDisplay(props) {
 
     const getRestingType = () => {
         if (stage === 'RESTING') {
-            return restTime < 0 ? 'danger' : 'highlight';
+            return restTimer.value < 0 ? 'danger' : 'highlight';
         }
         return baseType;
     };
@@ -166,8 +166,8 @@ export default function SetDisplay(props) {
                     inputProps={numericInputProps}
                     isEdit={isEditTime && !isReadOnly}
                     onToggleEdit={setIsEditTime}
-                    onChange={setDurationTime}
-                    value={durationTime}
+                    onChange={durationTimer.set}
+                    value={durationTimer.value}
                     formatFunction={timeFormat}
                     type={stage === 'ACTIVE' ? 'highlight' : baseType}
                     labelText={t('time')}
@@ -203,8 +203,12 @@ export default function SetDisplay(props) {
                     inputProps={numericInputProps}
                     isEdit={isEditRest && !isReadOnly}
                     onToggleEdit={setIsEditRest}
-                    onChange={setRestTime}
-                    value={restTime > 0 ? restTime : - restTime}
+                    onChange={restTimer.set}
+                    value={
+                        restTimer.value > 0 ?
+                        restTimer.value :
+                        -restTimer.value
+                    }
                     type={getRestingType()}
                     formatFunction={timeFormat}
                     labelText={t('rest')}

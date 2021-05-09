@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 
-export default function useTimer(initialTimer = 0) {
+export default function useTimer(
+    timerId = 'timer', initialTimer = 0, increment = 1
+) {
     const [timer, setTimer] = useState(initialTimer);
     const [isRunning, setIsRunning] = useState(false);
     const [isBackground, setIsBackground] = useState(
         document.visibilityState !== 'visible'
     );
-    const localStorage = window.localStorage;
+    const sessionStorage = window.sessionStorage;
 
     const play = () => setIsRunning(true);
     const pause = () => setIsRunning(false);
@@ -14,7 +16,7 @@ export default function useTimer(initialTimer = 0) {
     useEffect(() => {
         if (isRunning && !isBackground) {
             const interval = setInterval(() => {
-                setTimer((t) => t + 1);
+                setTimer((t) => t + increment);
             }, 1000);
             return () => clearInterval(interval);
         }
@@ -37,9 +39,9 @@ export default function useTimer(initialTimer = 0) {
 
     useEffect(() => {
         if (isBackground) {
-            localStorage.setItem('lastTimer', Date.now());
+            sessionStorage.setItem(timerId, Date.now());
         } else if (isRunning) {
-            const lastTimer = Number(localStorage.getItem('lastTimer'));
+            const lastTimer = Number(sessionStorage.getItem(timerId));
             if (lastTimer && isRunning) {
                 const ellapsed = Math.floor((Date.now() - lastTimer) / 1000);
                 setTimer(t => t + ellapsed);
@@ -47,5 +49,5 @@ export default function useTimer(initialTimer = 0) {
         }
     }, [isBackground]);
 
-    return { play, pause, value: timer, isRunning };
+    return { play, pause, value: timer, isRunning, set: setTimer };
 }

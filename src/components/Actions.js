@@ -74,7 +74,7 @@ export default function Actions(props) {
 
     const history = useHistory();
 
-    const timer = useTimer(state.duration || 0);
+    const timer = useTimer('mainTimer', state.duration || 0);
     const [isComplete, setIsComplete] = useState(false);
 
     const updateStage = () => {
