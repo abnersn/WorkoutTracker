@@ -5,7 +5,7 @@ import en from 'date-fns/locale/en-US';
 
 const locales = { pt, en };
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useTranslation from '../hooks/useTranslation';
 
 import {
@@ -26,6 +26,7 @@ import { useHistory } from 'react-router';
 import { Button, DecoratedBlock, Footer, TextLabel } from '../ui';
 import usePersistence from '../hooks/usePersistence';
 import { getWorkout } from '../util/serializeWorkout';
+import useTimer from '../hooks/useTimer';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const { t } = useTranslation();
@@ -73,19 +74,8 @@ export default function Actions(props) {
 
     const history = useHistory();
 
-    const [timer, setTimer] = useState(state.duration || 0);
+    const timer = useTimer(state.duration || 0);
     const [isComplete, setIsComplete] = useState(false);
-    const [timerIsRunning, setTimerIsRunning] = useState(false);
-
-    useEffect(() => {
-        if (!timerIsRunning) {
-            return;
-        }
-        const interval = setInterval(() => {
-            setTimer(t => t + 1);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [timerIsRunning]);
 
     const updateStage = () => {
         dispatch({
@@ -109,14 +99,14 @@ export default function Actions(props) {
         const workout = getWorkout(state.id);
         db?.saveLogEntry(workout);
         setIsComplete(true);
-        setTimerIsRunning(false);
+        timer.pause();
         dispatch({
             type: 'COMPLETE_WORKOUT'
         });
     };
 
     const onStartWorkout = () => {
-        setTimerIsRunning(true);
+        timer.play();
         dispatch({
             type: 'UPDATE_ACTIVE_SET',
             payload: {
@@ -161,7 +151,7 @@ export default function Actions(props) {
             onClick={onGoBack}
             Icon={BiArrowBack}
         />;
-    } else if (timerIsRunning) {
+    } else if (timer.isRunning) {
         if (hasActiveSet) {
             footerButtons[0] = <CycleButton
                 onClick={updateStage}
@@ -193,7 +183,7 @@ export default function Actions(props) {
         />;
     }
 
-    const timerType = timerIsRunning || !isComplete ? 'neutral' : 'success';
+    const timerType = timer.isRunning || !isComplete ? 'neutral' : 'success';
     const locale = locales[language];
     const formatOptions = {};
     if (locale) {
@@ -207,8 +197,8 @@ export default function Actions(props) {
                 <BiStopwatch className='inline -mt-1 mr-1 -ml-1' />
                 <time
                     className='workout-duration'
-                    data-value={timer}
-                >{timeFormat(timer)}</time>
+                    data-value={timer.value}
+                >{timeFormat(timer.value)}</time>
                 <TextLabel small>
                     {format(date, 'PP', formatOptions)}
                 </TextLabel>
