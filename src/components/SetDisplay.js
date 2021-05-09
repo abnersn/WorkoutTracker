@@ -104,6 +104,12 @@ export default function SetDisplay(props) {
     ]);
 
     useEffect(() => {
+        if (stage === 'COMPLETE' && restTimer.value < 0) {
+            restTimer.set((t) => defaultRestTime + Math.abs(t));
+        }
+    }, [stage, defaultRestTime]);
+
+    useEffect(() => {
         if (stage === 'IDLE' && prevStageRef.current === 'COMPLETE') {
             durationTimer.set(0);
             restTimer.set(defaultRestTime);
