@@ -43,7 +43,9 @@ export default function useTimer(
         } else if (isRunning) {
             const lastTimer = Number(sessionStorage.getItem(timerId));
             if (lastTimer && isRunning) {
-                const ellapsed = Math.floor((Date.now() - lastTimer) / 1000);
+                const ellapsed = Math.floor(
+                    (Date.now() - lastTimer) / (1000 * increment)
+                );
                 setTimer(t => t + ellapsed);
             }
         }
