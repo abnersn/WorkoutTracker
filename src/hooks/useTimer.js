@@ -42,7 +42,6 @@ export default function useTimer(initialTimer = 0) {
             const lastTimer = Number(localStorage.getItem('lastTimer'));
             if (lastTimer && isRunning) {
                 const ellapsed = Math.floor((Date.now() - lastTimer) / 1000);
-                console.log(ellapsed);
                 setTimer(t => t + ellapsed);
             }
         }
