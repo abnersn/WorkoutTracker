@@ -16,7 +16,7 @@ export default function useTimer(
     useEffect(() => {
         if (isRunning && !isBackground) {
             const interval = setInterval(() => {
-                setTimer((t) => t + increment);
+                setTimer((t) => Math.max(t + increment, 0));
             }, 1000);
             return () => clearInterval(interval);
         }
@@ -46,7 +46,7 @@ export default function useTimer(
                 const ellapsed = Math.floor(
                     (Date.now() - lastTimer) / (1000 * increment)
                 );
-                setTimer(t => t + ellapsed);
+                setTimer(t => Math.max(t + ellapsed, 0));
             }
         }
     }, [isBackground]);
