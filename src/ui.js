@@ -101,8 +101,8 @@ export function ListItem(props) {
 }
 
 export function TitleH3(props) {
-    const { children, className } = props;
-    return <h3 className={`text-lg font-semibold text-indigo-800 ${className}`}>{children}</h3>;
+    const { children, className, onClick } = props;
+    return <button onClick={onClick} className={`text-lg self-start font-semibold text-indigo-800 select-none cursor-pointer ${className}`}>{children}</button>;
 }
 
 export function EmptyMessage(props) {

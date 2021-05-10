@@ -60,6 +60,7 @@ function SetInputField(props) {
 export default function SetDisplay(props) {
     const {
         id,
+        exerciseType,
         exerciseId,
         defaultDurationTime = 0,
         defaultRestTime = 30,
@@ -72,7 +73,7 @@ export default function SetDisplay(props) {
         stage = 'IDLE'
     } = props;
 
-    const durationTimer = useTimer('durationTimer', defaultDurationTime);
+    const durationTimer = useTimer('durationTimer', defaultDurationTime, -1);
     const restTimer = useTimer('restTimer', defaultRestTime, -1);
 
     const [reps, setReps] = useState(defaultReps);
@@ -123,12 +124,15 @@ export default function SetDisplay(props) {
     }, [stage]);
 
     useEffect(() => {
-        if (stage === 'ACTIVE' && !isEditTime) {
+        if (stage === 'ACTIVE' && !isEditTime && exerciseType == 'cardio') {
+            if (!Number.isFinite(durationTimer.value)) {
+                durationTimer.set(0);
+            }
             durationTimer.play();
         } else {
             durationTimer.pause();
         }
-    }, [stage, durationTimer, isEditTime]);
+    }, [stage, durationTimer, isEditTime, exerciseType]);
 
     useEffect(() => {
         if (stage === 'RESTING' && !isEditRest) {
@@ -153,9 +157,9 @@ export default function SetDisplay(props) {
 
     const baseType = stage === 'COMPLETE' ? 'success' : 'neutral';
 
-    const getRestingType = () => {
-        if (stage === 'RESTING') {
-            return restTimer.value < 0 ? 'danger' : 'highlight';
+    const getTypeForTimer = (timer, baseStage) => {
+        if (stage === baseStage) {
+            return timer.value < 0 ? 'danger' : 'highlight';
         }
         return baseType;
     };
@@ -167,19 +171,26 @@ export default function SetDisplay(props) {
             className='set-display flex space-x-2'
             isActive={isActive && !isReadOnly}
         >
-            <div className='time flex-1'>
-                <SetInputField
-                    inputProps={numericInputProps}
-                    isEdit={isEditTime && !isReadOnly}
-                    onToggleEdit={setIsEditTime}
-                    onChange={durationTimer.set}
-                    value={durationTimer.value}
-                    formatFunction={timeFormat}
-                    type={stage === 'ACTIVE' ? 'highlight' : baseType}
-                    labelText={t('time')}
-                    defaultValue='0'
-                />
-            </div>
+            {
+                (
+                    Number.isFinite(durationTimer.value) &&
+                    exerciseType === 'cardio'
+                ) && (
+                    <div className='time flex-1'>
+                        <SetInputField
+                            inputProps={numericInputProps}
+                            isEdit={isEditTime && !isReadOnly}
+                            onToggleEdit={setIsEditTime}
+                            onChange={durationTimer.set}
+                            value={Math.abs(durationTimer.value)}
+                            formatFunction={timeFormat}
+                            type={getTypeForTimer(durationTimer, 'ACTIVE')}
+                            labelText={t('time')}
+                            defaultValue='0'
+                        />
+                    </div>
+                )
+            }
             <div className='reps flex-1'>
                 <SetInputField
                     inputProps={numericInputProps}
@@ -210,12 +221,8 @@ export default function SetDisplay(props) {
                     isEdit={isEditRest && !isReadOnly}
                     onToggleEdit={setIsEditRest}
                     onChange={restTimer.set}
-                    value={
-                        restTimer.value > 0 ?
-                        restTimer.value :
-                        -restTimer.value
-                    }
-                    type={getRestingType()}
+                    value={Math.abs(restTimer.value)}
+                    type={getTypeForTimer(restTimer, 'RESTING')}
                     formatFunction={timeFormat}
                     labelText={t('rest')}
                     defaultValue={defaultRestTime}

@@ -1,4 +1,4 @@
-import { BiChevronDown, BiChevronUp, BiDumbbell } from 'react-icons/bi';
+import { BiChevronDown, BiChevronUp, BiDumbbell, BiRun } from 'react-icons/bi';
 
 import SetDisplay from './SetDisplay';
 import RPEScale from './RPEScale';
@@ -13,6 +13,7 @@ import {
     LightButton,
     BlockActions
 } from '../ui';
+import { useState } from 'react';
 
 export default function Exercise(props) {
     const {
@@ -25,12 +26,14 @@ export default function Exercise(props) {
         isComplete = false,
         isReadOnly=false,
         defaultRPE=5,
+        defaultType='weight',
         isWorkoutComplete = false,
         activeSetId = null,
         dispatch = () => {},
     } = props;
 
     const { t } = useTranslation();
+    const [type, setType] = useState(defaultType);
 
     const onRemoveSet = () => {
         dispatch({
@@ -70,8 +73,27 @@ export default function Exercise(props) {
         });
     };
 
+    const typeIcons = {
+        cardio: <BiRun className='inline text-xl mb-1'/>,
+        weight: <BiDumbbell className='inline text-xl mb-1'/>
+    };
+
+    const toggleType = () => {
+        if (isReadOnly || isComplete) {
+            return;
+        }
+        const newType = type === 'cardio' ? 'weight' : 'cardio';
+        dispatch({
+            type: 'UPDATE_EXERCISE_TYPE',
+            payload: {
+                exerciseId: id, type: newType
+            }
+        });
+        setType(newType);
+    };
+
     return (
-        <div className='exercise relative' data-id={id}>
+        <div className='exercise relative' data-id={id} data-type={type}>
             {isWorkoutComplete || isReadOnly || (
                 <div className='absolute top-1 right-1 text-indigo-500'>
                     <button
@@ -88,13 +110,14 @@ export default function Exercise(props) {
             )}
             <Block isActive={isActive}>
                 <List>
-                    <TitleH3 className='exercise-name'>
-                        <BiDumbbell className='inline text-xl mb-1'/> {name}
+                    <TitleH3 onClick={toggleType} className='exercise-name'>
+                        {typeIcons[type]} {name}
                     </TitleH3>
                     {sets.length ? sets.map((set) =>
                         <SetDisplay
                             key={set.id}
                             id={set.id}
+                            exerciseType={type}
                             exerciseId={id}
                             defaultDurationTime={set.defaultDurationTime}
                             defaultWeight={set.defaultWeight}

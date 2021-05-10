@@ -20,6 +20,7 @@ export function getWorkout(id) {
             '.exercise-name'
         ).textContent.trim();
         exercise.id = $exercise.dataset.id;
+        exercise.type = $exercise.dataset.type;
         exercise.sets = [];
 
         const $sets = $exercise.querySelectorAll('.set-display');
@@ -27,7 +28,7 @@ export function getWorkout(id) {
             const set = {};
             set.id = $set.dataset.id;
             set.defaultDurationTime = Number(
-                $set.querySelector('.time .value').dataset.value
+                $set.querySelector('.time .value')?.dataset?.value
             );
             set.defaultReps = Number(
                 $set.querySelector('.reps .value').dataset.value

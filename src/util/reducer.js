@@ -130,6 +130,19 @@ function moveExercise(workout, payload) {
     return workout;
 }
 
+function updateExerciseType(workout, payload) {
+    const { exerciseId, type } = payload;
+
+    const exerciseIndex = workout.exercises.findIndex(e => e.id === exerciseId);
+
+    if (exerciseIndex === -1) {
+        return workout;
+    }
+
+    workout.exercises[exerciseIndex].type = type;
+    return workout;
+}
+
 export default function reducer(state, action) {
     const workout = cloneDeep(state);
 
@@ -144,6 +157,8 @@ export default function reducer(state, action) {
             return updateActiveSet(workout, action.payload);
         case 'UPDATE_SET_STAGE':
             return updateSetStage(workout);
+        case 'UPDATE_EXERCISE_TYPE':
+            return updateExerciseType(workout, action.payload);
         case 'COMPLETE_EXERCISE':
             return updateActiveExercise(workout);
         case 'ADD_EXERCISE':

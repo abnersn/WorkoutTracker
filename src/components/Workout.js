@@ -11,6 +11,7 @@ import useTranslation from '../hooks/useTranslation';
 import useNotification from '../hooks/useNotification';
 import usePersistence from '../hooks/usePersistence';
 import { BiBell, BiChevronLeft, BiSave } from 'react-icons/bi';
+import useTimer from '../hooks/useTimer';
 
 export default function Workout(props) {
     const { t } = useTranslation();
@@ -22,6 +23,7 @@ export default function Workout(props) {
         hasAskedPermission
     } = useNotification();
     const [workout, dispatch] = useReducer(reducer, null);
+    const timer = useTimer('mainTimer', 0);
 
     useEffect(() => {
         db?.loadWorkoutLogById(id, createNew).then((workout) => {
@@ -29,6 +31,7 @@ export default function Workout(props) {
                 type: 'SET_WORKOUT',
                 payload: workout
             });
+            timer.set(workout.duration);
         });
     }, [db]);
 
@@ -54,7 +57,7 @@ export default function Workout(props) {
                 >
                     <BiBell className='inline' />
                 </button>}
-                {createNew &&
+                {createNew && !timer.isRunning && !workout.isComplete &&
                 <button onClick={onSaveWorkout} className='text-indigo-500 px-3 ml-auto text-xl' to='/'>
                     <BiSave />
                 </button>}
@@ -77,6 +80,7 @@ export default function Workout(props) {
                                         name={exercise.name}
                                         sets={exercise.sets}
                                         defaultRPE={exercise.rpe}
+                                        defaultType={exercise.type}
                                         activeSetId={workout.activeSetId}
                                         dispatch={dispatch}
                                     />
@@ -90,6 +94,7 @@ export default function Workout(props) {
                 {workout.isComplete || !createNew || <AddExercise dispatch={dispatch} />}
             </main>
             <Actions
+                timer={timer}
                 isReadOnly={!createNew}
                 state={workout}
                 dispatch={dispatch}

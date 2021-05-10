@@ -24,7 +24,6 @@ import timeFormat from '../util/timeFormat';
 import { Button, DecoratedBlock, Footer, TextLabel } from '../ui';
 import usePersistence from '../hooks/usePersistence';
 import { getWorkout } from '../util/serializeWorkout';
-import useTimer from '../hooks/useTimer';
 
 function CycleButton({ stage, onClick = () => {} }) {
     const { t } = useTranslation();
@@ -65,12 +64,11 @@ function CycleButton({ stage, onClick = () => {} }) {
 }
 
 export default function Actions(props) {
-    const { state, dispatch, isReadOnly } = props;
+    const { state, dispatch, isReadOnly, timer } = props;
 
     const { t, language } = useTranslation();
     const db = usePersistence();
 
-    const timer = useTimer('mainTimer', state.duration || 0);
     const [isComplete, setIsComplete] = useState(false);
 
     const updateStage = () => {
