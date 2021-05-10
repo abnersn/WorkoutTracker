@@ -11,6 +11,7 @@ import usePersistence from '../hooks/usePersistence';
 
 import { BiDumbbell, BiTrash } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
+import { sortBy } from 'lodash';
 
 export default function WorkoutHistory() {
     const [workoutsList, setWorkoutsList] = useState([]);
@@ -39,12 +40,16 @@ export default function WorkoutHistory() {
         formatOptions.locale = locale;
     }
 
+    const sortedList = sortBy(
+        workoutsList, w => -w.date.valueOf()
+    );
+
     return <div>
         <h2 className='workout-name text-2xl text-blue-800 font-semibold px-3 pt-4'>
             {t('history')}
         </h2>
         <ul className='flex flex-col space-y-4 p-3'>{
-            workoutsList.map((workout) => 
+            sortedList.map((workout) => 
                 <Link to={{
                     pathname: '/viewWorkout',
                     search: `?id=${workout.persistenceKey}`
