@@ -85,8 +85,7 @@ export default class Database {
     }
 
     async loadNewWorkout(id) {
-        const lastLogEntry = await this.getLastLogEntry(id);
-        const workout = lastLogEntry || await this.getData('workouts', id);
+        const workout = await this.getData('workouts', id);
 
         workout.date = new Date();
         workout.isComplete = false;

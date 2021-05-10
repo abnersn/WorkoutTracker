@@ -154,7 +154,7 @@ export default function SetDisplay(props) {
     }, [stage, restTimer, isEditRest]);
 
     useEffect(() => {
-        if (isReadOnly || exerciseType !== 'cardio') {
+        if (stage !== 'ACTIVE' || exerciseType !== 'cardio') {
             return;
         }
 
@@ -167,7 +167,7 @@ export default function SetDisplay(props) {
             notify(t('duration_up'));
             setNotifiedDuration(true);
         }
-    }, [restTimer, durationTimer]);
+    }, [restTimer, durationTimer, stage, exerciseType]);
 
     const numericInputProps = {
         type: 'number',
