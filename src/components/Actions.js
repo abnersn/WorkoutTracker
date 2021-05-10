@@ -9,7 +9,6 @@ import { useState } from 'react';
 import useTranslation from '../hooks/useTranslation';
 
 import {
-    BiArrowBack,
     BiCheck,
     BiPause,
     BiPlay,
@@ -22,7 +21,6 @@ import hasIncompleteExercises from '../util/hasIncompleteExercises';
 import hasIncompleteSets from '../util/hasIncompleteSets';
 import timeFormat from '../util/timeFormat';
 
-import { useHistory } from 'react-router';
 import { Button, DecoratedBlock, Footer, TextLabel } from '../ui';
 import usePersistence from '../hooks/usePersistence';
 import { getWorkout } from '../util/serializeWorkout';
@@ -72,8 +70,6 @@ export default function Actions(props) {
     const { t, language } = useTranslation();
     const db = usePersistence();
 
-    const history = useHistory();
-
     const timer = useTimer('mainTimer', state.duration || 0);
     const [isComplete, setIsComplete] = useState(false);
 
@@ -119,10 +115,6 @@ export default function Actions(props) {
         });
     };
 
-    const onGoBack = () => {
-        history.push('/');
-    };
-
     let footerButtons = [null, null];
 
     const exercise = state.exercises.find(
@@ -137,50 +129,38 @@ export default function Actions(props) {
     const hasExercises = state.exercises.length > 0;
     const hasSets = state.exercises[0]?.sets.length > 0;
 
-    if (isReadOnly) {
-        footerButtons[0] = <Button
-            type='primary'
-            label={t('back')}
-            onClick={onGoBack}
-            Icon={BiArrowBack}
-        />;
-    } else if (isComplete) {
-        footerButtons[0] = <Button
-            type='primary'
-            label={t('back')}
-            onClick={onGoBack}
-            Icon={BiArrowBack}
-        />;
-    } else if (timer.isRunning) {
-        if (hasActiveSet) {
-            footerButtons[0] = <CycleButton
-                onClick={updateStage}
-                stage={set.stage}
+    if (!isReadOnly && !isComplete) {
+        if (timer.isRunning) {
+            if (hasActiveSet) {
+                footerButtons[0] = <CycleButton
+                    onClick={updateStage}
+                    stage={set.stage}
+                />;
+            }
+        
+            if (!hasIncompleteExercises(state)) {
+                footerButtons[1] = <Button
+                    type='success'
+                    label={t('finish_workout')}
+                    Icon={BiTrophy}
+                    onClick={completeWorkout}
+                />;
+            } else if (!hasIncompleteSets(exercise)) {
+                footerButtons[1] = <Button
+                    type='success'
+                    label={t('finish_exercise')}
+                    Icon={BiStar}
+                    onClick={completeExercise}
+                />;
+            }
+        } else if (hasExercises && hasSets && !isComplete) {
+            footerButtons[0] = <Button
+                type='primary'
+                label={t('start_workout')}
+                onClick={onStartWorkout}
+                Icon={BiPlay}
             />;
         }
-    
-        if (!hasIncompleteExercises(state)) {
-            footerButtons[1] = <Button
-                type='success'
-                label={t('finish_workout')}
-                Icon={BiTrophy}
-                onClick={completeWorkout}
-            />;
-        } else if (!hasIncompleteSets(exercise)) {
-            footerButtons[1] = <Button
-                type='success'
-                label={t('finish_exercise')}
-                Icon={BiStar}
-                onClick={completeExercise}
-            />;
-        }
-    } else if (hasExercises && hasSets && !isComplete) {
-        footerButtons[0] = <Button
-            type='primary'
-            label={t('start_workout')}
-            onClick={onStartWorkout}
-            Icon={BiPlay}
-        />;
     }
 
     const timerType = timer.isRunning || !isComplete ? 'neutral' : 'success';

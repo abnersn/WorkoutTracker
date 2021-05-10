@@ -10,7 +10,7 @@ import reducer from '../util/reducer';
 import useTranslation from '../hooks/useTranslation';
 import useNotification from '../hooks/useNotification';
 import usePersistence from '../hooks/usePersistence';
-import { BiBell } from 'react-icons/bi';
+import { BiBell, BiChevronLeft, BiSave } from 'react-icons/bi';
 
 export default function Workout(props) {
     const { t } = useTranslation();
@@ -32,6 +32,10 @@ export default function Workout(props) {
         });
     }, [db]);
 
+    const onSaveWorkout = () => {
+        db.saveWorkoutTemplate(workout.id, workout.exercises);
+    };
+
     if (!workout) {
         return null;
     }
@@ -39,6 +43,7 @@ export default function Workout(props) {
     return (
         <div>
             <header className='flex items-center pt-4'>
+                <Link className='text-indigo-500 px-3 pr-0 text-xl' to='/'><BiChevronLeft /></Link>
                 <h2 className='workout-name text-2xl text-indigo-800 font-semibold px-3 pr-2'>
                     {workout.name}
                 </h2>
@@ -49,7 +54,10 @@ export default function Workout(props) {
                 >
                     <BiBell className='inline' />
                 </button>}
-                <Link className='text-blue-500 ml-auto px-3' to='/'>{t('close')}</Link>
+                {createNew &&
+                <button onClick={onSaveWorkout} className='text-indigo-500 px-3 ml-auto text-xl' to='/'>
+                    <BiSave />
+                </button>}
             </header>
             <main>
                 {

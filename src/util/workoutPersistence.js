@@ -115,6 +115,12 @@ export default class Database {
         return workout;
     }
 
+    async saveWorkoutTemplate(id, exercises) {
+        const workout = await this.getData('workouts', id);
+        workout.exercises = exercises;
+        return this.runInWorkouts((store) => store.put(workout));
+    }
+
     loadWorkoutLogById(id, createNew = true) {
         if (createNew) {
             return this.loadNewWorkout(id);
