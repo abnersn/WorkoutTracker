@@ -76,6 +76,9 @@ export default function SetDisplay(props) {
     const durationTimer = useTimer('durationTimer', defaultDurationTime, -1);
     const restTimer = useTimer('restTimer', defaultRestTime, -1);
 
+    const [notifiedDuration, setNotifiedDuration] = useState(false);
+    const [notifiedRest, setNotifiedRest] = useState(true);
+
     const [reps, setReps] = useState(defaultReps);
     const [weight, setWeight] = useState(defaultWeight);
 
@@ -88,6 +91,14 @@ export default function SetDisplay(props) {
     const prevStageRef = useRef();
 
     const { t } = useTranslation();
+
+    useEffect(() => {
+        if (stage === 'ACTIVE') {
+            setNotifiedDuration(false);
+            setNotifiedRest(false);
+        }
+    }, [stage]);
+
     useEffect(() => {
         if (isEditTime || isEditReps || isEditWeight || isEditRest) {
             dispatch({
@@ -143,10 +154,20 @@ export default function SetDisplay(props) {
     }, [stage, restTimer, isEditRest]);
 
     useEffect(() => {
-        if (restTimer.value === 0) {
-            notify(t('times_up'));
+        if (isReadOnly || exerciseType !== 'cardio') {
+            return;
         }
-    }, [restTimer]);
+
+        if (restTimer.value === 0 && !notifiedRest) {
+            notify(t('times_up'));
+            setNotifiedRest(true);
+        }
+
+        if (durationTimer.value === 0 && !notifiedDuration) {
+            notify(t('duration_up'));
+            setNotifiedDuration(true);
+        }
+    }, [restTimer, durationTimer]);
 
     const numericInputProps = {
         type: 'number',
