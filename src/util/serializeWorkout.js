@@ -42,7 +42,7 @@ export function getWorkout(id) {
             set.stage = 'COMPLETE';
             exercise.sets.push(set);
         }
-        exercise.rpe = Number($exercise.querySelector('.rpe').value);
+        exercise.rpe = Number($exercise.querySelector('.rpe')?.value);
         workout.exercises.push(exercise);
     }
 

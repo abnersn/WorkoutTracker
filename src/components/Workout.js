@@ -12,6 +12,7 @@ import useNotification from '../hooks/useNotification';
 import usePersistence from '../hooks/usePersistence';
 import { BiBell, BiChevronLeft, BiSave } from 'react-icons/bi';
 import useTimer from '../hooks/useTimer';
+import { getWorkout } from '../util/serializeWorkout';
 
 export default function Workout(props) {
     const { t } = useTranslation();
@@ -36,7 +37,8 @@ export default function Workout(props) {
     }, [db]);
 
     const onSaveWorkout = () => {
-        db.saveWorkoutTemplate(workout.id, workout.exercises);
+        const uiWorkout = getWorkout(workout.id);
+        db.saveWorkoutTemplate(workout.id, uiWorkout.exercises);
     };
 
     if (!workout) {
