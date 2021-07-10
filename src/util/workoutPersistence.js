@@ -84,8 +84,10 @@ export default class Database {
         return lastLogEntry[0];
     }
 
-    async loadNewWorkout(id) {
-        const workout = await this.getData('workouts', id);
+    async loadNewWorkout(id, fromLogs) {
+        const workout = await this.getData(
+            fromLogs ? 'logs' : 'workouts', id
+        );
 
         workout.date = new Date();
         workout.isComplete = false;
@@ -110,7 +112,7 @@ export default class Database {
                 set.stage = 'COMPLETE';
             }
         }
-    
+
         return workout;
     }
 
@@ -120,9 +122,9 @@ export default class Database {
         return this.runInWorkouts((store) => store.put(workout));
     }
 
-    loadWorkoutLogById(id, createNew = true) {
+    loadWorkoutLogById(id, createNew = true, fromLogs = false) {
         if (createNew) {
-            return this.loadNewWorkout(id);
+            return this.loadNewWorkout(id, fromLogs);
         }
         return this.loadWorkoutFromLogs(id);
     }

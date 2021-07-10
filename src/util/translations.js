@@ -55,7 +55,8 @@ export const en = {
     'load_error': 'Could not load data',
     'times_up': 'Rest time\'s up!',
     'duration_up': 'Exercise time\'s up!',
-    'persist_error': 'Could not save data'
+    'persist_error': 'Could not save data',
+    'start_workout_from_history': 'Use workout'
 };
 
 export const pt = {
@@ -115,5 +116,6 @@ export const pt = {
     'times_up': 'Descanso acabou!',
     'duration_up': 'Exercício acabou!',
     'load_error': 'Não foi possível carregar os dados',
-    'persist_error': 'Não foi possível salvar as alterações'
+    'persist_error': 'Não foi possível salvar as alterações',
+    'start_workout_from_history': 'Usar treino'
 };

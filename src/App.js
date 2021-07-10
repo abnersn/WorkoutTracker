@@ -9,14 +9,15 @@ import { Container } from './ui';
 function App() {
     const renderWorkout = (routeProps) => {
         let id = new URLSearchParams(routeProps.location.search).get('id');
+        let fromLogs = new URLSearchParams(routeProps.location.search).get('fromLogs');
 
         const createNew = routeProps.match.path === '/newWorkout';
 
-        if (routeProps.match.path === '/viewWorkout') {
+        if (routeProps.match.path === '/viewWorkout' || fromLogs) {
             id = Number(id); // Logs have numeric ids
         }
 
-        return <Workout id={id} createNew={createNew} />;
+        return <Workout id={id} createNew={createNew} fromLogs={Boolean(fromLogs)} />;
     };
 
     return (

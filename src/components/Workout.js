@@ -16,7 +16,7 @@ import { getWorkout } from '../util/serializeWorkout';
 
 export default function Workout(props) {
     const { t } = useTranslation();
-    const { id, createNew = true } = props;
+    const { id, createNew = true, fromLogs = false } = props;
 
     const db = usePersistence();
     const {
@@ -27,14 +27,15 @@ export default function Workout(props) {
     const timer = useTimer('mainTimer', 0);
 
     useEffect(() => {
-        db?.loadWorkoutLogById(id, createNew).then((workout) => {
-            dispatch({
-                type: 'SET_WORKOUT',
-                payload: workout
+        db?.loadWorkoutLogById(id, createNew, fromLogs)
+            .then((workout) => {
+                dispatch({
+                    type: 'SET_WORKOUT',
+                    payload: workout
+                });
+                timer.set(workout.duration);
             });
-            timer.set(workout.duration);
-        });
-    }, [db]);
+    }, [db, id, createNew, fromLogs]);
 
     const onSaveWorkout = () => {
         const uiWorkout = getWorkout(workout.id);
@@ -98,6 +99,7 @@ export default function Workout(props) {
             <Actions
                 timer={timer}
                 isReadOnly={!createNew}
+                loadedId={id}
                 state={workout}
                 dispatch={dispatch}
             />

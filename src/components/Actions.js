@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
 
 import pt from 'date-fns/locale/pt-BR';
 import en from 'date-fns/locale/en-US';
@@ -64,7 +65,7 @@ function CycleButton({ stage, onClick = () => {} }) {
 }
 
 export default function Actions(props) {
-    const { state, dispatch, isReadOnly, timer } = props;
+    const { state, dispatch, isReadOnly, timer, loadedId } = props;
 
     const { t, language } = useTranslation();
     const db = usePersistence();
@@ -159,6 +160,14 @@ export default function Actions(props) {
                 Icon={BiPlay}
             />;
         }
+    } else {
+        footerButtons[0] = <Link to={{ pathname: '/newWorkout', search: `id=${loadedId}&fromLogs=true` }}>
+            <Button
+                type='primary'
+                label={t('start_workout_from_history')}
+                Icon={BiPlay}
+            />
+        </Link>;
     }
 
     const timerType = timer.isRunning || !isComplete ? 'neutral' : 'success';
