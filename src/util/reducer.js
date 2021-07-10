@@ -38,6 +38,16 @@ function removeSet(workout, payload) {
     return workout;
 }
 
+function removeExercise(workout, payload) {
+    const { exerciseId } = payload;
+
+    workout.exercises = workout.exercises.filter(
+        ex => ex.id !== exerciseId
+    );
+
+    return workout;
+}
+
 function updateActiveSet(workout, payload) {
     const { setId, exerciseId } = payload;
 
@@ -156,7 +166,7 @@ export default function reducer(state, action) {
         case 'UPDATE_ACTIVE_SET':
             return updateActiveSet(workout, action.payload);
         case 'UPDATE_SET_STAGE':
-            return updateSetStage(workout);
+            return updateSetStage(workout); 
         case 'UPDATE_EXERCISE_TYPE':
             return updateExerciseType(workout, action.payload);
         case 'COMPLETE_EXERCISE':
@@ -167,6 +177,8 @@ export default function reducer(state, action) {
             return completeWorkout(workout);
         case 'MOVE_EXERCISE':
             return moveExercise(workout, action.payload);
+        case 'REMOVE_EXERCISE':
+            return removeExercise(workout, action.payload);
         default:
             throw new Error();
     }

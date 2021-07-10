@@ -43,6 +43,15 @@ export default function Exercise(props) {
             }
         });
     };
+    
+    const onRemoveExercise = () => {
+        dispatch({
+            type: 'REMOVE_EXERCISE',
+            payload: {
+                exerciseId: id
+            }
+        });
+    };
 
     const onAddSet = () => {
         dispatch({
@@ -144,6 +153,9 @@ export default function Exercise(props) {
             </Block>
             {isWorkoutComplete || isReadOnly || (
                 <BlockActions>
+                    <LightButton onClick={onRemoveExercise} style={{ marginRight: 'auto' }}>
+                        {t('remove_exercise')}
+                    </LightButton>
                     {
                         isActive && activeSetId !== null &&
                         <LightButton onClick={onRemoveSet}>
