@@ -1,0 +1,9 @@
+{
+  "name": "client-limits",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "client/limits/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project client-limits --web",
+  "targets": {}
+}

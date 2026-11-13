@@ -1,0 +1,9 @@
+{
+  "name": "reducer",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "client/reducer/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project reducer --web",
+  "targets": {}
+}

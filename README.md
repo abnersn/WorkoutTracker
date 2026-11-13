@@ -134,9 +134,8 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
 ## Day 1: The Front End on Nx (Still IndexedDB)
 
 - [ ] **Workspace**
-	- [ ] Create it with `create-nx-workspace`, pinned to Node 24
+	- [x] Create it with `create-nx-workspace`, pinned to Node 24
 	- [ ] Add the plugins: `@nx/react`, `@nx/nest`, `@nx/js`, `@nx/module-federation`, `@nx/storybook`
-	- [ ] Connect Nx Cloud (Hobby plan) for remote caching
 	- [ ] Add the tags and the boundary rule
 - [ ] **`client/types`**, **`client/reducer`**, **`client/utils`**, **`client/limits`**
 	- [ ] Port the types, the reducer and its actions, and the time utilities, with tests in `tests/`
