@@ -1,0 +1,54 @@
+{
+  "tab_size": 2,
+  "hard_tabs": false,
+  "ensure_final_newline_on_save": true,
+  "remove_trailing_whitespace_on_save": true,
+  "languages": {
+    "JavaScript": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+    "JSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "TypeScript": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+    "TSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "JSON": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "JSONC": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "CSS": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "SCSS": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "Less": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "HTML": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "Vue.js": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+    "Svelte": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+    "Astro": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "Markdown": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+    "MDX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "YAML": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "GraphQL": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+    "Handlebars": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+    },
+  },
+}

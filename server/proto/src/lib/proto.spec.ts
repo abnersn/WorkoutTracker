@@ -1,7 +1,7 @@
-import { proto } from './proto';
+import { proto } from "./proto";
 
-describe('proto', () => {
-  it('should work', () => {
-    expect(proto()).toEqual('proto');
-  })
-})
+describe("proto", () => {
+  it("should work", () => {
+    expect(proto()).toEqual("proto");
+  });
+});

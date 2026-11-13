@@ -1,0 +1,41 @@
+[
+  {
+    "label": "Debug gateway with Nx",
+    "adapter": "JavaScript",
+    "type": "node",
+    "request": "attach",
+    "port": 9229,
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "skipFiles": ["<node_internals>/**"],
+    "build": {
+      "command": "npx",
+      "args": ["nx", "serve", "gateway"]
+    }
+  },
+  {
+    "label": "Debug users-svc with Nx",
+    "adapter": "JavaScript",
+    "type": "node",
+    "request": "attach",
+    "port": 9230,
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "skipFiles": ["<node_internals>/**"],
+    "build": {
+      "command": "npx",
+      "args": ["nx", "serve", "users-svc"]
+    }
+  },
+  {
+    "label": "Debug workouts-svc with Nx",
+    "adapter": "JavaScript",
+    "type": "node",
+    "request": "attach",
+    "port": 9231,
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "skipFiles": ["<node_internals>/**"],
+    "build": {
+      "command": "npx",
+      "args": ["nx", "serve", "workouts-svc"]
+    }
+  }
+]

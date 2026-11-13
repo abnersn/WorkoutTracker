@@ -1,3 +1,3 @@
 export function reducer(): string {
-  return 'reducer';
+  return "reducer";
 }

@@ -1,3 +1,3 @@
 export function proto(): string {
-  return 'proto';
+  return "proto";
 }

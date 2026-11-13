@@ -10,39 +10,19 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "strict": false,
     "paths": {
-      "@workout-tracker/proto": [
-        "./server/proto/src/index.ts"
-      ],
-      "@workout-tracker/server-limits": [
-        "./server/limits/src/index.ts"
-      ],
-      "@workout-tracker/types": [
-        "./client/types/src/index.ts"
-      ],
-      "@workout-tracker/reducer": [
-        "./client/reducer/src/index.ts"
-      ],
-      "@workout-tracker/utils": [
-        "./client/utils/src/index.ts"
-      ],
-      "@workout-tracker/limits": [
-        "./client/limits/src/index.ts"
-      ],
-      "@workout-tracker/client-limits": [
-        "./client/limits/src/index.ts"
-      ]
+      "@workout-tracker/proto": ["./server/proto/src/index.ts"],
+      "@workout-tracker/server-limits": ["./server/limits/src/index.ts"],
+      "@workout-tracker/types": ["./client/types/src/index.ts"],
+      "@workout-tracker/reducer": ["./client/reducer/src/index.ts"],
+      "@workout-tracker/utils": ["./client/utils/src/index.ts"],
+      "@workout-tracker/limits": ["./client/limits/src/index.ts"],
+      "@workout-tracker/client-limits": ["./client/limits/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }
