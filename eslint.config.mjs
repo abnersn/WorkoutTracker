@@ -5,7 +5,7 @@ export default [
   ...nx.configs["flat/typescript"],
   ...nx.configs["flat/javascript"],
   {
-    ignores: ["**/dist", "**/out-tsc"],
+    ignores: ["**/dist", "**/out-tsc", "**/@mf-types"],
   },
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
@@ -41,7 +41,7 @@ export default [
   },
   {
     // Named exports only: default exports are forbidden across the repo.
-    // Tool config files (ESLint, Jest) and Storybook stories require a default export and are exempt.
+    // Tool config files (ESLint, Jest, rspack), nx-generated App modules and Storybook stories require a default export and are exempt.
     files: [
       "**/*.ts",
       "**/*.tsx",
@@ -55,6 +55,9 @@ export default [
     ignores: [
       "**/eslint.config.mjs",
       "**/jest.config.ts",
+      "**/rspack.config.ts",
+      // Module-federation app modules: consumers load these via lazy(), which needs a default export.
+      "client/*/src/App.tsx",
       "**/jest.config.cts",
       // Storybook's CSF format requires a default export (the meta object).
       "**/*.stories.ts",
