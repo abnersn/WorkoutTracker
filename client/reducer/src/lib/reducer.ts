@@ -5,8 +5,8 @@ import {
   type WorkoutAction,
 } from "./types";
 
-function genHash(): string {
-  return crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+function genId(): string {
+  return crypto.randomUUID();
 }
 
 function hasIncompleteSets(exercise: Exercise): boolean {
@@ -32,7 +32,7 @@ function getNextStageFor(stage: SetStage): SetStage {
 
 function addNewSet(workout: Workout, exerciseId: string): Workout {
   const exercise = findExercise(workout, exerciseId);
-  const hash = genHash();
+  const hash = genId();
   exercise.sets = [...exercise.sets, { id: hash, stage: SetStage.Idle }];
   workout.activeSetId = hash;
   return workout;
@@ -99,7 +99,7 @@ function updateActiveExercise(workout: Workout): Workout {
 }
 
 function addNewExercise(workout: Workout, name: string): Workout {
-  workout.exercises.push({ id: genHash(), name, sets: [] });
+  workout.exercises.push({ id: genId(), name, sets: [] });
   return workout;
 }
 

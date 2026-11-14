@@ -39,4 +39,38 @@ export default [
     // Override or add rules here
     rules: {},
   },
+  {
+    // Named exports only: default exports are forbidden across the repo.
+    // Tool config files (ESLint, Jest) require a default export and are exempt.
+    files: [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.cts",
+      "**/*.mts",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.cjs",
+      "**/*.mjs",
+    ],
+    ignores: [
+      "**/eslint.config.mjs",
+      "**/jest.config.ts",
+      "**/jest.config.cts",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "ExportDefaultDeclaration",
+          message:
+            "Default exports are not allowed. Use a named export instead.",
+        },
+        {
+          selector: 'ExportSpecifier[exported.name="default"]',
+          message:
+            "Default exports are not allowed. Use a named export instead.",
+        },
+      ],
+    },
+  },
 ];
