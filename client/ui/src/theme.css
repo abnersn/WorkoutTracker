@@ -44,6 +44,13 @@
   --duration-enter: 200ms;
   --duration-slow: 300ms;
   --duration-draw: 360ms;
+  /* Loading placeholders breathe slowly; a fast pulse is noise when glancing at a phone. */
+  --animate-skeleton: skeleton 1.8s var(--ease-draw) infinite;
+  @keyframes skeleton {
+    50% {
+      opacity: 0.55;
+    }
+  }
   --delay-draw: 80ms;
   /* How far a label or number travels when it slides in. */
   --distance-label-slide: 0.25rem;

@@ -8,7 +8,12 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import { Button, Container } from "@workout-tracker/ui";
+import {
+  Button,
+  CardListSkeleton,
+  Container,
+  WorkoutScreenSkeleton,
+} from "@workout-tracker/ui";
 import { lazyProvider } from "./mf";
 import "./styles.css";
 
@@ -42,13 +47,7 @@ class ProviderBoundary extends Component<
       );
     }
     return (
-      <Suspense
-        fallback={
-          <p role="status" className="px-4 py-6 text-base text-indigo-700">
-            Loading…
-          </p>
-        }
-      >
+      <Suspense fallback={PLACEHOLDERS[this.props.name] ?? null}>
         {this.props.children}
       </Suspense>
     );
@@ -61,6 +60,16 @@ const SECTION_LABELS: Record<string, string> = {
   workoutHistory: "Your history",
   workoutNew: "This workout",
   workoutView: "This session",
+};
+
+// Shaped like each remote's loaded screen, so nothing jumps when it arrives.
+const PLACEHOLDERS: Record<string, ReactNode> = {
+  workoutList: <CardListSkeleton label="Loading your workouts" withHeading />,
+  workoutHistory: (
+    <CardListSkeleton label="Loading your history" tone="primary" withHeading />
+  ),
+  workoutNew: <WorkoutScreenSkeleton label="Loading this workout" />,
+  workoutView: <WorkoutScreenSkeleton label="Loading this session" />,
 };
 
 // Every remote receives `navigate`, so its links move within the SPA instead of reloading.
@@ -87,14 +96,16 @@ function HomeRoute() {
     document.title = "Workout Tracker";
   }, []);
   return (
-    <>
+    // The two sections are flex items of one column, so the space between them
+    // comes from `gap`, not from margins on either remote.
+    <div className="flex flex-1 flex-col gap-6 pb-8">
       <ProviderBoundary name="workoutList">
         <ProviderWorkoutList navigate={navigate} />
       </ProviderBoundary>
       <ProviderBoundary name="workoutHistory">
         <ProviderWorkoutHistory navigate={navigate} />
       </ProviderBoundary>
-    </>
+    </div>
   );
 }
 
@@ -135,7 +146,7 @@ export function App() {
   return (
     <BrowserRouter>
       <Container>
-        <main className="flex flex-1 flex-col">
+        <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
           <Routes>
             <Route index element={<HomeRoute />} />
             <Route path="workouts/new" element={<WorkoutNewRoute />} />

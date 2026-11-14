@@ -358,7 +358,7 @@ export function WorkoutScreen({
   return (
     <section
       data-testid={isView ? "workout-view" : "workout-new"}
-      className="flex flex-1 flex-col"
+      className="flex flex-1 flex-col w-full max-w-2xl mx-auto"
     >
       <header className="flex items-center gap-2 px-4 pt-6">
         <a
@@ -448,7 +448,7 @@ export function WorkoutScreen({
             ))}
           </ul>
         ) : (
-          <EmptyMessage className="text-base">
+          <EmptyMessage className="text-base px-4">
             {isView
               ? "No sets were logged in this session."
               : "No exercises yet. Add the first one below."}

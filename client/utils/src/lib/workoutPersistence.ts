@@ -166,8 +166,11 @@ export class Database {
     workout.duration = 0;
 
     for (const exercise of workout.exercises) {
+      // Effort belongs to a session: a repeated run starts unrated.
+      delete exercise.rpe;
       for (const set of exercise.sets) {
         set.stage = SetStage.Idle;
+        delete set.restStartedAt;
       }
     }
 

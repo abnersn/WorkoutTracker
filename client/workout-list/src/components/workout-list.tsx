@@ -3,6 +3,7 @@ import { Play } from "lucide-react";
 import {
   AddItemForm,
   Button,
+  CardListSkeleton,
   Dialog,
   EmptyMessage,
   SectionHeading,
@@ -148,9 +149,7 @@ export function WorkoutList({
         Workout plans
       </SectionHeading>
       {workouts === null ? (
-        <p role="status" className="p-4 text-base text-indigo-700">
-          Loading your workouts…
-        </p>
+        <CardListSkeleton label="Loading your workouts" />
       ) : workouts.length > 0 ? (
         <ul className="flex flex-col gap-inset p-4">
           {workouts.map((workout) => (

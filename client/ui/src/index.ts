@@ -11,3 +11,4 @@ export * from "./components/text-label";
 export * from "./components/tone";
 export * from "./motion";
 export * from "./components/link-card";
+export * from "./components/skeleton";

@@ -163,11 +163,11 @@ Storybook picks port 6006 and offers another if it is taken; pass `-- --port <n>
   - [x] Load `theme.css` in `.storybook/preview.css`, and add `@storybook/addon-a11y`
   - [x] Storybook in every remote too
 - [x] **`client/hooks`**: `useTimer`, `useNotification`
-- [ ] **`client/workout-repository`**: the `WorkoutRepository` interface and its IndexedDB adapter
-- [ ] **Module Federation**
+- [x] **`client/workout-repository`**: the `WorkoutRepository` interface and its IndexedDB adapter
+- [x] **Module Federation**
   - [x] `shell` host, plus the `workout-list`, `workout-new`, `workout-view` and `workout-history` remotes (Rspack)
   - [x] React 19 and React Router 7
-  - [ ] Share react, react-router, `@apollo/client` and `auth-state` as singletons
+  - [x] Share react, react-router, `@apollo/client` and `auth-state` as singletons
 - [x] Fix the old issues:
   - [x] Switch to `createRoot`
   - [x] Stop passing an async function to `useEffect`

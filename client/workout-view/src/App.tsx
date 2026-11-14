@@ -1,6 +1,7 @@
 // Exposed by the federation plugin as 'workoutView/App'.
 // Consumers render it lazily via `lazyProvider('workoutView', 'App')`.
 import { lazy, Suspense } from "react";
+import { WorkoutScreenSkeleton } from "@workout-tracker/ui";
 import "./styles.css";
 
 // A finished workout is shown with the same screen the workout-new remote runs,
@@ -20,13 +21,7 @@ export interface AppProps {
 
 export function App({ id = "", finished = false, navigate }: AppProps) {
   return (
-    <Suspense
-      fallback={
-        <p role="status" className="px-4 pt-10 text-base text-indigo-700">
-          Loading session…
-        </p>
-      }
-    >
+    <Suspense fallback={<WorkoutScreenSkeleton label="Loading session" />}>
       <Workout id={id} mode="view" finished={finished} navigate={navigate} />
     </Suspense>
   );

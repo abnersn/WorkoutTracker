@@ -9,6 +9,7 @@ import {
   sessionHref,
   type ActiveSession,
 } from "@workout-tracker/utils";
+import { WorkoutScreenSkeleton } from "@workout-tracker/ui";
 import { StatusMessage } from "./components/status-message";
 import { WorkoutScreen } from "./components/workout-screen";
 import "./styles.css";
@@ -134,7 +135,7 @@ export function Workout({
     );
   }
   if (state.status === "loading") {
-    return <StatusMessage title="Loading workout…" busy />;
+    return <WorkoutScreenSkeleton label="Loading workout" />;
   }
 
   return (

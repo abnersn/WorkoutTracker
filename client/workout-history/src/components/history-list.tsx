@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Button,
+  CardListSkeleton,
   Dialog,
   EmptyMessage,
   SectionHeading,
@@ -37,9 +38,7 @@ export function HistoryList({ entries, onRemove, navigate }: HistoryListProps) {
         History
       </SectionHeading>
       {entries === null ? (
-        <p role="status" className="p-4 text-base text-blue-800">
-          Loading your history…
-        </p>
+        <CardListSkeleton label="Loading your history" tone="primary" />
       ) : sorted.length === 0 ? (
         <EmptyMessage className="p-4 text-base">
           Finished workouts show up here, with their time, sets and volume.
