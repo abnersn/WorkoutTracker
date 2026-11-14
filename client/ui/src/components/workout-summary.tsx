@@ -1,7 +1,12 @@
 import { Check, TrendingDown, TrendingUp } from "lucide-react";
 import type { Workout } from "@workout-tracker/types";
 import { useWeightUnit } from "@workout-tracker/hooks";
-import { formatDate, formatDateTime, timeFormat } from "@workout-tracker/utils";
+import {
+  formatDate,
+  formatDateTime,
+  timeFormat,
+  toDisplayWeight,
+} from "@workout-tracker/utils";
 import { tallyWorkout } from "../lib/build-log";
 
 export interface WorkoutSummaryProps {
@@ -21,15 +26,19 @@ export function WorkoutSummary({
   previous,
   finished = false,
 }: WorkoutSummaryProps) {
-  const { logged, volume } = tallyWorkout(workout);
   const [unit] = useWeightUnit();
+  // Volume is tallied in kg; shown in the lifter's unit.
+  const { logged, volume: volumeKg } = tallyWorkout(workout);
+  const volume = toDisplayWeight(volumeKg, unit);
   const stats = [
     { label: "Time", value: timeFormat(workout.duration) },
     { label: logged === 1 ? "Set" : "Sets", value: number.format(logged) },
     { label: `Volume (${unit})`, value: number.format(volume) },
   ];
 
-  const before = previous ? tallyWorkout(previous).volume : null;
+  const before = previous
+    ? toDisplayWeight(tallyWorkout(previous).volume, unit)
+    : null;
   const delta = before === null ? null : volume - before;
 
   return (

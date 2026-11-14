@@ -10,7 +10,12 @@ import {
   useWeightUnit,
   weightStepFor,
 } from "@workout-tracker/hooks";
-import { secondsSince, timeFormat } from "@workout-tracker/utils";
+import {
+  fromDisplayWeight,
+  secondsSince,
+  timeFormat,
+  toDisplayWeight,
+} from "@workout-tracker/utils";
 import { SET_DEFAULTS } from "../lib/build-log";
 import { SetRow, type SetFieldName } from "./set-row";
 
@@ -53,7 +58,11 @@ export function SetItem({
 
   const restValue = set.defaultRestTime ?? SET_DEFAULTS.defaultRestTime;
   const reps = set.defaultReps ?? SET_DEFAULTS.defaultReps;
-  const weight = set.defaultWeight ?? SET_DEFAULTS.defaultWeight;
+  // Stored in kg; shown in the lifter's unit.
+  const weight = toDisplayWeight(
+    set.defaultWeight ?? SET_DEFAULTS.defaultWeight,
+    weightUnit,
+  );
 
   // A rest picked back up after a reload continues from where the clock is now.
   const restTimer = useTimer(
@@ -130,12 +139,15 @@ export function SetItem({
       return;
     }
     if (field === "rest") restTimer.set(value);
+    // Weights come in as the lifter's unit and are stored in kg.
+    const stored =
+      field === "weight" ? fromDisplayWeight(value, weightUnit) : value;
     dispatch({
       type: "UPDATE_SET",
       payload: {
         exerciseId,
         setId: set.id,
-        changes: { [FIELD_TO_KEY[field]]: value },
+        changes: { [FIELD_TO_KEY[field]]: stored },
       },
     });
   };

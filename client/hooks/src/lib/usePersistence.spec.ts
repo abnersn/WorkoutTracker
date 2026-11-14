@@ -3,6 +3,7 @@ import { Database } from "@workout-tracker/utils";
 import { usePersistence } from "./usePersistence";
 
 jest.mock("@workout-tracker/utils", () => ({
+  ...jest.requireActual("@workout-tracker/utils"),
   Database: jest.fn(),
 }));
 

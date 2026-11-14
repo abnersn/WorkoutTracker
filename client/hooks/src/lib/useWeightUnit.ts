@@ -1,17 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+import { defaultWeightUnit, type WeightUnit } from "@workout-tracker/utils";
 
-export type WeightUnit = "kg" | "lb";
+export type { WeightUnit } from "@workout-tracker/utils";
+export { defaultWeightUnit } from "@workout-tracker/utils";
 
 const KEY = "workoutTracker.weightUnit";
 const EVENT = "workoutTracker:weightUnit";
 
-/** Pounds where they're the norm (US, Liberia, Myanmar), kilograms elsewhere. */
-export function defaultWeightUnit(locale?: string): WeightUnit {
-  const region = (locale ?? navigator.language).split("-")[1]?.toUpperCase();
-  return region === "US" || region === "LR" || region === "MM" ? "lb" : "kg";
-}
-
-function readUnit(): WeightUnit {
+/**
+ * The unit weights are shown in. Display only: weights are always stored in kg.
+ */
+export function readUnit(): WeightUnit {
   try {
     const stored = window.localStorage.getItem(KEY);
     if (stored === "kg" || stored === "lb") return stored;

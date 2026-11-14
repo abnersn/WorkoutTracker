@@ -69,10 +69,6 @@ export function App({ navigate }: AppProps) {
       }
       onAdd={add}
       onRemove={remove}
-      onConvertWeights={async (factor) => {
-        if (!db) throw new Error("Workouts aren't open yet.");
-        await db.convertWeights(factor);
-      }}
       navigate={navigate}
     />
   );

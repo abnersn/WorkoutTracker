@@ -12,7 +12,6 @@ import {
   toneClass,
 } from "@workout-tracker/ui";
 import {
-  convertActiveSessionWeights,
   formatClockTime,
   formatDistanceToNow,
   linkClickHandler,
@@ -20,31 +19,18 @@ import {
 import { useWeightUnit, type WeightUnit } from "@workout-tracker/hooks";
 import { SavedWorkoutCard } from "./saved-workout-card";
 
-const LB_PER_KG = 2.20462;
-
-/** kg or lb, set once and used by every set and summary. Switching converts saved weights. */
-function UnitSwitch({
-  onConvert,
-}: {
-  onConvert?: (factor: number) => Promise<void>;
-}) {
+/**
+ * kg or lb, for display only. Weights are stored in kg, so switching changes
+ * how they are shown and nothing that is saved.
+ */
+function UnitSwitch() {
   const [unit, setUnit] = useWeightUnit();
-  const [status, setStatus] = useState<string | null>(null);
   const options: { value: WeightUnit; label: string }[] = [
     { value: "kg", label: "kg" },
     { value: "lb", label: "lb" },
   ];
-  const choose = async (next: WeightUnit) => {
-    if (next === unit) return;
-    const factor = next === "lb" ? LB_PER_KG : 1 / LB_PER_KG;
-    try {
-      await onConvert?.(factor);
-      convertActiveSessionWeights(factor);
-      setUnit(next);
-      setStatus(`Saved weights converted to ${next}.`);
-    } catch {
-      setStatus("Couldn't convert your saved weights. Nothing was changed.");
-    }
+  const choose = (next: WeightUnit) => {
+    if (next !== unit) setUnit(next);
   };
   return (
     <fieldset className="tone-neutral mx-4 mb-6 flex flex-wrap items-center gap-3">
@@ -76,9 +62,6 @@ function UnitSwitch({
           </label>
         ))}
       </div>
-      <p role="status" className="w-full text-sm text-indigo-700 empty:hidden">
-        {status}
-      </p>
     </fieldset>
   );
 }
@@ -104,8 +87,6 @@ export interface WorkoutListProps {
   inProgress?: InProgressWorkout | null;
   onAdd: (name: string) => void;
   onRemove: (id: string) => void;
-  /** Multiplies every saved weight by `factor` when the unit switches. */
-  onConvertWeights?: (factor: number) => Promise<void>;
   navigate?: (to: string) => void;
 }
 
@@ -115,7 +96,6 @@ export function WorkoutList({
   inProgress,
   onAdd,
   onRemove,
-  onConvertWeights,
   navigate,
 }: WorkoutListProps) {
   const [pendingRemoval, setPendingRemoval] = useState<SavedWorkout | null>(
@@ -178,7 +158,7 @@ export function WorkoutList({
         placeholder="Workout name"
         onSubmit={onAdd}
       />
-      <UnitSwitch onConvert={onConvertWeights} />
+      <UnitSwitch />
       <Dialog
         open={pendingRemoval !== null}
         title={`Delete ${pendingRemoval?.name ?? "workout"}?`}
