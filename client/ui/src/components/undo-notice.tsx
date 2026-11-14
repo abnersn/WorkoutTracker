@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Button } from "@workout-tracker/ui";
+import { Button } from "./button";
 
 export interface UndoNoticeProps {
   /** What just happened, e.g. "Removed Bench press". */

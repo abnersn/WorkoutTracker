@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Pause, Timer, Trophy } from "lucide-react";
 import { ActionBar } from "./action-bar";
-import { Badge, Button, Container } from "@workout-tracker/ui";
+import { Badge } from "./badge";
+import { Button } from "./button";
+import { Container } from "./container";
 
 const meta = {
   title: "Workout/ActionBar",

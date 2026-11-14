@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "@workout-tracker/ui";
+import { cn } from "./tone";
 
 export interface ActionBarProps extends HTMLAttributes<HTMLDivElement> {
   /** A short-lived line above the buttons, such as an undo offer. */

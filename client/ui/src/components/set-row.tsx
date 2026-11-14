@@ -3,15 +3,8 @@ import { Check, Lock, Play, Timer } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { SetField } from "./set-field";
 import { Stepper } from "./stepper";
-import {
-  cn,
-  toneClass,
-  type Tone,
-  cssToken,
-  easingToken,
-  msToken,
-  prefersReducedMotion,
-} from "@workout-tracker/ui";
+import { cn, toneClass, type Tone } from "./tone";
+import { cssToken, easingToken, msToken, prefersReducedMotion } from "../motion";
 
 export type SetFieldName = "reps" | "weight" | "rest";
 

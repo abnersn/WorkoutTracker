@@ -2,6 +2,7 @@ import { defineConfig } from "@rspack/cli";
 import { rspack } from "@rspack/core";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxReadySignalPlugin } from "@nx/rspack/ready-signal";
+import { withZephyr } from "zephyr-rspack-plugin";
 import { ReactRefreshRspackPlugin } from "@rspack/plugin-react-refresh";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,7 +20,7 @@ const NAME = "shell";
 // `NODE_ENV=...` prefix.
 export default defineConfig((_env, argv) => {
   const isDev = argv.mode !== "production";
-  return {
+  return withZephyr()({
     context: __dirname,
     entry: { main: "./src/index.ts" },
     output: {
@@ -89,11 +90,18 @@ export default defineConfig((_env, argv) => {
       new rspack.HtmlRspackPlugin({ template: "./index.html" }),
       new ModuleFederationPlugin({
         name: NAME,
-        // No build-time `remotes:` block - registered at runtime in
-        // src/mf.ts at module load time.
+        // Declared at build time so Zephyr can rewrite these localhost URLs to
+        // each remote's deployed URL (mapped in package.json `zephyr:dependencies`).
+        // The keys are the aliases passed to lazyProvider() in src/App.tsx.
+        remotes: {
+          workoutView: "workoutView@http://localhost:8101/remoteEntry.js",
+          workoutHistory: "workoutHistory@http://localhost:8102/remoteEntry.js",
+          workoutNew: "workoutNew@http://localhost:8103/remoteEntry.js",
+          workoutList: "workoutList@http://localhost:8104/remoteEntry.js",
+        },
         shared: ["react", "react-dom"],
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),
-  };
+  });
 });

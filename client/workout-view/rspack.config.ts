@@ -2,6 +2,7 @@ import { defineConfig } from "@rspack/cli";
 import { rspack } from "@rspack/core";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxReadySignalPlugin } from "@nx/rspack/ready-signal";
+import { withZephyr } from "zephyr-rspack-plugin";
 import { ReactRefreshRspackPlugin } from "@rspack/plugin-react-refresh";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,7 +20,7 @@ const NAME = "workoutView";
 // `NODE_ENV=...` prefix.
 export default defineConfig((_env, argv) => {
   const isDev = argv.mode !== "production";
-  return {
+  return withZephyr()({
     context: __dirname,
     entry: { main: "./src/index.ts" },
     output: {
@@ -99,9 +100,6 @@ export default defineConfig((_env, argv) => {
       new ModuleFederationPlugin({
         name: NAME,
         filename: "remoteEntry.js",
-        remotes: {
-          workoutNew: "workout_new@http://localhost:8103/remoteEntry.js",
-        },
         exposes: {
           "./App": "./src/App.tsx",
         },
@@ -109,5 +107,5 @@ export default defineConfig((_env, argv) => {
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),
-  };
+  });
 });

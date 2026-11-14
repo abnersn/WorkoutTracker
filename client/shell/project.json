@@ -20,8 +20,24 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "rspack build --mode=production",
-        "cwd": "client/shell"
+        "cwd": "client/shell",
+        "env": { "ZE_DISABLED": "true" }
       }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/shell",
+        "env": { "ZE_DISABLED": "false" }
+      },
+      "dependsOn": [
+        "workout-new:deploy",
+        "workout-view:deploy",
+        "workout-list:deploy",
+        "workout-history:deploy"
+      ]
     }
   }
 }

@@ -9,10 +9,9 @@ import {
   sessionHref,
   type ActiveSession,
 } from "@workout-tracker/utils";
-import { WorkoutScreenSkeleton } from "@workout-tracker/ui";
-import { StatusMessage } from "./components/status-message";
-import { WorkoutScreen } from "./components/workout-screen";
-import "./styles.css";
+import { WorkoutScreenSkeleton } from "./skeleton";
+import { StatusMessage } from "./status-message";
+import { WorkoutScreen } from "./workout-screen";
 
 export interface WorkoutProps {
   /** Template id (new), or the numeric log key as a string when `fromLogs`/`mode="view"`. */
@@ -35,7 +34,7 @@ type LoadState =
       startedAt?: number;
     };
 
-/** Loads a workout from IndexedDB and shows it. Exposed to other remotes. */
+/** Loads a workout from IndexedDB and shows it. Used by workout-new and workout-view. */
 export function Workout({
   id,
   mode = "new",

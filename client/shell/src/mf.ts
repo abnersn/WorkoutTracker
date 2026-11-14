@@ -1,39 +1,9 @@
 import { lazy, type ComponentType } from "react";
-import { registerRemotes, loadRemote } from "@module-federation/runtime";
+import { loadRemote } from "@module-federation/runtime";
 
-// The providers this consumer loads at runtime. Edit `entry` to point at a
-// different URL (`remoteEntry.js` is what every supported bundler emits at dev
-// + build time). `name` is the provider build's federation container name and
-// must match the provider's federation `name`; `alias` is the key you pass to
-// loadRemote()/lazyProvider().
-const PROVIDERS: Array<{ alias: string; name: string; entry: string }> = [
-  {
-    alias: "workoutView",
-    name: "workoutView",
-    entry: "http://localhost:8101/remoteEntry.js",
-  },
-  {
-    alias: "workoutHistory",
-    name: "workoutHistory",
-    entry: "http://localhost:8102/remoteEntry.js",
-  },
-  {
-    alias: "workoutList",
-    name: "workoutList",
-    entry: "http://localhost:8104/remoteEntry.js",
-  },
-  {
-    alias: "workoutNew",
-    name: "workout_new",
-    entry: "http://localhost:8103/remoteEntry.js",
-  },
-];
-
-// `type` is omitted so the federation runtime auto-detects the entry format.
-// The providers in this workspace are rspack-built and emit UMD;
-// setting `type: 'module'` here breaks them with #RUNTIME-002.
-registerRemotes(PROVIDERS.map((remote) => ({ ...remote })));
-
+// The remotes themselves are declared in rspack.config.ts (`remotes:`), not
+// registered here, so Zephyr can point them at their deployed URLs at build
+// time. `alias` is the key from that `remotes:` block.
 export function lazyProvider<Props = unknown>(
   alias: string,
   exposeName: string,

@@ -1,14 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
-import {
-  cssToken,
-  easingToken,
-  msToken,
-  prefersReducedMotion,
-  cn,
-  toneClass,
-  type Tone,
-  TextLabel,
-} from "@workout-tracker/ui";
+import { cssToken, easingToken, msToken, prefersReducedMotion } from "../motion";
+import { cn, toneClass, type Tone } from "./tone";
+import { TextLabel } from "./text-label";
 
 export interface SetFieldProps {
   label: string;

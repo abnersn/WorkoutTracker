@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn, focusRing, toneClass } from "@workout-tracker/ui";
+import { cn, focusRing, toneClass } from "./tone";
 import { linkClickHandler } from "@workout-tracker/utils";
 
 export interface StatusMessageProps {

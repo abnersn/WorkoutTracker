@@ -1,6 +1,7 @@
 // Exposed by the federation plugin as 'workoutNew/App'.
 // Consumers render it lazily via `lazyProvider('workoutNew', 'App')`.
-import { Workout } from "./Workout";
+import { Workout } from "@workout-tracker/ui";
+import "./styles.css";
 
 export interface AppProps {
   /** Saved workout to start, or the history entry to repeat when `fromLogs`. */

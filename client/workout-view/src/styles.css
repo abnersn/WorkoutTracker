@@ -2,5 +2,3 @@
 @import "../../ui/src/theme.css";
 @source ".";
 @source "../../ui/src";
-/* The screen it renders comes from workout-new; its classes must exist in this bundle too. */
-@source "../../workout-new/src";

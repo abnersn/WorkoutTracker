@@ -6,6 +6,12 @@
     "dev": "rspack serve --mode=development",
     "build": "rspack build --mode=production"
   },
+  "zephyr:dependencies": {
+    "workoutView": "workout-view@*",
+    "workoutHistory": "workout-history@*",
+    "workoutNew": "workout-new@*",
+    "workoutList": "workout-list@*"
+  },
   "dependencies": {
     "@module-federation/enhanced": "^2.4.0",
     "@module-federation/runtime": "^2.4.0",

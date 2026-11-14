@@ -1,6 +1,6 @@
 import { Info } from "lucide-react";
 import { useId, useState, type CSSProperties } from "react";
-import { cn, focusRing } from "@workout-tracker/ui";
+import { cn, focusRing } from "./tone";
 
 // Lifting RPE: effort read as reps left in the tank at the end of the set.
 export const RPE_LEVELS: readonly { title: string; description: string }[] = [

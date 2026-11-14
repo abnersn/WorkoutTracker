@@ -62,7 +62,8 @@
     "vite-tsconfig-paths": "^6.1.1",
     "webpack": "^5.112.2",
     "webpack-cli": "^7.0.0",
-    "webpack-dev-server": "^5.2.7"
+    "webpack-dev-server": "^5.2.7",
+    "zephyr-rspack-plugin": "^1.8.0"
   },
   "packageManager": "npm@11.20.0",
   "dependencies": {

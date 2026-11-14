@@ -24,16 +24,13 @@ import {
   secondsSince,
   timeFormat,
 } from "@workout-tracker/utils";
-import {
-  AddItemForm,
-  Badge,
-  Button,
-  cn,
-  focusRing,
-  Dialog,
-  EmptyMessage,
-  SectionHeading,
-} from "@workout-tracker/ui";
+import { AddItemForm } from "./add-item-form";
+import { Badge } from "./badge";
+import { Button } from "./button";
+import { cn, focusRing } from "./tone";
+import { Dialog } from "./dialog";
+import { EmptyMessage } from "./empty-message";
+import { SectionHeading } from "./section-heading";
 import { buildLog, normalizeExercises, tallyWorkout } from "../lib/build-log";
 import { ActionBar } from "./action-bar";
 import { ExerciseItem } from "./exercise-item";

@@ -1,6 +1,9 @@
 import { ChevronDown, ChevronUp, Dumbbell, Trash2 } from "lucide-react";
 import { Children, useId, useState, type ReactNode } from "react";
-import { Button, Card, EmptyMessage, cn, focusRing } from "@workout-tracker/ui";
+import { Button } from "./button";
+import { Card } from "./card";
+import { EmptyMessage } from "./empty-message";
+import { cn, focusRing } from "./tone";
 
 export interface ExerciseCardProps {
   name: string;

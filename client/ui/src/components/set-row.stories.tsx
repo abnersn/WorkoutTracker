@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { SetRow } from "./set-row";
-import { Button } from "@workout-tracker/ui";
+import { Button } from "./button";
 import { SetStage } from "@workout-tracker/types";
 import { timeFormat } from "@workout-tracker/utils";
 

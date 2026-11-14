@@ -1,15 +1,10 @@
 // Exposed by the federation plugin as 'workoutView/App'.
 // Consumers render it lazily via `lazyProvider('workoutView', 'App')`.
-import { lazy, Suspense } from "react";
-import { WorkoutScreenSkeleton } from "@workout-tracker/ui";
+import { Workout } from "@workout-tracker/ui";
 import "./styles.css";
 
-// A finished workout is shown with the same screen the workout-new remote runs,
-// in read-only mode, so the exercise and set components exist in one place only.
-const Workout = lazy(async () => {
-  const mod = await import("workoutNew/Workout");
-  return { default: mod.Workout };
-});
+// A finished workout is shown with the same screen workout-new runs, in read-only
+// mode. The screen lives in the ui library, so both remotes bundle it at build time.
 
 export interface AppProps {
   /** Key of the history entry to show. */
@@ -21,9 +16,7 @@ export interface AppProps {
 
 export function App({ id = "", finished = false, navigate }: AppProps) {
   return (
-    <Suspense fallback={<WorkoutScreenSkeleton label="Loading session" />}>
-      <Workout id={id} mode="view" finished={finished} navigate={navigate} />
-    </Suspense>
+    <Workout id={id} mode="view" finished={finished} navigate={navigate} />
   );
 }
 

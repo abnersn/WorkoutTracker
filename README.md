@@ -37,7 +37,7 @@ flowchart LR
 
 ### The front end
 
-The shell is the only app the browser loads directly; it pulls in each remote at runtime. `workout-view` is the one remote that loads another: it renders `workout-new`'s screen in read-only mode, so the exercise and set components exist in one place. Dashed borders mark the train-together bonus.
+The shell is the only app the browser loads directly; it pulls in each remote at runtime. Remotes never load each other: `workout-new` and `workout-view` both render the workout screen from the `ui` library (`workout-view` in read-only mode), so the exercise and set components exist in one place. Dashed borders mark the train-together bonus.
 
 ```mermaid
 flowchart TB
@@ -47,7 +47,6 @@ flowchart TB
   shell --> new["<b>workout-new</b><br/>build and run a workout"]
   shell --> view["<b>workout-view</b><br/>a finished workout"]
   shell --> history["<b>workout-history</b><br/>past workouts"]
-  view -.->|"loads the screen at runtime"| new
   shell --> pairing["<b>pairing</b><br/>QR code links two people"]
   shell --> together["<b>train-together</b><br/>shared live screen"]
 
@@ -94,12 +93,12 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
   - `shell/` (host): layout, routes and the sign-in guard; loads every remote. _Unit and e2e tests._
   - `auth/` (remote): sign-up and sign-in screens
   - `workout-list/` (remote, port 8104): saved workouts, with add and delete
-  - `workout-new/` (remote, port 8103): the workout screen: build, run, finish and save as a template. Exposes `./App` and `./Workout`. _Unit tests._
-  - `workout-view/` (remote, port 8101): a finished workout, read-only; renders `workoutNew/Workout`
+  - `workout-new/` (remote, port 8103): build, run, finish and save a workout as a template; renders `ui`'s `Workout`
+  - `workout-view/` (remote, port 8101): a finished workout, read-only; renders `ui`'s `Workout` with `mode="view"`
   - `workout-history/` (remote, port 8102): completed workouts, with delete
   - `pairing/` (remote): shows your QR code and scans a partner's to link two trainings
   - `train-together/` (remote): the shared training screen, with each exercise as it's completed
-  - `ui/` (lib): generic components, documented in Storybook: Button, Card, Badge, Dialog, Container, TextInput, TextLabel, SectionHeading, EmptyMessage, AddItemForm, plus the `tone` and `motion` helpers
+  - `ui/` (lib): generic components, documented in Storybook: Button, Card, Badge, Dialog, Container, TextInput, TextLabel, SectionHeading, EmptyMessage, AddItemForm, plus the `tone` and `motion` helpers. Also the workout screen shared by `workout-new` and `workout-view`: `Workout` (the only part exported), its exercise and set components, and `buildLog`. _Unit tests._
     - `src/theme.css`: the Tailwind theme every remote imports
   - `hooks/` (lib): `useTimer`, `useNotification`, and `usePersistence` (IndexedDB, deprecated until `workout-repository` replaces it)
   - `auth-state/` (lib): token storage, `AuthProvider`, `useAuth`; loaded once and shared by every remote
@@ -130,18 +129,18 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
 
 - File names in kebab-case.
 - Nest code: one feature module per folder, such as `users/users.module.ts`, `users.service.ts`, `users.resolver.ts`.
-- Remotes: components in `src/components/`, each with a story; the federated entry is `src/App.tsx`. A component belongs to the view that uses it. A generic one used by several views goes to `ui`; a view-specific one used by two views (the exercise and set components) stays in `workout-new` and is reached through its exposed `./Workout`.
+- Remotes: components in `src/components/`, each with a story; the federated entry is `src/App.tsx`. A component belongs to the view that uses it. One used by several views goes to `ui`, including the workout screen that `workout-new` and `workout-view` share. Remotes never load each other's code at runtime.
 - Views take an optional `navigate` prop from the shell, so their links move within the SPA instead of reloading.
 - Strings are plain English; there is no translation layer.
 - Styling: each remote imports its own `src/styles.css` (Tailwind 4 through PostCSS, with `@source` for `ui` and for any remote whose components it renders). Storybook uses the Vite plugin instead.
-- Libraries are imported through `@workout-tracker/<name>`. Nx project names must be unique, so the two `limits` folders are the projects `client-limits` and `server-limits`. Remotes are never imported: the shell loads them, and `workout-view` loads `workout-new` through Module Federation.
+- Libraries are imported through `@workout-tracker/<name>`. Nx project names must be unique, so the two `limits` folders are the projects `client-limits` and `server-limits`. Remotes are never imported: only the shell loads them, through Module Federation.
 - Generators run with `--e2eTestRunner=none`. Each project's test config points at `tests/`, and projects with e2e tests get a separate `e2e` target with its config in `tests/e2e/`.
 
 ## Running locally
 
 ```sh
 npx nx serve shell              # the shell on :8100; serve each remote the same way
-npx nx serve workout-view       # also starts the shell and workout-new
+npx nx serve workout-view       # also starts the shell
 npx nx storybook workout-new    # or ui, workout-view, workout-history, workout-list
 npx nx run-many -t lint test
 ```

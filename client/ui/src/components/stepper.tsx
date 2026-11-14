@@ -1,4 +1,4 @@
-import { cn, focusRing, toneClass } from "@workout-tracker/ui";
+import { cn, focusRing, toneClass } from "./tone";
 
 export interface StepperProps {
   /** What the buttons change, e.g. "reps". Used in the accessible names. */

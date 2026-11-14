@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Container } from "@workout-tracker/ui";
+import { Container } from "./container";
 import { SetStage, type Workout } from "@workout-tracker/types";
 import { WorkoutScreen } from "./workout-screen";
 
