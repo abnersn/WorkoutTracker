@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "src/components/exercise-card.tsx"
+        ],
+        "createdAt": "2026-11-14T17:30:56.473Z",
+        "reason": "model triage: flat text-indigo-800 heading on the indigo-50 card, no gradient and no dark ground; indigo is the incumbent neutral brand ink ported from the 2021 app (ui/src/theme.css), and this line was unchanged in hue"
+      }
+    ]
+  }
+}

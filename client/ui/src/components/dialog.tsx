@@ -10,7 +10,10 @@ export interface DialogProps {
   actions?: ReactNode;
 }
 
-/** A modal on the native <dialog>: focus is trapped and Escape closes it. */
+/**
+ * A modal on the native <dialog>: focus is trapped and Escape closes it.
+ * Mark the safe action with `data-autofocus` to take first focus.
+ */
 export function Dialog({
   open,
   title,
@@ -24,7 +27,13 @@ export function Dialog({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
+    if (open && !el.open) {
+      el.showModal();
+      // showModal() focuses the first button, which may be the destructive one.
+      // React's autoFocus doesn't render the attribute, so a button opts in
+      // to first focus with data-autofocus.
+      el.querySelector<HTMLElement>("[data-autofocus]")?.focus();
+    }
     if (!open && el.open) el.close();
   }, [open]);
 

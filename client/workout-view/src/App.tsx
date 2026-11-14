@@ -13,13 +13,21 @@ const Workout = lazy(async () => {
 export interface AppProps {
   /** Key of the history entry to show. */
   id?: string;
+  /** Opened straight after finishing: celebrate and allow a late RPE. */
+  finished?: boolean;
   navigate?: (to: string) => void;
 }
 
-export function App({ id = "", navigate }: AppProps) {
+export function App({ id = "", finished = false, navigate }: AppProps) {
   return (
-    <Suspense fallback={null}>
-      <Workout id={id} mode="view" navigate={navigate} />
+    <Suspense
+      fallback={
+        <p role="status" className="px-4 pt-10 text-base text-indigo-700">
+          Loading session…
+        </p>
+      }
+    >
+      <Workout id={id} mode="view" finished={finished} navigate={navigate} />
     </Suspense>
   );
 }

@@ -11,7 +11,7 @@ export interface AppProps {
 
 export function App({ navigate }: AppProps) {
   const db = usePersistence();
-  const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [entries, setEntries] = useState<HistoryEntry[] | null>(null);
 
   useEffect(() => {
     if (!db) return;
@@ -33,7 +33,7 @@ export function App({ navigate }: AppProps) {
 
   const remove = async (key: number) => {
     await db?.eraseLogEntry(key);
-    setEntries((current) => current.filter((e) => e.key !== key));
+    setEntries((current) => (current ?? []).filter((e) => e.key !== key));
   };
 
   return (

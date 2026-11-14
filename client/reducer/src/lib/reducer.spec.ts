@@ -127,6 +127,66 @@ describe("reducer", () => {
     expect(result.exercises[0].sets[0].stage).toBe(SetStage.Idle);
   });
 
+  it("UPDATE_SET_STAGE moves on to the next exercise when this one is done", () => {
+    const state = makeWorkout({
+      exercises: [
+        {
+          id: "ex1",
+          name: "Squat",
+          sets: [{ id: "s1", stage: SetStage.Resting }],
+        },
+        {
+          id: "ex2",
+          name: "Bench",
+          sets: [{ id: "s3", stage: SetStage.Idle }],
+        },
+      ],
+      activeSetId: "s1",
+      activeExerciseId: "ex1",
+    });
+    const result = reducer(state, { type: "UPDATE_SET_STAGE" });
+    expect(result.activeExerciseId).toBe("ex2");
+    expect(result.activeSetId).toBe("s3");
+  });
+
+  it("UPDATE_ACTIVE_SET leaves a set in progress as the target", () => {
+    const state = makeWorkout({
+      exercises: [
+        {
+          id: "ex1",
+          name: "Squat",
+          sets: [
+            { id: "s1", stage: SetStage.Resting },
+            { id: "s2", stage: SetStage.Idle },
+          ],
+        },
+      ],
+    });
+    const result = reducer(state, {
+      type: "UPDATE_ACTIVE_SET",
+      payload: { setId: "s2", exerciseId: "ex1" },
+    });
+    expect(result.activeSetId).toBe("s1");
+  });
+
+  it("ADD_SET starts from the given values", () => {
+    const result = reducer(makeWorkout(), {
+      type: "ADD_SET",
+      payload: { exerciseId: "ex2", values: { defaultReps: 5 } },
+    });
+    expect(result.exercises[1].sets[1]).toMatchObject({ defaultReps: 5 });
+    expect(result.activeExerciseId).toBe("ex2");
+  });
+
+  it("REMOVE_EXERCISE clears the active exercise when it is removed", () => {
+    const result = reducer(makeWorkout(), {
+      type: "REMOVE_EXERCISE",
+      payload: { exerciseId: "ex1" },
+    });
+    expect(result.activeExerciseId).toBeNull();
+    expect(result.activeSetId).toBeNull();
+  });
+
   it("UPDATE_SET_STAGE clears activeSetId once every set is complete", () => {
     const state = makeWorkout({
       exercises: [

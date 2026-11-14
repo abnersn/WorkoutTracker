@@ -160,7 +160,8 @@
     );
     appearance: none;
     width: 100%;
-    height: 2rem;
+    /* The whole 44px band is the touch target, not just the thin track. */
+    height: 2.75rem;
     background: transparent;
     cursor: pointer;
   }
@@ -182,9 +183,9 @@
   }
   .rpe-range::-webkit-slider-thumb {
     appearance: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-top: calc((6px - 1.5rem) / 2);
+    width: 2rem;
+    height: 2rem;
+    margin-top: calc((6px - 2rem) / 2);
     border-radius: 9999px;
     border: 3px solid var(--rpe-color);
     background: white;
@@ -193,8 +194,8 @@
     transition: border-color var(--duration-base) ease-out;
   }
   .rpe-range::-moz-range-thumb {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2rem;
+    height: 2rem;
     box-sizing: border-box;
     border-radius: 9999px;
     border: 3px solid var(--rpe-color);
@@ -202,6 +203,10 @@
     box-shadow: var(--shadow-thumb);
     /* The ring warms or cools with the effort instead of jumping a colour. */
     transition: border-color var(--duration-base) ease-out;
+  }
+  /* Unrated: the track greys out so a default can't pass for an answer. */
+  .rpe-range-unrated {
+    --rpe-track: var(--color-slate-200);
   }
   .rpe-range:focus-visible::-webkit-slider-thumb {
     outline: 2px solid var(--color-indigo-600);
@@ -224,5 +229,7 @@
   }
   html {
     overscroll-behavior: none;
+    /* The page and the app column share one ground, so wide screens read as one surface. */
+    background: white;
   }
 }

@@ -8,6 +8,10 @@ describe("advanceTimer", () => {
   it("never goes below zero", () => {
     expect(advanceTimer(1, -5)).toBe(0);
   });
+
+  it("runs past zero when the floor allows it", () => {
+    expect(advanceTimer(1, -5, -Infinity)).toBe(-4);
+  });
 });
 
 describe("elapsedTicks", () => {

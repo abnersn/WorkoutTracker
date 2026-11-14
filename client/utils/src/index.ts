@@ -6,3 +6,4 @@ export * from "./lib/timeFormat";
 export * from "./lib/workoutPersistence";
 export * from "./lib/format";
 export * from "./lib/navigation";
+export * from "./lib/activeSession";

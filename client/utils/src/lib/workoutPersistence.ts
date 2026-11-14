@@ -36,8 +36,9 @@ export class Database {
 
   async init(): Promise<void> {
     if (!("indexedDB" in window)) {
-      alert("This app needs indexedDb support to run.");
-      return;
+      throw new Error(
+        "This browser can't store workouts. Turn off private browsing, or try another browser.",
+      );
     }
 
     this.db = await openDB<WorkoutTrackerDB>("workoutTracker", 1, {
@@ -119,8 +120,12 @@ export class Database {
     await tx.done;
   }
 
-  saveLogEntry(logEntry: Workout): Promise<void> {
-    return this.runInLogs((store) => store.add(logEntry));
+  /** Adds a finished workout to the history and returns its key. */
+  async saveLogEntry(logEntry: Workout): Promise<number> {
+    const tx = this.database.transaction("logs", "readwrite");
+    const key = await tx.objectStore("logs").add(logEntry);
+    await tx.done;
+    return key;
   }
 
   eraseLogEntry(key: number): Promise<void> {
@@ -193,6 +198,44 @@ export class Database {
     }
     workout.exercises = exercises;
     await this.runInWorkouts((store) => store.put(workout));
+  }
+
+  /**
+   * Rewrites every stored weight by `factor` (kg↔lb), rounded to 0.1, so a unit
+   * switch converts 80 kg to 176.4 lb instead of relabelling it "80 lb".
+   */
+  async convertWeights(factor: number): Promise<void> {
+    const convert = (workout: Workout): Workout => ({
+      ...workout,
+      exercises: workout.exercises.map((exercise) => ({
+        ...exercise,
+        sets: exercise.sets.map((set) =>
+          set.defaultWeight === undefined
+            ? set
+            : {
+                ...set,
+                defaultWeight: Math.round(set.defaultWeight * factor * 10) / 10,
+              },
+        ),
+      })),
+    });
+    const tx = this.database.transaction(["workouts", "logs"], "readwrite");
+    let workouts = await tx.objectStore("workouts").openCursor();
+    while (workouts) {
+      await workouts.update(convert(workouts.value));
+      workouts = await workouts.continue();
+    }
+    let logs = await tx.objectStore("logs").openCursor();
+    while (logs) {
+      await logs.update(convert(logs.value));
+      logs = await logs.continue();
+    }
+    await tx.done;
+  }
+
+  /** Replaces a history entry, e.g. to add an effort rating after finishing. */
+  async updateLogEntry(key: number, log: Workout): Promise<void> {
+    await this.runInLogs((store) => store.put(log, key));
   }
 
   loadWorkoutLogById(

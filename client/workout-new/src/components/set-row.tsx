@@ -1,5 +1,5 @@
 import { SetStage } from "@workout-tracker/types";
-import { Check, Play, Timer } from "lucide-react";
+import { Check, Lock, Play, Timer } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { SetField } from "./set-field";
 import { Stepper } from "./stepper";
@@ -16,6 +16,8 @@ import {
 export type SetFieldName = "reps" | "weight" | "rest";
 
 export interface SetRowProps {
+  /** 1-based position in its exercise, for the accessible name. */
+  number?: number;
   stage: SetStage;
   reps: number;
   weight?: number;
@@ -30,6 +32,10 @@ export interface SetRowProps {
   weightStep?: number;
   /** Seconds the rest stepper changes a value by. */
   restStep?: number;
+  /** Shown as the weight column's label. */
+  weightUnit?: "kg" | "lb";
+  /** While resting: what to load next, e.g. "Set 2 · 5 × 80 kg". */
+  nextUp?: string;
   /** Formats seconds for the rest field, e.g. 90 -> 1:30. */
   formatTime?: (seconds: number) => string;
   onChange?: (field: SetFieldName, value: number) => void;
@@ -46,7 +52,7 @@ function defaultFormatTime(seconds: number): string {
 
 const stageLabel: Record<SetStage, { text: string; icon: ReactNode } | null> = {
   [SetStage.Idle]: null,
-  [SetStage.Active]: { text: "In progress", icon: <Play size={14} /> },
+  [SetStage.Active]: { text: "Lifting", icon: <Play size={14} /> },
   [SetStage.Resting]: { text: "Resting", icon: <Timer size={14} /> },
   [SetStage.Complete]: { text: "Done", icon: <Check size={14} /> },
 };
@@ -107,6 +113,7 @@ function useStageTransition(stage: SetStage) {
 
 /** One set: reps, weight and rest. */
 export function SetRow({
+  number,
   stage,
   reps,
   weight = 0,
@@ -115,15 +122,18 @@ export function SetRow({
   isOnly = false,
   readOnly = false,
   repsStep = 1,
-  weightStep = 5,
+  weightStep = 2.5,
   restStep = 15,
+  weightUnit = "kg",
+  nextUp,
   formatTime = defaultFormatTime,
   onChange,
   onActivate,
 }: SetRowProps) {
   const baseTone: Tone = stage === SetStage.Complete ? "success" : "neutral";
   const timerTone = (value: number, runningStage: SetStage): Tone =>
-    stage === runningStage ? (value < 0 ? "danger" : "highlight") : baseTone;
+    // Running over is normal between heavy sets: blue "go" rather than red alarm.
+    stage === runningStage ? (value < 0 ? "primary" : "highlight") : baseTone;
 
   // While resting, the countdown is the number to read; the other fields step back.
   const leadsWithRest = stage === SetStage.Resting;
@@ -134,7 +144,10 @@ export function SetRow({
     : stageLabel[stage];
   const labelRef = useStageTransition(stage);
 
+  // While resting only the countdown takes input; the set just done is logged.
   const showSteppers = isActive && !readOnly;
+  const stepperFor = (key: SetFieldName) =>
+    showSteppers && (!leadsWithRest || key === "rest");
   // Sets that are neither done nor underway recede.
   const quiet = stage === SetStage.Idle && !isActive;
 
@@ -152,6 +165,9 @@ export function SetRow({
       abs?: boolean;
       /** A clock that is counting: it changes every second, so it does not tick. */
       running?: boolean;
+      decimal?: boolean;
+      /** What the steppers say they change, e.g. "weight in kilograms". */
+      spoken?: string;
     },
   ) => {
     const current = options.abs ? Math.abs(value) : value;
@@ -165,20 +181,31 @@ export function SetRow({
           format={options.time ? formatTime : undefined}
           tone={options.tone}
           prominent={options.prominent}
-          strong={isActive}
+          // The set just done steps back while its rest counts down.
+          strong={isActive && !leadsWithRest}
           tick={!options.running}
+          decimal={options.decimal}
           readOnly={readOnly}
           quiet={quiet}
           onChange={(v) => onChange?.(key, v)}
         />
-        {showSteppers && (
+        {stepperFor(key) && (
           <Stepper
-            label={labelText.toLowerCase()}
+            label={options.spoken ?? labelText.toLowerCase()}
             step={step}
             unit={options.unit}
-            disableDecrement={current <= 0}
-            onDecrement={() => onChange?.(key, Math.max(0, current - step))}
-            onIncrement={() => onChange?.(key, current + step)}
+            // A running countdown moves from where it is now, overrun included
+            // (+15s at "over by 0:05" leaves 0:10), never from its absolute value.
+            disableDecrement={(options.running ? value : current) <= 0}
+            onDecrement={() =>
+              onChange?.(
+                key,
+                Math.max(0, (options.running ? value : current) - step),
+              )
+            }
+            onIncrement={() =>
+              onChange?.(key, (options.running ? value : current) + step)
+            }
           />
         )}
       </div>
@@ -195,8 +222,13 @@ export function SetRow({
   });
   const columns = [
     unit("reps", "Reps", reps, repsStep, { tone: baseTone }),
-    unit("weight", "Weight", weight, weightStep, { tone: baseTone }),
-    ...(!leadsWithRest ? [restUnit] : []),
+    // "Kg"/"Lb" fits a phone-width column where "Weight (kg)" would truncate.
+    unit("weight", weightUnit === "kg" ? "Kg" : "Lb", weight, weightStep, {
+      tone: baseTone,
+      decimal: true,
+      spoken: weightUnit === "kg" ? "weight in kilograms" : "weight in pounds",
+    }),
+    restUnit,
   ];
   const gridStyle = {
     gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
@@ -218,12 +250,12 @@ export function SetRow({
         onClick={onActivate}
         onFocus={readOnly ? undefined : onActivate}
         role="group"
-        aria-label={`Set, ${label ? label.text.toLowerCase() : "not started"}${isActive ? ", current" : ""}`}
+        aria-label={`Set${number ? ` ${number}` : ""}, ${label ? label.text.toLowerCase() : "not started"}${isActive ? ", current" : ""}`}
         aria-current={isActive || undefined}
         data-stage={stage}
         className="flex flex-col gap-3"
       >
-        {label && (
+        {label && !readOnly && (
           <p
             ref={labelRef}
             className={cn(
@@ -231,7 +263,7 @@ export function SetRow({
                 stage === SetStage.Complete
                   ? "success"
                   : restOverrun
-                    ? "danger"
+                    ? "primary"
                     : "neutral"
               ],
               "flex items-center gap-1.5 text-xs font-medium tracking-wider text-tone-800 uppercase",
@@ -241,10 +273,28 @@ export function SetRow({
             {label.text}
           </p>
         )}
+        {leadsWithRest && (
+          // The set just lifted is on the record: plain text with a lock, no
+          // input wells, so it reads as logged rather than as a field to fix.
+          <p className="flex items-center gap-2 text-slate-600">
+            <Lock size={16} aria-hidden="true" className="shrink-0" />
+            <span className="text-sm">Logged</span>
+            <span className="tabular text-xl font-semibold text-slate-700">
+              {reps} × {weight} {weightUnit}
+            </span>
+          </p>
+        )}
         {leadsWithRest && restUnit}
-        <div className="grid gap-2" style={gridStyle}>
-          {columns}
-        </div>
+        {leadsWithRest && nextUp && (
+          <p className="tabular text-lg font-semibold text-indigo-900">
+            {nextUp}
+          </p>
+        )}
+        {!leadsWithRest && (
+          <div className="grid gap-2" style={gridStyle}>
+            {columns}
+          </div>
+        )}
       </div>
     </div>
   );

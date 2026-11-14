@@ -24,7 +24,9 @@ export default defineConfig((_env, argv) => {
     entry: { main: "./src/index.ts" },
     output: {
       path: path.resolve(__dirname, "dist"),
-      publicPath: "auto",
+      // Absolute, so the entry script resolves on nested routes like /workouts/new
+      // (historyApiFallback serves the same index.html at every path).
+      publicPath: "/",
       uniqueName: NAME,
       clean: true,
     },

@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "./tone";
 
-/** The page column: a white sheet, centred, as tall as the screen. */
+/** The page column, centred and as tall as the screen, on the same white as the page: one continuous surface. */
 export function Container({
   className,
   ...props
@@ -9,7 +9,7 @@ export function Container({
   return (
     <div
       className={cn(
-        "m-auto flex min-h-dvh max-w-5xl flex-col border border-slate-200 bg-white shadow-md",
+        "mx-auto flex min-h-dvh max-w-5xl flex-col bg-white",
         className,
       )}
       {...props}

@@ -1,8 +1,9 @@
 import { timeFormat } from "./timeFormat";
 
 describe("timeFormat", () => {
-  it("formats seconds", () => {
-    expect(timeFormat(39)).toBe("39");
+  it("formats seconds as a clock", () => {
+    expect(timeFormat(39)).toBe("0:39");
+    expect(timeFormat(0)).toBe("0:00");
   });
 
   it("formats minutes", () => {

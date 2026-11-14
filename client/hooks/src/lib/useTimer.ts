@@ -9,9 +9,9 @@ export interface UseTimerResult {
   set: Dispatch<SetStateAction<number>>;
 }
 
-/** Applies a delta to the timer, never letting it drop below zero. */
-export function advanceTimer(value: number, delta: number): number {
-  return Math.max(value + delta, 0);
+/** Applies a delta to the timer, never letting it drop below `floor` (zero by default). */
+export function advanceTimer(value: number, delta: number, floor = 0): number {
+  return Math.max(value + delta, floor);
 }
 
 /** Whole ticks of `increment` seconds that fit in the time between `startedAt` and `now` (ms). */
@@ -57,11 +57,13 @@ function clearStartedAt(key: string): void {
 /**
  * A ticking timer that moves by `increment` seconds every second while running.
  * It pauses while the page is hidden and, on return, catches up on the time that passed.
+ * A countdown stops at `floor`; pass `-Infinity` to let it run past zero (an overrun rest).
  */
 export function useTimer(
   timerId = "timer",
   initialTimer = 0,
   increment = 1,
+  floor = 0,
 ): UseTimerResult {
   const [value, setValue] = useState(initialTimer);
   const [isRunning, setIsRunning] = useState(false);
@@ -75,10 +77,10 @@ export function useTimer(
       return;
     }
     const interval = setInterval(() => {
-      setValue((t) => advanceTimer(t, increment));
+      setValue((t) => advanceTimer(t, increment, floor));
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning, isBackground, increment]);
+  }, [isRunning, isBackground, increment, floor]);
 
   useEffect(() => {
     const onVisibilityChange = () => setIsBackground(isPageHidden());
@@ -96,7 +98,7 @@ export function useTimer(
     clearStartedAt(timerId);
     if (isRunning && startedAt) {
       setValue((t) =>
-        advanceTimer(t, elapsedTicks(startedAt, Date.now(), increment)),
+        advanceTimer(t, elapsedTicks(startedAt, Date.now(), increment), floor),
       );
     }
     // Only react to visibility changes; the other values are read as they were at that moment.

@@ -4,7 +4,7 @@ import {
   type Workout,
   type WorkoutAction,
 } from "@workout-tracker/types";
-import { genId, hasIncompleteSets } from "@workout-tracker/utils";
+import { genId } from "@workout-tracker/utils";
 
 function findExercise(
   workout: Workout,
@@ -23,11 +23,53 @@ function getNextStageFor(stage: SetStage): SetStage {
   return stages[(index + 1) % stages.length];
 }
 
-function addNewSet(workout: Workout, exerciseId: string): Workout {
+/** The set the lifter is lifting or resting after, if any. */
+function setInProgress(workout: Workout) {
+  for (const exercise of workout.exercises) {
+    const set = exercise.sets.find(
+      (s) => s.stage === SetStage.Active || s.stage === SetStage.Resting,
+    );
+    if (set) return set;
+  }
+  return undefined;
+}
+
+/**
+ * The next set still to do, searching forward from the active exercise and
+ * wrapping around, so the workout carries on without an extra tap.
+ */
+function nextIncompleteSet(
+  workout: Workout,
+): { exerciseId: string; setId: string } | null {
+  const start = Math.max(
+    0,
+    workout.exercises.findIndex((ex) => ex.id === workout.activeExerciseId),
+  );
+  const count = workout.exercises.length;
+  for (let i = 0; i < count; i++) {
+    const exercise = workout.exercises[(start + i) % count];
+    const set = exercise.sets.find((s) => s.stage !== SetStage.Complete);
+    if (set) return { exerciseId: exercise.id, setId: set.id };
+  }
+  return null;
+}
+
+function addNewSet(
+  workout: Workout,
+  exerciseId: string,
+  values: Extract<WorkoutAction, { type: "ADD_SET" }>["payload"]["values"] = {},
+): Workout {
   const exercise = findExercise(workout, exerciseId);
   const hash = genId();
-  exercise.sets = [...exercise.sets, { id: hash, stage: SetStage.Idle }];
-  workout.activeSetId = hash;
+  exercise.sets = [
+    ...exercise.sets,
+    { id: hash, stage: SetStage.Idle, ...values },
+  ];
+  // Never pull the main button away from a set that is underway.
+  if (!setInProgress(workout)) {
+    workout.activeSetId = hash;
+    workout.activeExerciseId = exerciseId;
+  }
   return workout;
 }
 
@@ -43,6 +85,10 @@ function removeSet(workout: Workout, exerciseId: string): Workout {
 
 function removeExercise(workout: Workout, exerciseId: string): Workout {
   workout.exercises = workout.exercises.filter((ex) => ex.id !== exerciseId);
+  if (workout.activeExerciseId === exerciseId) {
+    workout.activeExerciseId = null;
+    workout.activeSetId = null;
+  }
   return workout;
 }
 
@@ -51,12 +97,18 @@ function updateActiveSet(
   setId: string,
   exerciseId: string,
 ): Workout {
+  // While a set is being lifted or rested, touching another set (to read it or
+  // correct a number) must not retarget the main button.
+  const inProgress = setInProgress(workout);
+  if (inProgress && inProgress.id !== setId) {
+    return workout;
+  }
   workout.activeSetId = setId;
   workout.activeExerciseId = exerciseId;
   return workout;
 }
 
-function updateSetStage(workout: Workout): Workout {
+function updateSetStage(workout: Workout, now?: number): Workout {
   const exercise = findExercise(workout, workout.activeExerciseId);
   const setIndex = exercise.sets.findIndex((s) => s.id === workout.activeSetId);
   if (setIndex === -1) {
@@ -65,16 +117,20 @@ function updateSetStage(workout: Workout): Workout {
 
   const currentStage = exercise.sets[setIndex].stage;
   const nextStage = getNextStageFor(currentStage);
-
-  if (nextStage === SetStage.Complete) {
-    const nextIndex = (setIndex + 1) % exercise.sets.length;
-    workout.activeSetId = nextIndex > 0 ? exercise.sets[nextIndex].id : null;
+  const set = exercise.sets[setIndex];
+  set.stage = nextStage;
+  if (nextStage === SetStage.Resting && now !== undefined) {
+    set.restStartedAt = now;
+  } else {
+    delete set.restStartedAt;
   }
 
-  exercise.sets[setIndex].stage = nextStage;
-
-  if (!hasIncompleteSets(exercise)) {
-    workout.activeSetId = null;
+  // A finished set hands the button to the next set still to do, moving on to
+  // the next exercise when this one is done; none left means the workout is.
+  if (nextStage === SetStage.Complete) {
+    const next = nextIncompleteSet(workout);
+    workout.activeSetId = next?.setId ?? null;
+    workout.activeExerciseId = next?.exerciseId ?? workout.activeExerciseId;
   }
 
   return workout;
@@ -156,7 +212,11 @@ export function reducer(state: Workout, action: WorkoutAction): Workout {
     case "SET_WORKOUT":
       return action.payload;
     case "ADD_SET":
-      return addNewSet(workout, action.payload.exerciseId);
+      return addNewSet(
+        workout,
+        action.payload.exerciseId,
+        action.payload.values,
+      );
     case "REMOVE_SET":
       return removeSet(workout, action.payload.exerciseId);
     case "UPDATE_ACTIVE_SET":
@@ -166,7 +226,7 @@ export function reducer(state: Workout, action: WorkoutAction): Workout {
         action.payload.exerciseId,
       );
     case "UPDATE_SET_STAGE":
-      return updateSetStage(workout);
+      return updateSetStage(workout, action.payload?.now);
     case "COMPLETE_EXERCISE":
       return updateActiveExercise(workout);
     case "ADD_EXERCISE":

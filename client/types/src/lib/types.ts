@@ -14,6 +14,8 @@ export interface WorkoutSet {
   defaultReps?: number;
   defaultWeight?: number;
   defaultRestTime?: number;
+  /** Epoch ms the set started resting, so a reloaded page resumes the countdown. */
+  restStartedAt?: number;
 }
 
 export interface Exercise {
@@ -43,13 +45,26 @@ export type StoreName = "workouts" | "logs";
 
 export type WorkoutAction =
   | { type: "SET_WORKOUT"; payload: Workout }
-  | { type: "ADD_SET"; payload: { exerciseId: string } }
+  | {
+      type: "ADD_SET";
+      payload: {
+        exerciseId: string;
+        /** Starting values, usually copied from the set before it. */
+        values?: Partial<
+          Pick<WorkoutSet, "defaultReps" | "defaultWeight" | "defaultRestTime">
+        >;
+      };
+    }
   | { type: "REMOVE_SET"; payload: { exerciseId: string } }
   | {
       type: "UPDATE_ACTIVE_SET";
       payload: { setId: string; exerciseId: string };
     }
-  | { type: "UPDATE_SET_STAGE" }
+  | {
+      type: "UPDATE_SET_STAGE";
+      /** `now` (epoch ms) stamps when a rest begins. */
+      payload?: { now?: number };
+    }
   | { type: "COMPLETE_EXERCISE" }
   | { type: "ADD_EXERCISE"; payload: { name: string } }
   | { type: "COMPLETE_WORKOUT" }
@@ -61,7 +76,13 @@ export type WorkoutAction =
         exerciseId: string;
         setId: string;
         changes: Partial<
-          Pick<WorkoutSet, "defaultReps" | "defaultWeight" | "defaultRestTime">
+          Pick<
+            WorkoutSet,
+            | "defaultReps"
+            | "defaultWeight"
+            | "defaultRestTime"
+            | "restStartedAt"
+          >
         >;
       };
     }

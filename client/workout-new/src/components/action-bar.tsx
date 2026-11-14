@@ -1,18 +1,30 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@workout-tracker/ui";
 
-/** Pinned to the bottom of the Container; holds the clock and the stage buttons. */
+export interface ActionBarProps extends HTMLAttributes<HTMLDivElement> {
+  /** A short-lived line above the buttons, such as an undo offer. */
+  notice?: ReactNode;
+}
+
+/** Pinned to the bottom of the Container, in thumb reach; holds the clock and the main actions. */
 export function ActionBar({
   className,
+  notice,
+  children,
   ...props
-}: HTMLAttributes<HTMLDivElement>) {
+}: ActionBarProps) {
   return (
-    <div
-      className={cn(
-        "sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-indigo-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]",
-        className,
-      )}
-      {...props}
-    />
+    <div className="sticky bottom-0 mt-auto border-t border-indigo-200 bg-white">
+      {notice}
+      <div
+        className={cn(
+          "flex items-center justify-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    </div>
   );
 }

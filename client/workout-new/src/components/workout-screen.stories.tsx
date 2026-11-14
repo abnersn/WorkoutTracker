@@ -41,8 +41,8 @@ const meta = {
   parameters: { layout: "fullscreen" },
   args: {
     workout: workout(),
-    onFinish: () => undefined,
-    onSaveTemplate: () => undefined,
+    onFinish: async () => undefined,
+    onSaveTemplate: async () => undefined,
   },
   decorators: [
     (Story) => (

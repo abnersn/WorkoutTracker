@@ -4,6 +4,7 @@ declare module "workoutNew/Workout" {
     id: string;
     mode?: "new" | "view";
     fromLogs?: boolean;
+    finished?: boolean;
     navigate?: (to: string) => void;
   }
   export function Workout(props: WorkoutProps): JSX.Element | null;

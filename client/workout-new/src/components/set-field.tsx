@@ -31,6 +31,21 @@ export interface SetFieldProps {
    * less). Turn it off for a running clock, which changes every second.
    */
   tick?: boolean;
+  /** Accepts a decimal part (2.5 kg plates); otherwise whole numbers only. */
+  decimal?: boolean;
+}
+
+/** What was typed, kept as text while editing so "62." survives until the "5". */
+export function parseFieldValue(text: string, decimal: boolean): number {
+  if (!decimal) {
+    const digits = text.replace(/\D/g, "");
+    return digits === "" ? 0 : Number(digits);
+  }
+  // A comma is the decimal mark on many phone keypads.
+  const cleaned = text.replace(",", ".").replace(/[^\d.]/g, "");
+  const [whole, ...rest] = cleaned.split(".");
+  const value = Number(`${whole || "0"}.${rest.join("") || "0"}`);
+  return Number.isFinite(value) ? value : 0;
 }
 
 /**
@@ -49,9 +64,11 @@ export function SetField({
   strong = false,
   quiet = false,
   tick = true,
+  decimal = false,
 }: SetFieldProps) {
   const id = useId();
   const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const previous = useRef(value);
 
@@ -106,7 +123,10 @@ export function SetField({
               : "bg-tone-50",
           prominent
             ? "min-h-16 text-4xl font-semibold"
-            : cn("min-h-11 text-lg", strong && "font-semibold"),
+            : // The set being lifted reads from arm's length; the rest stay compact.
+              strong
+              ? "min-h-12 text-2xl font-semibold"
+              : "min-h-11 text-lg",
           "focus-within:border-tone-400 focus-within:ring-2 focus-within:ring-tone-200",
         )}
       >
@@ -114,12 +134,16 @@ export function SetField({
           ref={inputRef}
           id={id}
           type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          inputMode={decimal ? "decimal" : "numeric"}
+          pattern={decimal ? "[0-9]*[.,]?[0-9]*" : "[0-9]*"}
+          enterKeyHint="done"
           readOnly={readOnly}
-          value={isEditing ? String(value) : format(value)}
+          // Read-only values are text to read, not stops on the way to the button.
+          tabIndex={readOnly ? -1 : undefined}
+          value={isEditing ? draft : format(value)}
           onFocus={(ev) => {
             if (readOnly) return;
+            setDraft(String(value));
             setIsEditing(true);
             onEditingChange?.(true);
             ev.currentTarget.select();
@@ -130,8 +154,11 @@ export function SetField({
             onEditingChange?.(false);
           }}
           onChange={(ev) => {
-            const digits = ev.target.value.replace(/\D/g, "");
-            onChange?.(digits === "" ? 0 : Number(digits));
+            setDraft(ev.target.value);
+            onChange?.(parseFieldValue(ev.target.value, decimal));
+          }}
+          onKeyDown={(ev) => {
+            if (ev.key === "Enter") ev.currentTarget.blur();
           }}
           className={cn(
             "block w-full min-w-0 self-stretch bg-transparent outline-none",

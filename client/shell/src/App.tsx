@@ -1,4 +1,4 @@
-import { Component, Suspense, type ReactNode } from "react";
+import { Component, Suspense, useEffect, type ReactNode } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -8,7 +8,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import { Container } from "@workout-tracker/ui";
+import { Button, Container } from "@workout-tracker/ui";
 import { lazyProvider } from "./mf";
 import "./styles.css";
 
@@ -25,34 +25,52 @@ class ProviderBoundary extends Component<
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
+  componentDidCatch(error: Error) {
+    // The technical detail is for developers; people get a way forward.
+    console.error(`Remote "${this.props.name}" failed to load`, error);
+  }
   render() {
     if (this.state.error) {
       return (
-        <div role="alert">
-          <p>
-            Provider &quot;{this.props.name}&quot; unavailable:{" "}
-            {this.state.error.message}
+        <div role="alert" className="flex flex-col items-start gap-3 px-4 py-6">
+          <p className="text-base text-indigo-800">
+            {SECTION_LABELS[this.props.name] ?? "This section"} couldn&apos;t
+            load. Check your connection, then try again.
           </p>
+          <Button onClick={() => window.location.reload()}>Try again</Button>
         </div>
       );
     }
     return (
-      <Suspense fallback={<p>Loading {this.props.name}...</p>}>
+      <Suspense
+        fallback={
+          <p role="status" className="px-4 py-6 text-base text-indigo-700">
+            Loading…
+          </p>
+        }
+      >
         {this.props.children}
       </Suspense>
     );
   }
 }
 
+// What each remote is, in words a lifter would use.
+const SECTION_LABELS: Record<string, string> = {
+  workoutList: "Your workouts",
+  workoutHistory: "Your history",
+  workoutNew: "This workout",
+  workoutView: "This session",
+};
+
 // Every remote receives `navigate`, so its links move within the SPA instead of reloading.
 interface NavigateProps {
   navigate: (to: string) => void;
 }
 
-const ProviderWorkoutView = lazyProvider<{ id: string } & NavigateProps>(
-  "workoutView",
-  "App",
-);
+const ProviderWorkoutView = lazyProvider<
+  { id: string; finished?: boolean } & NavigateProps
+>("workoutView", "App");
 const ProviderWorkoutHistory = lazyProvider<NavigateProps>(
   "workoutHistory",
   "App",
@@ -65,6 +83,9 @@ const ProviderWorkoutNew = lazyProvider<
 // "/": the saved workouts above the history.
 function HomeRoute() {
   const navigate = useNavigate();
+  useEffect(() => {
+    document.title = "Workout Tracker";
+  }, []);
   return (
     <>
       <ProviderBoundary name="workoutList">
@@ -94,12 +115,18 @@ function WorkoutNewRoute() {
 
 // workouts/:id -> view mode. The id comes from the path and is handed to the
 // workoutView remote.
+// workouts/:id?finished=true -> the session that was just finished.
 function WorkoutViewRoute() {
   const { id = "" } = useParams();
+  const [params] = useSearchParams();
   const navigate = useNavigate();
   return (
     <ProviderBoundary name="workoutView">
-      <ProviderWorkoutView id={id} navigate={navigate} />
+      <ProviderWorkoutView
+        id={id}
+        finished={params.get("finished") === "true"}
+        navigate={navigate}
+      />
     </ProviderBoundary>
   );
 }
@@ -108,12 +135,14 @@ export function App() {
   return (
     <BrowserRouter>
       <Container>
-        <Routes>
-          <Route index element={<HomeRoute />} />
-          <Route path="workouts/new" element={<WorkoutNewRoute />} />
-          <Route path="workouts/:id" element={<WorkoutViewRoute />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <main className="flex flex-1 flex-col">
+          <Routes>
+            <Route index element={<HomeRoute />} />
+            <Route path="workouts/new" element={<WorkoutNewRoute />} />
+            <Route path="workouts/:id" element={<WorkoutViewRoute />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
       </Container>
     </BrowserRouter>
   );

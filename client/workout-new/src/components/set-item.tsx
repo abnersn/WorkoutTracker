@@ -4,13 +4,22 @@ import {
   type WorkoutAction,
   type WorkoutSet,
 } from "@workout-tracker/types";
-import { useNotification, useTimer } from "@workout-tracker/hooks";
-import { timeFormat } from "@workout-tracker/utils";
+import {
+  useNotification,
+  useTimer,
+  useWeightUnit,
+  weightStepFor,
+} from "@workout-tracker/hooks";
+import { secondsSince, timeFormat } from "@workout-tracker/utils";
 import { SET_DEFAULTS } from "../lib/build-log";
 import { SetRow, type SetFieldName } from "./set-row";
 
 export interface SetItemProps {
   exerciseId: string;
+  /** 1-based position in its exercise. */
+  number: number;
+  /** The next set still to do in this exercise, shown while this one rests. */
+  next?: { number: number; set: WorkoutSet };
   set: WorkoutSet;
   isActive: boolean;
   isOnly: boolean;
@@ -30,6 +39,8 @@ const FIELD_TO_KEY = {
  */
 export function SetItem({
   exerciseId,
+  number,
+  next,
   set,
   isActive,
   isOnly,
@@ -37,14 +48,24 @@ export function SetItem({
   dispatch,
 }: SetItemProps) {
   const { notify } = useNotification();
+  const [weightUnit] = useWeightUnit();
   const { stage } = set;
 
   const restValue = set.defaultRestTime ?? SET_DEFAULTS.defaultRestTime;
   const reps = set.defaultReps ?? SET_DEFAULTS.defaultReps;
   const weight = set.defaultWeight ?? SET_DEFAULTS.defaultWeight;
 
-  const restTimer = useTimer("restTimer", restValue, -1);
-  const notified = useRef(true);
+  // A rest picked back up after a reload continues from where the clock is now.
+  const restTimer = useTimer(
+    `restTimer:${set.id}`,
+    stage === SetStage.Resting && set.restStartedAt
+      ? restValue - secondsSince(set.restStartedAt)
+      : restValue,
+    -1,
+    -Infinity,
+  );
+  // A rest resumed after a reload still owes its alert if it hasn't run out.
+  const notified = useRef(!(stage === SetStage.Resting && restTimer.value > 0));
   const previousStage = useRef(stage);
 
   useEffect(() => {
@@ -70,11 +91,14 @@ export function SetItem({
   useEffect(() => {
     if (
       stage === SetStage.Resting &&
-      restTimer.value === 0 &&
+      // <= 0: a tab that slept through zero catches up past it.
+      restTimer.value <= 0 &&
       !notified.current
     ) {
       notified.current = true;
-      notify("Rest time's up!");
+      notify("Rest's over. Time for your next set.");
+      // A buzz reaches a phone on the bench face-down, where a banner can't.
+      navigator.vibrate?.([200, 100, 200]);
     }
   }, [stage, restTimer.value, notify]);
 
@@ -85,6 +109,26 @@ export function SetItem({
     });
 
   const onChange = (field: SetFieldName, value: number) => {
+    if (field === "rest" && stage === SetStage.Resting) {
+      // Mid-rest, ±15s changes this rest only. The planned rest stays as it was;
+      // the start stamp shifts so a reload still lands on the adjusted countdown.
+      restTimer.set(value);
+      if (set.restStartedAt !== undefined) {
+        dispatch({
+          type: "UPDATE_SET",
+          payload: {
+            exerciseId,
+            setId: set.id,
+            changes: {
+              restStartedAt:
+                set.restStartedAt + (value - restTimer.value) * 1000,
+            },
+          },
+        });
+      }
+      if (value > 0) notified.current = false;
+      return;
+    }
     if (field === "rest") restTimer.set(value);
     dispatch({
       type: "UPDATE_SET",
@@ -98,13 +142,22 @@ export function SetItem({
 
   return (
     <SetRow
+      number={number}
+      nextUp={
+        next
+          ? `Next: set ${next.number} · ${next.set.defaultReps ?? SET_DEFAULTS.defaultReps} × ${next.set.defaultWeight ?? SET_DEFAULTS.defaultWeight} ${weightUnit}`
+          : "Last set. Rate the effort below."
+      }
       stage={stage}
       reps={reps}
       weight={weight}
-      rest={restTimer.value}
+      // Only a resting set shows the live countdown; otherwise the planned rest.
+      rest={stage === SetStage.Resting ? restTimer.value : restValue}
       isActive={isActive}
       isOnly={isOnly}
       readOnly={readOnly}
+      weightUnit={weightUnit}
+      weightStep={weightStepFor(weightUnit)}
       formatTime={timeFormat}
       onChange={onChange}
       onActivate={activate}
