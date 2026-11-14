@@ -1,5 +1,4 @@
 import type { Workout } from "@workout-tracker/types";
-import { workoutWeightsToKg, type WeightUnit } from "./weight";
 
 /**
  * The workout being run, kept in localStorage after every change so a refresh,
@@ -73,15 +72,4 @@ export function sessionHref(session: ActiveSession): string {
   const params = new URLSearchParams({ id: session.sourceId });
   if (session.fromLogs) params.set("fromLogs", "true");
   return `/workouts/new?${params}`;
-}
-
-/**
- * Brings a running workout saved before weights were stored in kg over to kg.
- * Called once, after the database upgrade that does the same for saved workouts.
- */
-export function convertActiveSessionToKg(unit: WeightUnit): void {
-  const session = loadActiveSession();
-  if (!session) return;
-  session.workout = workoutWeightsToKg(session.workout, unit);
-  saveActiveSession(session);
 }

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import {
   SetStage,
+  type LogEntry,
   type Workout,
   type WorkoutAction,
 } from "@workout-tracker/types";
@@ -52,7 +53,7 @@ export interface WorkoutScreenProps {
   /** The person threw this run away. */
   onDiscard?: () => void;
   /** Saves the history entry; resolves to its key so the summary can open. */
-  onFinish?: (log: Workout) => Promise<number | void>;
+  onFinish?: (log: LogEntry) => Promise<number | void>;
   onSaveTemplate?: (exercises: Workout["exercises"]) => Promise<void>;
   /** View mode, opened straight after finishing: celebrate, then "Done". */
   finished?: boolean;

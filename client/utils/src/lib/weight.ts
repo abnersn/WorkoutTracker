@@ -1,5 +1,3 @@
-import type { Workout } from "@workout-tracker/types";
-
 /**
  * Weights are stored in kilograms, always. The lifter's unit only changes how a
  * weight is shown and typed, never what is saved.
@@ -33,29 +31,4 @@ export function toDisplayWeight(kg: number, unit: WeightUnit): number {
  */
 export function fromDisplayWeight(value: number, unit: WeightUnit): number {
   return unit === "kg" ? round(value, 3) : round(value / LB_PER_KG, 3);
-}
-
-/**
- * A copy of `workout` whose weights were recorded in `unit`, converted to kg.
- * Used once, to bring data saved before weights were stored in kg up to date.
- */
-export function workoutWeightsToKg(
-  workout: Workout,
-  unit: WeightUnit,
-): Workout {
-  if (unit === "kg") return workout;
-  return {
-    ...workout,
-    exercises: workout.exercises.map((exercise) => ({
-      ...exercise,
-      sets: exercise.sets.map((set) =>
-        set.defaultWeight === undefined
-          ? set
-          : {
-              ...set,
-              defaultWeight: fromDisplayWeight(set.defaultWeight, unit),
-            },
-      ),
-    })),
-  };
 }

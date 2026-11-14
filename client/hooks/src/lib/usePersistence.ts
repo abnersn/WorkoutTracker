@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Database } from "@workout-tracker/utils";
-import { readUnit } from "./useWeightUnit";
 
 export interface PersistenceState {
   /** `null` until the database has finished opening, or when it failed to. */
@@ -24,9 +23,8 @@ export function usePersistenceState(): PersistenceState {
   useEffect(() => {
     let cancelled = false;
     const database = new Database();
-    // The unit weights were saved in before version 2 (see Database.init).
     database
-      .init(readUnit())
+      .init()
       .then(() => {
         if (!cancelled) setState({ db: database, error: null });
       })

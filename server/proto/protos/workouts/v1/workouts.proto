@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package workouts.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Mirrors SetStage in client/types.
+enum SetStage {
+  SET_STAGE_UNSPECIFIED = 0;
+  SET_STAGE_IDLE = 1;
+  SET_STAGE_ACTIVE = 2;
+  SET_STAGE_RESTING = 3;
+  SET_STAGE_COMPLETE = 4;
+}
+
+// Mirrors WorkoutSet in client/types.
+message WorkoutSet {
+  string id = 1;
+  SetStage stage = 2;
+  optional int32 default_reps = 3;
+  optional double default_weight = 4; // always kg
+  optional int32 default_rest_time = 5; // seconds
+  // Epoch ms the set started resting, so a reloaded page resumes the countdown.
+  optional int64 rest_started_at = 6;
+}
+
+// Mirrors Exercise in client/types.
+message Exercise {
+  string id = 1;
+  string name = 2;
+  optional int32 rpe = 3; // 1 to 10
+  repeated WorkoutSet sets = 4;
+}
+
+// Mirrors Workout in client/types.
+message Workout {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp date = 3;
+  int32 duration = 4; // seconds
+  bool is_complete = 5;
+  optional string active_set_id = 6;
+  optional string active_exercise_id = 7;
+  repeated Exercise exercises = 8;
+}
+
+// Mirrors LogEntry in client/types: a Workout (Workout & { workoutId,
+// persistenceKey }) whose `id` identifies the log and `workout_id` the
+// workout it was run from.
+message LogEntry {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp date = 3;
+  int32 duration = 4; // seconds
+  bool is_complete = 5;
+  optional string active_set_id = 6;
+  optional string active_exercise_id = 7;
+  repeated Exercise exercises = 8;
+  string workout_id = 9;
+  optional int32 persistence_key = 10;
+}
+
+service WorkoutsService {
+  rpc ListWorkouts(ListWorkoutsRequest) returns (ListWorkoutsResponse);
+  rpc GetWorkout(GetWorkoutRequest) returns (Workout);
+  rpc CreateWorkout(CreateWorkoutRequest) returns (Workout);
+  rpc UpdateWorkout(UpdateWorkoutRequest) returns (Workout);
+  rpc DeleteWorkout(DeleteWorkoutRequest) returns (google.protobuf.Empty);
+  rpc CreateLog(CreateLogRequest) returns (LogEntry);
+  rpc ListLogs(ListLogsRequest) returns (ListLogsResponse);
+  rpc GetLog(GetLogRequest) returns (LogEntry);
+  rpc UpdateLog(UpdateLogRequest) returns (LogEntry);
+  rpc DeleteLog(DeleteLogRequest) returns (google.protobuf.Empty);
+}
+
+message ListWorkoutsRequest {}
+message ListWorkoutsResponse {
+  repeated Workout workouts = 1;
+}
+message GetWorkoutRequest {
+  string id = 1;
+}
+message DeleteWorkoutRequest {
+  string id = 1;
+}
+message CreateWorkoutRequest {
+  Workout workout = 1;
+}
+message UpdateWorkoutRequest {
+  Workout workout = 1; // matched by workout.id
+}
+message CreateLogRequest {
+  LogEntry log = 1;
+}
+message GetLogRequest {
+  string id = 1;
+}
+message UpdateLogRequest {
+  LogEntry log = 1; // matched by log.id
+}
+message DeleteLogRequest {
+  string id = 1;
+}
+message ListLogsRequest {}
+message ListLogsResponse {
+  repeated LogEntry logs = 1;
+}

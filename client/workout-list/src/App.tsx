@@ -28,7 +28,7 @@ export function App({ navigate }: AppProps) {
       setWorkouts(
         saved.map((workout) => {
           const dates = logs
-            .filter((log) => log.id === workout.id)
+            .filter((log) => log.workoutId === workout.id)
             .map((log) => new Date(log.date));
           const lastRun = dates.sort((a, b) => b.getTime() - a.getTime())[0];
           return { id: workout.id, name: workout.name, lastRun };

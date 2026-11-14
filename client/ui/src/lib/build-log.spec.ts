@@ -41,6 +41,13 @@ const workout: Workout = {
 describe("buildLog", () => {
   const log = buildLog(workout, 754, new Date("2026-11-14T10:00:00Z"));
 
+  it("gives the log its own id and links back to the workout", () => {
+    expect(log.id).not.toBe(workout.id);
+    expect(log.id).toEqual(expect.any(String));
+    expect(log.workoutId).toBe(workout.id);
+    expect(buildLog(workout, 1).id).not.toBe(log.id);
+  });
+
   it("marks the workout complete with its duration and date", () => {
     expect(log).toMatchObject({
       isComplete: true,

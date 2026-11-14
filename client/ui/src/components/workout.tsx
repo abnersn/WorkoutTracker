@@ -73,10 +73,12 @@ export function Workout({
         setState({ status: "ready", workout });
         if (!isView) return;
         const logs = await db.getAllLogs();
+        const viewed = logs.find((log) => log.persistenceKey === Number(id));
         const before = logs
           .filter(
             (log) =>
-              log.id === workout.id &&
+              viewed !== undefined &&
+              log.workoutId === viewed.workoutId &&
               new Date(log.date).getTime() < workout.date.getTime(),
           )
           .sort(

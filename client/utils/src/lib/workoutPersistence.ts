@@ -3,12 +3,9 @@ import {
   type DBSchema,
   type IDBPDatabase,
   type IDBPObjectStore,
-  type IDBPTransaction,
 } from "idb";
 import type { Exercise, LogEntry, Workout } from "@workout-tracker/types";
 import { SetStage } from "@workout-tracker/types";
-import { workoutWeightsToKg, type WeightUnit } from "./weight";
-import { convertActiveSessionToKg } from "./activeSession";
 
 /** @deprecated IndexedDB schema; being replaced. Do not use in new code. */
 interface WorkoutTrackerDB extends DBSchema {
@@ -17,10 +14,10 @@ interface WorkoutTrackerDB extends DBSchema {
 }
 
 /**
- * Version 2 stores every weight in kg. Version 1 stored weights in whatever unit
- * the lifter had chosen, so opening a version 1 database converts them once.
+ * Bump when the stored shape changes. There are no migrations yet: while the app
+ * is in development, clear site data after a bump.
  */
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 /** @deprecated IndexedDB store type; being replaced. */
 type WorkoutsStore = IDBPObjectStore<
@@ -43,39 +40,23 @@ type LogsStore = IDBPObjectStore<
 export class Database {
   private db: IDBPDatabase<WorkoutTrackerDB> | null = null;
 
-  /**
-   * @param legacyUnit The unit weights were stored in before version 2. Only
-   * read when upgrading an existing version 1 database.
-   */
-  async init(legacyUnit: WeightUnit = "kg"): Promise<void> {
+  async init(): Promise<void> {
     if (!("indexedDB" in window)) {
       throw new Error(
         "This browser can't store workouts. Turn off private browsing, or try another browser.",
       );
     }
 
-    let upgradedFrom = 0;
     this.db = await openDB<WorkoutTrackerDB>("workoutTracker", SCHEMA_VERSION, {
-      upgrade(db, oldVersion, _newVersion, transaction) {
-        upgradedFrom = oldVersion;
+      upgrade(db) {
         if (!db.objectStoreNames.contains("workouts")) {
           db.createObjectStore("workouts", { keyPath: "id" });
         }
         if (!db.objectStoreNames.contains("logs")) {
           db.createObjectStore("logs", { autoIncrement: true });
         }
-        if (oldVersion === 1) {
-          // Runs inside the upgrade transaction: all of it commits, or none.
-          void convertStoredWeightsToKg(transaction, legacyUnit);
-        }
       },
     });
-
-    // The running workout lives in localStorage, outside the transaction. The
-    // upgrade has committed by now, so converting it here happens exactly once.
-    if (upgradedFrom === 1) {
-      convertActiveSessionToKg(legacyUnit);
-    }
   }
 
   private get database(): IDBPDatabase<WorkoutTrackerDB> {
@@ -146,7 +127,7 @@ export class Database {
   }
 
   /** Adds a finished workout to the history and returns its key. */
-  async saveLogEntry(logEntry: Workout): Promise<number> {
+  async saveLogEntry(logEntry: LogEntry): Promise<number> {
     const tx = this.database.transaction("logs", "readwrite");
     const key = await tx.objectStore("logs").add(logEntry);
     await tx.done;
@@ -169,7 +150,7 @@ export class Database {
     const data = await this.getAllLogs();
 
     const lastLogEntry = data
-      .filter((entry) => entry.id === workoutId)
+      .filter((entry) => entry.workoutId === workoutId)
       .sort((a, b) => b.date.getTime() - a.date.getTime());
 
     return lastLogEntry[0];
@@ -179,12 +160,16 @@ export class Database {
     id: string | number,
     fromLogs: boolean,
   ): Promise<Workout> {
-    const workout = fromLogs
+    const source = fromLogs
       ? await this.getLogEntry(Number(id))
       : await this.getWorkout(String(id));
-    if (!workout) {
+    if (!source) {
       throw new Error(`Workout not found: ${id}`);
     }
+    // A repeated log is a new run of its workout, not of the log itself.
+    const workout: Workout = fromLogs
+      ? withoutLogFields(source as LogEntry)
+      : source;
 
     workout.date = new Date();
     workout.isComplete = false;
@@ -230,7 +215,16 @@ export class Database {
 
   /** Replaces a history entry, e.g. to add an effort rating after finishing. */
   async updateLogEntry(key: number, log: Workout): Promise<void> {
-    await this.runInLogs((store) => store.put(log, key));
+    const tx = this.database.transaction("logs", "readwrite");
+    const store = tx.objectStore("logs");
+    const existing = await store.get(key);
+    if (!existing) throw new Error(`Log entry not found: ${key}`);
+    // The log keeps its own id and the link to its workout.
+    await store.put(
+      { ...log, id: existing.id, workoutId: existing.workoutId },
+      key,
+    );
+    await tx.done;
   }
 
   loadWorkoutLogById(
@@ -245,26 +239,8 @@ export class Database {
   }
 }
 
-/** Brings version 1 weights, stored in `unit`, over to kg inside the upgrade. */
-async function convertStoredWeightsToKg(
-  transaction: IDBPTransaction<
-    WorkoutTrackerDB,
-    ("workouts" | "logs")[],
-    "versionchange"
-  >,
-  unit: WeightUnit,
-): Promise<void> {
-  if (unit === "kg") return;
-
-  const workouts = transaction.objectStore("workouts");
-  for (const workout of await workouts.getAll()) {
-    await workouts.put(workoutWeightsToKg(workout, unit));
-  }
-
-  const logs = transaction.objectStore("logs");
-  const keys = await logs.getAllKeys();
-  const entries = await logs.getAll();
-  for (const [index, entry] of entries.entries()) {
-    await logs.put(workoutWeightsToKg(entry, unit), keys[index]);
-  }
+/** The workout a log was run from, without the fields only logs carry. */
+function withoutLogFields(log: LogEntry): Workout {
+  const { workoutId, persistenceKey: _key, ...workout } = log;
+  return { ...workout, id: workoutId };
 }

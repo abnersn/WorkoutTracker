@@ -1,9 +1,11 @@
 import {
   SetStage,
   type Exercise,
+  type LogEntry,
   type Workout,
   type WorkoutSet,
 } from "@workout-tracker/types";
+import { genId } from "@workout-tracker/utils";
 
 /** Values a set shows when nothing was ever entered for it. */
 export const SET_DEFAULTS = {
@@ -87,12 +89,13 @@ export function tallyWorkout(workout: Workout): WorkoutTally {
  * The history entry for a workout that was just finished. Only the sets that
  * were done are kept, so finishing early never records work that didn't happen;
  * an exercise with nothing done is dropped. An unrated effort stays unrated.
+ * The log gets an id of its own; `workoutId` points back at the workout.
  */
 export function buildLog(
   workout: Workout,
   duration: number,
   date = new Date(),
-): Workout {
+): LogEntry {
   const exercises = workout.exercises
     .map((exercise) => ({
       ...exercise,
@@ -104,6 +107,8 @@ export function buildLog(
 
   return {
     ...workout,
+    id: genId(),
+    workoutId: workout.id,
     date,
     duration,
     isComplete: true,
