@@ -7,13 +7,13 @@
     "JavaScript": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
+      "format_on_save": "on"
     },
     "JSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "TypeScript": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
+      "format_on_save": "on"
     },
     "TSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "JSON": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
@@ -25,30 +25,30 @@
     "Vue.js": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
+      "format_on_save": "on"
     },
     "Svelte": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
+      "format_on_save": "on"
     },
     "Astro": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "Markdown": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
+      "format_on_save": "on"
     },
     "MDX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "YAML": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "GraphQL": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
+      "format_on_save": "on"
     },
     "Handlebars": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
-    },
-  },
+      "format_on_save": "on"
+    }
+  }
 }
