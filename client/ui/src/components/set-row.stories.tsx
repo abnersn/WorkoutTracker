@@ -74,9 +74,14 @@ export const Interactive: Story = {
           stage={stage}
           isActive={stage !== SetStage.Complete}
           isOnly
-          onChange={(field, value) => setValues((v) => ({ ...v, [field]: value }))}
+          onChange={(field, value) =>
+            setValues((v) => ({ ...v, [field]: value }))
+          }
         />
-        <Button tone={stage === SetStage.Resting ? "success" : "primary"} onClick={() => setStage(next.stage)}>
+        <Button
+          tone={stage === SetStage.Resting ? "success" : "primary"}
+          onClick={() => setStage(next.stage)}
+        >
           {next.label}
         </Button>
       </div>

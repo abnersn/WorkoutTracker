@@ -16,3 +16,4 @@ export * from "./components/text-input";
 export * from "./components/text-label";
 export * from "./components/tone";
 export * from "./components/workout-summary-card";
+export * from "./motion";

@@ -21,6 +21,48 @@
    */
   --spacing-corner: calc(var(--spacing-inset) - 0.75rem);
   --radius-corner: calc(var(--radius-control) - var(--spacing-corner));
+  /*
+   * A dialog floats alone over a dimmed page, so it gets a roomier 24px inset, and
+   * its radius follows the same rule: control radius plus inset = 32px.
+   */
+  --spacing-dialog: 1.5rem;
+  --radius-dialog: calc(var(--radius-control) + var(--spacing-dialog));
+}
+
+/*
+ * Motion and data-viz tokens. `static` keeps them in the CSS even when no utility
+ * uses them, because the Web Animations calls in components read them at runtime
+ * (see `motion.ts`).
+ */
+@theme static {
+  /* Natural deceleration: arrives and settles, no bounce. */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Symmetric ease for drawing a stroke. */
+  --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-quick: 120ms;
+  --duration-base: 180ms;
+  --duration-enter: 200ms;
+  --duration-slow: 300ms;
+  --duration-draw: 360ms;
+  --delay-draw: 80ms;
+  /* How far a label or number travels when it slides in. */
+  --distance-label-slide: 0.25rem;
+  --distance-value-slide: 0.45em;
+
+  /* RPE ramp, green (easy) to red (max), one colour per level. */
+  --color-rpe-0: #10b981;
+  --color-rpe-1: #49b364;
+  --color-rpe-2: #68ac48;
+  --color-rpe-3: #81a42d;
+  --color-rpe-4: #999a0f;
+  --color-rpe-5: #af8e00;
+  --color-rpe-6: #c37f00;
+  --color-rpe-7: #d66f13;
+  --color-rpe-8: #e55b2c;
+  --color-rpe-9: #ec4d38;
+  --color-rpe-10: #ef4444;
+
+  --shadow-thumb: 0 1px 3px rgb(15 23 42 / 0.3);
 }
 
 @theme inline {
@@ -105,16 +147,16 @@
   .rpe-range {
     --rpe-track: linear-gradient(
       90deg,
-      #10b981,
-      #49b364,
-      #68ac48,
-      #81a42d,
-      #999a0f,
-      #af8e00,
-      #c37f00,
-      #d66f13,
-      #e55b2c,
-      #ef4444
+      var(--color-rpe-0),
+      var(--color-rpe-1),
+      var(--color-rpe-2),
+      var(--color-rpe-3),
+      var(--color-rpe-4),
+      var(--color-rpe-5),
+      var(--color-rpe-6),
+      var(--color-rpe-7),
+      var(--color-rpe-8),
+      var(--color-rpe-10)
     );
     appearance: none;
     width: 100%;
@@ -146,9 +188,9 @@
     border-radius: 9999px;
     border: 3px solid var(--rpe-color);
     background: white;
-    box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+    box-shadow: var(--shadow-thumb);
     /* The ring warms or cools with the effort instead of jumping a colour. */
-    transition: border-color 180ms ease-out;
+    transition: border-color var(--duration-base) ease-out;
   }
   .rpe-range::-moz-range-thumb {
     width: 1.5rem;
@@ -157,9 +199,9 @@
     border-radius: 9999px;
     border: 3px solid var(--rpe-color);
     background: white;
-    box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+    box-shadow: var(--shadow-thumb);
     /* The ring warms or cools with the effort instead of jumping a colour. */
-    transition: border-color 180ms ease-out;
+    transition: border-color var(--duration-base) ease-out;
   }
   .rpe-range:focus-visible::-webkit-slider-thumb {
     outline: 2px solid var(--color-indigo-600);

@@ -1,4 +1,9 @@
 {
+  "lsp": {
+    "tailwindcss-language-server": {
+      "settings": { "classFunctions": ["cn"] }
+    }
+  },
   "tab_size": 2,
   "hard_tabs": false,
   "ensure_final_newline_on_save": true,
@@ -18,7 +23,16 @@
     "TSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "JSON": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "JSONC": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
-    "CSS": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "CSS": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+      "language_servers": [
+        "tailwindcss-intellisense-css",
+        "!vscode-css-language-server",
+        "..."
+      ]
+    },
     "SCSS": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "Less": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "HTML": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },

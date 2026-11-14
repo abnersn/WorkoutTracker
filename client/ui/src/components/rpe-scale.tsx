@@ -6,27 +6,33 @@ import { cn, focusRing } from "./tone";
 export const RPE_LEVELS: readonly { title: string; description: string }[] = [
   {
     title: "Very light activity",
-    description: "Hardly any exertion, but more than sleeping, watching TV, etc.",
+    description:
+      "Hardly any exertion, but more than sleeping, watching TV, etc.",
   },
   {
     title: "Light activity",
-    description: "Could maintain for hours. Easy to breathe and carry a conversation.",
+    description:
+      "Could maintain for hours. Easy to breathe and carry a conversation.",
   },
   {
     title: "Light activity",
-    description: "Could maintain for hours. Easy to breathe and carry a conversation.",
+    description:
+      "Could maintain for hours. Easy to breathe and carry a conversation.",
   },
   {
     title: "Moderate activity",
-    description: "Breathing heavily, can maintain a conversation, but more challenging.",
+    description:
+      "Breathing heavily, can maintain a conversation, but more challenging.",
   },
   {
     title: "Moderate activity",
-    description: "Breathing heavily, can maintain a conversation, but more challenging.",
+    description:
+      "Breathing heavily, can maintain a conversation, but more challenging.",
   },
   {
     title: "Moderate activity",
-    description: "Breathing heavily, can maintain a conversation, but more challenging.",
+    description:
+      "Breathing heavily, can maintain a conversation, but more challenging.",
   },
   {
     title: "Vigorous activity",
@@ -38,18 +44,14 @@ export const RPE_LEVELS: readonly { title: string; description: string }[] = [
   },
   {
     title: "Very hard activity",
-    description: "Very difficult to maintain, can barely breathe, can speak a few words.",
+    description:
+      "Very difficult to maintain, can barely breathe, can speak a few words.",
   },
   {
     title: "Max effort activity",
-    description: "Almost impossible to keep going. Out of breath, unable to talk.",
+    description:
+      "Almost impossible to keep going. Out of breath, unable to talk.",
   },
-];
-
-// One colour per level, sampled along the track gradient.
-const LEVEL_COLORS = [
-  "#49b364", "#68ac48", "#81a42d", "#999a0f", "#af8e00",
-  "#c37f00", "#d66f13", "#e55b2c", "#ec4d38", "#ef4444",
 ];
 
 export interface RpeScaleProps {
@@ -72,12 +74,15 @@ export function RpeScale({
   const [expanded, setExpanded] = useState(defaultExpanded);
   const panelId = useId();
   const level = RPE_LEVELS[Math.min(10, Math.max(1, value)) - 1];
-  const color = LEVEL_COLORS[Math.min(10, Math.max(1, value)) - 1];
+  const color = `var(--color-rpe-${Math.min(10, Math.max(1, value))})`;
 
   return (
     <Card variant="item">
       <div className="flex items-start justify-between gap-3">
-        <span id={`${panelId}-label`} className="text-sm tracking-wider text-indigo-700 uppercase">
+        <span
+          id={`${panelId}-label`}
+          className="text-sm tracking-wider text-indigo-700 uppercase"
+        >
           Rate of perceived exertion
         </span>
         <button
@@ -109,14 +114,28 @@ export function RpeScale({
         className="rpe-range"
         style={{ "--rpe-color": color } as CSSProperties}
       />
-      <ul aria-hidden="true" className="tabular -mt-1 flex justify-between text-sm text-indigo-700">
+      <ul
+        aria-hidden="true"
+        className="tabular -mt-1 flex justify-between text-sm text-indigo-700"
+      >
         {Array.from({ length: 10 }, (_, i) => (
-          <li key={i} className={cn("w-6 text-center", i + 1 === value && "font-semibold")}>
+          <li
+            key={i}
+            className={cn(
+              "w-6 text-center",
+              i + 1 === value && "font-semibold",
+            )}
+          >
             {i + 1}
           </li>
         ))}
       </ul>
-      <div id={panelId} hidden={!expanded} aria-live="polite" className="mt-inset border-t border-indigo-200 pt-inset">
+      <div
+        id={panelId}
+        hidden={!expanded}
+        aria-live="polite"
+        className="mt-inset border-t border-indigo-200 pt-inset"
+      >
         <h4 className="text-sm font-semibold text-indigo-800">
           <span className="tabular">RPE {value}</span> · {level.title}
         </h4>

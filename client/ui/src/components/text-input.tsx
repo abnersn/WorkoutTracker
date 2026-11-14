@@ -1,8 +1,10 @@
 import { useId, type InputHTMLAttributes } from "react";
 import { cn, toneClass } from "./tone";
 
-export interface TextInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface TextInputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "size"
+> {
   /** Visible label. Omit it only when `aria-label` names the field. */
   label?: string;
   /** Names the problem and the way out. */

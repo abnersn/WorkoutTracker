@@ -4,6 +4,12 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { SetField } from "./set-field";
 import { Stepper } from "./stepper";
 import { cn, toneClass, type Tone } from "./tone";
+import {
+  cssToken,
+  easingToken,
+  msToken,
+  prefersReducedMotion,
+} from "../motion";
 
 export type SetFieldName = "duration" | "reps" | "weight" | "rest";
 
@@ -67,27 +73,36 @@ function useStageTransition(stage: SetStage) {
     previous.current = stage;
     const el = labelRef.current;
     if (before === stage || !el?.animate) return;
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const reduced = prefersReducedMotion();
 
     el.animate(
       reduced
         ? [{ opacity: 0 }, { opacity: 1 }]
         : [
-            { opacity: 0, transform: "translateX(-0.25rem)" },
+            {
+              opacity: 0,
+              transform: `translateX(-${cssToken("--distance-label-slide")})`,
+            },
             { opacity: 1, transform: "translateX(0)" },
           ],
-      { duration: 200, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+      {
+        duration: msToken("--duration-enter"),
+        easing: easingToken("--ease-settle"),
+      },
     );
 
     const path = stage === SetStage.Complete && el.querySelector("svg path");
     if (path instanceof SVGPathElement) {
       path.style.strokeDasharray = String(CHECK_LENGTH);
-      path.animate([{ strokeDashoffset: CHECK_LENGTH }, { strokeDashoffset: 0 }], {
-        duration: reduced ? 0 : 360,
-        delay: reduced ? 0 : 80,
-        easing: "cubic-bezier(0.65, 0, 0.35, 1)",
-        fill: "backwards",
-      });
+      path.animate(
+        [{ strokeDashoffset: CHECK_LENGTH }, { strokeDashoffset: 0 }],
+        {
+          duration: reduced ? 0 : msToken("--duration-draw"),
+          delay: reduced ? 0 : msToken("--delay-draw"),
+          easing: easingToken("--ease-draw"),
+          fill: "backwards",
+        },
+      );
     }
   }, [stage]);
 
@@ -215,7 +230,8 @@ export function SetRow({
         // A divider only between two sets, centred in the inset: the card's column
         // gap sits above it and this padding below. Whatever follows the last set
         // (the RPE scale) gets the gap and no line.
-        !isOnly && "border-tone-200 [[data-set-row]+&]:border-t [[data-set-row]+&]:pt-inset",
+        !isOnly &&
+          "border-tone-200 [[data-set-row]+&]:border-t [[data-set-row]+&]:pt-inset",
       )}
     >
       <div

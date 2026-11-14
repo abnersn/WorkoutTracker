@@ -7,17 +7,20 @@ import {
 import type { Exercise, LogEntry, Workout } from "@workout-tracker/types";
 import { SetStage } from "@workout-tracker/types";
 
+/** @deprecated IndexedDB schema; being replaced. Do not use in new code. */
 interface WorkoutTrackerDB extends DBSchema {
   workouts: { key: string; value: Workout };
   logs: { key: number; value: LogEntry };
 }
 
+/** @deprecated IndexedDB store type; being replaced. */
 type WorkoutsStore = IDBPObjectStore<
   WorkoutTrackerDB,
   ["workouts"],
   "workouts",
   "readwrite"
 >;
+/** @deprecated IndexedDB store type; being replaced. */
 type LogsStore = IDBPObjectStore<
   WorkoutTrackerDB,
   ["logs"],
@@ -25,6 +28,9 @@ type LogsStore = IDBPObjectStore<
   "readwrite"
 >;
 
+/**
+ * @deprecated IndexedDB persistence is being replaced. Do not use in new code.
+ */
 export class Database {
   private db: IDBPDatabase<WorkoutTrackerDB> | null = null;
 

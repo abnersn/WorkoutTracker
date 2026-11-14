@@ -40,7 +40,7 @@ export interface Workout {
 // A finished workout saved to the "logs" store. IndexedDB adds persistenceKey on read.
 export type LogEntry = Workout & { persistenceKey?: number };
 
-// IndexedDB object stores of the "workoutTracker" database (version 1).
+/** @deprecated IndexedDB object stores of the "workoutTracker" database (version 1). Being replaced. */
 export type StoreName = "workouts" | "logs";
 
 export type WorkoutAction =

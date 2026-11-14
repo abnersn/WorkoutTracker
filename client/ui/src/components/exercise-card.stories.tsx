@@ -6,7 +6,10 @@ import { timeFormat } from "@workout-tracker/utils";
 
 const row = (
   stage: SetStage,
-  { key, ...extra }: { key?: string } & Partial<ComponentProps<typeof SetRow>> = {},
+  {
+    key,
+    ...extra
+  }: { key?: string } & Partial<ComponentProps<typeof SetRow>> = {},
 ) => (
   <SetRow
     key={key}

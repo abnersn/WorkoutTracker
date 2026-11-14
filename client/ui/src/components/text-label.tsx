@@ -1,17 +1,21 @@
-import type { ElementType, HTMLAttributes } from "react";
+import type { ElementType } from "react";
 import { cn } from "./tone";
+import { PolymorphicProps } from "@workout-tracker/types/utils";
 
-export interface TextLabelProps extends HTMLAttributes<HTMLElement> {
-  small?: boolean;
-  as?: ElementType;
-}
+export type TextLabelProps<T extends ElementType = "p"> = PolymorphicProps<
+  T,
+  {
+    small?: boolean;
+  }
+>;
 
-export function TextLabel({
+export function TextLabel<T extends ElementType = "p">({
   small = false,
-  as: Tag = "p",
+  as,
   className,
   ...props
-}: TextLabelProps) {
+}: TextLabelProps<T>) {
+  const Tag: ElementType = as ?? "p";
   return (
     <Tag
       className={cn(

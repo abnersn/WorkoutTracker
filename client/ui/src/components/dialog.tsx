@@ -11,7 +11,13 @@ export interface DialogProps {
 }
 
 /** A modal on the native <dialog>: focus is trapped and Escape closes it. */
-export function Dialog({ open, title, onClose, children, actions }: DialogProps) {
+export function Dialog({
+  open,
+  title,
+  onClose,
+  children,
+  actions,
+}: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -33,18 +39,22 @@ export function Dialog({ open, title, onClose, children, actions }: DialogProps)
       onClick={(ev) => {
         if (ev.target === ev.currentTarget) onClose();
       }}
-      className="m-auto w-[min(24rem,calc(100vw-2rem))] rounded-card border border-indigo-200 bg-white p-0 text-indigo-800 shadow-xl backdrop:bg-slate-900/40"
+      className="m-auto w-[min(26rem,calc(100vw-3rem))] rounded-dialog border border-indigo-200 bg-white p-0 text-indigo-800 shadow-xl backdrop:bg-slate-900/40"
     >
-      {/* One inset on every side; the action buttons sit on it at the bottom corner,
-          so their control radius nests in the dialog's card radius. */}
-      <div className="p-inset">
+      {/* A 24px inset on every side; the action buttons sit on it at the bottom
+          corner, so their control radius nests in the dialog's radius. */}
+      <div className="p-dialog">
         <h2 id={titleId} className="text-lg font-semibold text-balance">
           {title}
         </h2>
-        {children && <div className="mt-2 text-sm text-slate-700">{children}</div>}
+        {children && (
+          <div className="mt-2 text-sm text-slate-700">{children}</div>
+        )}
       </div>
       {actions && (
-        <div className="flex justify-end gap-2 px-inset pt-2 pb-inset">{actions}</div>
+        <div className="flex justify-end gap-2 px-dialog pb-dialog">
+          {actions}
+        </div>
       )}
     </dialog>
   );

@@ -30,7 +30,11 @@ export function AddItemForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn(toneClass.neutral, "m-inset border-t border-tone-200 pt-inset", className)}
+      className={cn(
+        toneClass.neutral,
+        "m-inset border-t border-tone-200 pt-inset",
+        className,
+      )}
     >
       {/* Field and button sit on the inset, so their radius nests in the card's. */}
       <div className="flex items-center gap-2 rounded-card border border-tone-200 bg-tone-50 p-inset">

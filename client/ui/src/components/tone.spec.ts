@@ -8,8 +8,12 @@ describe("cn", () => {
 
 describe("toneClass", () => {
   it("has a class for every tone", () => {
-    expect(Object.keys(toneClass).sort()).toEqual(
-      ["danger", "highlight", "neutral", "primary", "success"],
-    );
+    expect(Object.keys(toneClass).sort()).toEqual([
+      "danger",
+      "highlight",
+      "neutral",
+      "primary",
+      "success",
+    ]);
   });
 });

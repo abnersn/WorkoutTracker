@@ -1,4 +1,10 @@
 import { useEffect, useId, useRef, useState } from "react";
+import {
+  cssToken,
+  easingToken,
+  msToken,
+  prefersReducedMotion,
+} from "../motion";
 import { cn, toneClass, type Tone } from "./tone";
 import { TextLabel } from "./text-label";
 
@@ -23,16 +29,6 @@ export interface SetFieldProps {
    * less). Turn it off for a running clock, which changes every second.
    */
   tick?: boolean;
-}
-
-// Natural deceleration: the number arrives and settles, no bounce.
-const SETTLE = "cubic-bezier(0.16, 1, 0.3, 1)";
-
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  );
 }
 
 /**
@@ -65,16 +61,23 @@ export function SetField({
     const el = inputRef.current;
     if (!el || !tick || isEditing || before === value || !el.animate) return;
     if (prefersReducedMotion()) {
-      el.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 120, easing: "ease-out" });
+      el.animate([{ opacity: 0.35 }, { opacity: 1 }], {
+        duration: msToken("--duration-quick"),
+        easing: "ease-out",
+      });
       return;
     }
-    const from = value > before ? "0.45em" : "-0.45em";
+    const distance = cssToken("--distance-value-slide");
+    const from = value > before ? distance : `-${distance}`;
     el.animate(
       [
         { transform: `translateY(${from})`, opacity: 0 },
         { transform: "translateY(0)", opacity: 1 },
       ],
-      { duration: 180, easing: SETTLE },
+      {
+        duration: msToken("--duration-base"),
+        easing: easingToken("--ease-settle"),
+      },
     );
     // isEditing is read, not reacted to: only a value change starts the tick.
   }, [value]);
@@ -93,7 +96,7 @@ export function SetField({
       <div
         className={cn(
           "tabular flex items-center overflow-hidden rounded-control border border-tone-200 text-tone-800 shadow-sm",
-          "transition-[color,background-color,border-color,box-shadow] duration-300 ease-out",
+          "transition-[color,background-color,border-color,box-shadow] duration-(--duration-slow) ease-out",
           quiet
             ? "bg-transparent text-slate-600 shadow-none"
             : tone === "neutral"

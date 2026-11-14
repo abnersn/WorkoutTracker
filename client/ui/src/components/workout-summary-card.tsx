@@ -37,7 +37,8 @@ export function WorkoutSummaryCard({
         className={cn(
           "flex flex-col justify-center rounded-card p-inset",
           // Leave room for the delete chip: its width plus a gap, and its full height.
-          onRemove && "min-h-[calc(2.75rem+2*var(--spacing-inset))] pr-[calc(2.75rem+var(--spacing-inset)+0.75rem)]",
+          onRemove &&
+            "min-h-[calc(2.75rem+2*var(--spacing-inset))] pr-[calc(2.75rem+var(--spacing-inset)+0.75rem)]",
           focusRing,
         )}
       >
@@ -47,7 +48,9 @@ export function WorkoutSummaryCard({
           </span>
           <span className="min-w-0 break-words font-medium">{name}</span>
         </span>
-        {meta && <span className="mt-1.5 block text-sm text-tone-800">{meta}</span>}
+        {meta && (
+          <span className="mt-1.5 block text-sm text-tone-800">{meta}</span>
+        )}
       </a>
       {onRemove && (
         <button
