@@ -58,6 +58,18 @@ export default [
       "**/jest.config.cts",
     ],
     rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["./*", "../*"],
+              message:
+                "Relative imports are not allowed. Use a workspace import alias (e.g. @workout-tracker/*).",
+            },
+          ],
+        },
+      ],
       "no-restricted-syntax": [
         "error",
         {

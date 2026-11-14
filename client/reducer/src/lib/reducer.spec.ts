@@ -1,8 +1,13 @@
-import { reducer } from "./reducer";
-import { SetStage, type Workout } from "./types";
+import { SetStage, type Workout } from "@workout-tracker/types";
+import { reducer } from "@workout-tracker/reducer/lib/reducer";
 
 function makeWorkout(overrides: Partial<Workout> = {}): Workout {
   return {
+    id: "w1",
+    name: "Test workout",
+    date: new Date(0),
+    duration: 0,
+    isComplete: false,
     exercises: [
       {
         id: "ex1",

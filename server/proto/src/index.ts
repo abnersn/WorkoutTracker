@@ -1,1 +1,1 @@
-export * from "./lib/proto";
+export * from "@workout-tracker/proto/lib/proto";

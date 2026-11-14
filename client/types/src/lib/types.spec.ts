@@ -1,7 +1,12 @@
-import { types } from "./types";
+import { SetStage } from "@workout-tracker/types/lib/types";
 
-describe("types", () => {
-  it("should work", () => {
-    expect(types()).toEqual("types");
+describe("SetStage", () => {
+  it("uses the legacy stage strings", () => {
+    expect(Object.values(SetStage)).toEqual([
+      "IDLE",
+      "ACTIVE",
+      "RESTING",
+      "COMPLETE",
+    ]);
   });
 });

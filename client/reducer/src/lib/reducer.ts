@@ -3,7 +3,7 @@ import {
   type Exercise,
   type Workout,
   type WorkoutAction,
-} from "./types";
+} from "@workout-tracker/types";
 
 function genId(): string {
   return crypto.randomUUID();
