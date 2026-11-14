@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Button, ConfirmDialog, Dialog } from "../index";
+import { Button, Dialog } from "../index";
 
 const meta = {
   title: "Primitives/Dialog",
@@ -24,28 +24,6 @@ export const Basic: Story = {
         >
           Your sets are kept in this browser until you save.
         </Dialog>
-      </>
-    );
-  },
-};
-
-export const ConfirmDelete: Story = {
-  render: function Render() {
-    const [open, setOpen] = useState(false);
-    return (
-      <>
-        <Button tone="danger" onClick={() => setOpen(true)}>
-          Delete workout
-        </Button>
-        <ConfirmDialog
-          open={open}
-          title="Delete Push day?"
-          description="It leaves your workout list. Workouts you've already finished stay in History."
-          confirmLabel="Delete workout"
-          cancelLabel="Keep workout"
-          onConfirm={() => setOpen(false)}
-          onCancel={() => setOpen(false)}
-        />
       </>
     );
   },

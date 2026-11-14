@@ -1,6 +1,4 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
-import { Button } from "./button";
-import type { Tone } from "./tone";
 
 export interface DialogProps {
   open: boolean;
@@ -66,49 +64,5 @@ export function Dialog({
         </div>
       )}
     </dialog>
-  );
-}
-
-export interface ConfirmDialogProps {
-  open: boolean;
-  title: string;
-  description?: string;
-  confirmLabel: string;
-  cancelLabel?: string;
-  /** `danger` for deletes, `primary` for saves. */
-  tone?: Extract<Tone, "primary" | "danger" | "success">;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-/** Replaces window.confirm for deletes and for saving a finished workout. */
-export function ConfirmDialog({
-  open,
-  title,
-  description,
-  confirmLabel,
-  cancelLabel = "Cancel",
-  tone = "danger",
-  onConfirm,
-  onCancel,
-}: ConfirmDialogProps) {
-  return (
-    <Dialog
-      open={open}
-      title={title}
-      onClose={onCancel}
-      actions={
-        <>
-          <Button variant="ghost" onClick={onCancel}>
-            {cancelLabel}
-          </Button>
-          <Button tone={tone} onClick={onConfirm}>
-            {confirmLabel}
-          </Button>
-        </>
-      }
-    >
-      {description}
-    </Dialog>
   );
 }

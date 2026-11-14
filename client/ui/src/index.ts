@@ -6,7 +6,6 @@ export * from "./components/container";
 export * from "./components/dialog";
 export * from "./components/empty-message";
 export * from "./components/section-heading";
-export * from "./components/text-input";
 export * from "./components/text-label";
 export * from "./components/tone";
 export * from "./motion";
