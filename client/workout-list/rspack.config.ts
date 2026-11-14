@@ -38,13 +38,6 @@ export default defineConfig((_env, argv) => {
       hot: true,
       headers: { "Access-Control-Allow-Origin": "*" },
     },
-    shared: {
-      react: { singleton: true, requiredVersion: "^19" },
-      "react-dom": { singleton: true, requiredVersion: "^19" },
-      "react-router": { singleton: true },
-      "@apollo/client": { singleton: true },
-      "@workout-tracker/auth-state": { singleton: true },
-    },
     resolve: {
       extensions: ["...", ".ts", ".tsx", ".jsx"],
       // Resolve the @workout-tracker/* workspace aliases from tsconfig.base.json.
@@ -106,7 +99,13 @@ export default defineConfig((_env, argv) => {
         exposes: {
           "./App": "./src/App.tsx",
         },
-        shared: ["react", "react-dom"],
+        shared: {
+          react: { singleton: true, requiredVersion: "^19" },
+          "react-dom": { singleton: true, requiredVersion: "^19" },
+          "@apollo/client": { singleton: true },
+          "react-router": { singleton: true },
+          "@workout-tracker/auth-state": { singleton: true },
+        },
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),

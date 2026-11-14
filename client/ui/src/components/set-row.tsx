@@ -32,8 +32,8 @@ export interface SetRowProps {
   restStep?: number;
   /** Shown as the weight column's label. */
   weightUnit?: "kg" | "lb";
-  /** While resting: what to load next, e.g. "Set 2 · 5 × 80 kg". */
-  nextUp?: string;
+  /** The set that follows the one resting: gets a small "Next set" label. */
+  isNext?: boolean;
   /** Formats seconds for the rest field, e.g. 90 -> 1:30. */
   formatTime?: (seconds: number) => string;
   onChange?: (field: SetFieldName, value: number) => void;
@@ -123,7 +123,7 @@ export function SetRow({
   weightStep = 2.5,
   restStep = 15,
   weightUnit = "kg",
-  nextUp,
+  isNext = false,
   formatTime = defaultFormatTime,
   onChange,
   onActivate,
@@ -253,6 +253,11 @@ export function SetRow({
         data-stage={stage}
         className="flex flex-col gap-3"
       >
+        {isNext && !readOnly && (
+          <p className="text-xs font-medium tracking-wider text-slate-500 uppercase">
+            Next set
+          </p>
+        )}
         {label && !readOnly && (
           <p
             ref={labelRef}
@@ -283,11 +288,6 @@ export function SetRow({
           </p>
         )}
         {leadsWithRest && restUnit}
-        {leadsWithRest && nextUp && (
-          <p className="tabular text-lg font-semibold text-indigo-900">
-            {nextUp}
-          </p>
-        )}
         {!leadsWithRest && (
           <div className="grid gap-2" style={gridStyle}>
             {columns}

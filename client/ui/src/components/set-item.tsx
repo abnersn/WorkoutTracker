@@ -18,8 +18,8 @@ export interface SetItemProps {
   exerciseId: string;
   /** 1-based position in its exercise. */
   number: number;
-  /** The next set still to do in this exercise, shown while this one rests. */
-  next?: { number: number; set: WorkoutSet };
+  /** The set up after the one currently resting: labelled "Next set". */
+  isNext?: boolean;
   set: WorkoutSet;
   isActive: boolean;
   isOnly: boolean;
@@ -40,7 +40,7 @@ const FIELD_TO_KEY = {
 export function SetItem({
   exerciseId,
   number,
-  next,
+  isNext,
   set,
   isActive,
   isOnly,
@@ -143,11 +143,7 @@ export function SetItem({
   return (
     <SetRow
       number={number}
-      nextUp={
-        next
-          ? `Next: set ${next.number} · ${next.set.defaultReps ?? SET_DEFAULTS.defaultReps} × ${next.set.defaultWeight ?? SET_DEFAULTS.defaultWeight} ${weightUnit}`
-          : "Last set. Rate the effort below."
-      }
+      isNext={isNext}
       stage={stage}
       reps={reps}
       weight={weight}

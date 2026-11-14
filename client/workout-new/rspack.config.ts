@@ -96,7 +96,13 @@ export default defineConfig((_env, argv) => {
         exposes: {
           "./App": "./src/App.tsx",
         },
-        shared: ["react", "react-dom"],
+        shared: {
+          react: { singleton: true, requiredVersion: "^19" },
+          "react-dom": { singleton: true, requiredVersion: "^19" },
+          "@apollo/client": { singleton: true },
+          "react-router": { singleton: true },
+          "@workout-tracker/auth-state": { singleton: true },
+        },
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),

@@ -37,13 +37,6 @@ export default defineConfig((_env, argv) => {
       // Resolve the @workout-tracker/* workspace aliases from tsconfig.base.json.
       tsConfig: path.resolve(__dirname, "tsconfig.json"),
     },
-    shared: {
-      react: { singleton: true, requiredVersion: "^19" },
-      "react-dom": { singleton: true, requiredVersion: "^19" },
-      "react-router": { singleton: true },
-      "@apollo/client": { singleton: true },
-      "@workout-tracker/auth-state": { singleton: true },
-    },
     module: {
       rules: [
         {
@@ -99,7 +92,13 @@ export default defineConfig((_env, argv) => {
           workoutNew: "workoutNew@http://localhost:8103/remoteEntry.js",
           workoutList: "workoutList@http://localhost:8104/remoteEntry.js",
         },
-        shared: ["react", "react-dom"],
+        shared: {
+          react: { singleton: true, requiredVersion: "^19" },
+          "react-dom": { singleton: true, requiredVersion: "^19" },
+          "@apollo/client": { singleton: true },
+          "react-router": { singleton: true },
+          "@workout-tracker/auth-state": { singleton: true },
+        },
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),

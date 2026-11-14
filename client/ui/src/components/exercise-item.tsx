@@ -49,18 +49,22 @@ export function ExerciseItem({
   const total = exercise.sets.length;
   const payload = { exerciseId: exercise.id };
 
+  // While one set rests, the first unfinished set after it is the one up next.
+  const restingIndex = exercise.sets.findIndex(
+    (s) => s.stage === SetStage.Resting,
+  );
+  const nextIndex =
+    restingIndex === -1
+      ? -1
+      : exercise.sets.findIndex(
+          (s, j) => j > restingIndex && s.stage !== SetStage.Complete,
+        );
+
   const children = exercise.sets.map((set, i) => (
     <SetItem
       key={set.id}
       number={i + 1}
-      next={(() => {
-        const at = exercise.sets.findIndex(
-          (s, j) => j > i && s.stage !== SetStage.Complete,
-        );
-        return at === -1
-          ? undefined
-          : { number: at + 1, set: exercise.sets[at] };
-      })()}
+      isNext={i === nextIndex}
       exerciseId={exercise.id}
       set={set}
       isActive={set.id === activeSetId}
