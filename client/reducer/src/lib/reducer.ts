@@ -125,20 +125,6 @@ function moveExercise(
   return workout;
 }
 
-function updateExerciseType(
-  workout: Workout,
-  exerciseId: string,
-  type: string,
-): Workout {
-  const exerciseIndex = workout.exercises.findIndex((e) => e.id === exerciseId);
-  if (exerciseIndex === -1) {
-    return workout;
-  }
-
-  workout.exercises[exerciseIndex].type = type;
-  return workout;
-}
-
 function updateSet(
   workout: Workout,
   exerciseId: string,
@@ -181,12 +167,6 @@ export function reducer(state: Workout, action: WorkoutAction): Workout {
       );
     case "UPDATE_SET_STAGE":
       return updateSetStage(workout);
-    case "UPDATE_EXERCISE_TYPE":
-      return updateExerciseType(
-        workout,
-        action.payload.exerciseId,
-        action.payload.type,
-      );
     case "COMPLETE_EXERCISE":
       return updateActiveExercise(workout);
     case "ADD_EXERCISE":

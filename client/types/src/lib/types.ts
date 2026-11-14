@@ -11,7 +11,6 @@ export interface WorkoutSet {
   id: string;
   stage: SetStage;
   // Template defaults. Sets created mid-workout (ADD_SET) only have id and stage.
-  defaultDurationTime?: number;
   defaultReps?: number;
   defaultWeight?: number;
   defaultRestTime?: number;
@@ -20,7 +19,6 @@ export interface WorkoutSet {
 export interface Exercise {
   id: string;
   name: string;
-  type?: string;
   // Rate of perceived exertion, 1 to 10. Exercises added mid-workout omit it.
   rpe?: number;
   sets: WorkoutSet[];
@@ -52,10 +50,6 @@ export type WorkoutAction =
       payload: { setId: string; exerciseId: string };
     }
   | { type: "UPDATE_SET_STAGE" }
-  | {
-      type: "UPDATE_EXERCISE_TYPE";
-      payload: { exerciseId: string; type: string };
-    }
   | { type: "COMPLETE_EXERCISE" }
   | { type: "ADD_EXERCISE"; payload: { name: string } }
   | { type: "COMPLETE_WORKOUT" }
@@ -67,13 +61,7 @@ export type WorkoutAction =
         exerciseId: string;
         setId: string;
         changes: Partial<
-          Pick<
-            WorkoutSet,
-            | "defaultDurationTime"
-            | "defaultReps"
-            | "defaultWeight"
-            | "defaultRestTime"
-          >
+          Pick<WorkoutSet, "defaultReps" | "defaultWeight" | "defaultRestTime">
         >;
       };
     }

@@ -10,7 +10,6 @@ const sets = (stage: SetStage, id: string) =>
     defaultReps: 8,
     defaultWeight: 60,
     defaultRestTime: 90,
-    defaultDurationTime: 0,
   }));
 
 const workout = (overrides: Partial<Workout> = {}): Workout => ({
@@ -25,14 +24,12 @@ const workout = (overrides: Partial<Workout> = {}): Workout => ({
     {
       id: "bench",
       name: "Bench press",
-      type: "weight",
       sets: sets(SetStage.Idle, "bench"),
     },
     {
-      id: "run",
-      name: "Treadmill",
-      type: "cardio",
-      sets: sets(SetStage.Idle, "run").slice(0, 1),
+      id: "squat",
+      name: "Back squat",
+      sets: sets(SetStage.Idle, "squat").slice(0, 1),
     },
   ],
   ...overrides,
@@ -73,7 +70,6 @@ export const Finished: Story = {
         {
           id: "bench",
           name: "Bench press",
-          type: "weight",
           rpe: 8,
           sets: sets(SetStage.Complete, "bench"),
         },

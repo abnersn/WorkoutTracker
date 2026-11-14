@@ -29,7 +29,7 @@ Undecided as a product claim. The user named the architecture as the differentia
 
 - English only, no i18n.
 - Planned UI components: Button, Input, Card, Dialog, Badge, ExerciseCard, SetRow, RestTimer, RpeScale, PartnerProgress.
-- Domain terms: Workout, Exercise, Set, WorkoutLog, ExerciseType, set stages, RPE.
+- Domain terms: Workout, Exercise, Set, WorkoutLog, set stages, RPE.
 - Out of scope unless time remains: PWA offline, data import, GitHub sign-in, email verification, password reset, refresh tokens.
 - Source of truth for scope: `README.md`.
 

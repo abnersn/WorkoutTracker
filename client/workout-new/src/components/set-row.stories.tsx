@@ -40,15 +40,6 @@ export const RestOverrun: Story = {
   args: { stage: SetStage.Resting, isActive: true, rest: -15 },
 };
 export const Complete: Story = { args: { stage: SetStage.Complete } };
-export const Cardio: Story = {
-  args: {
-    exerciseType: "cardio",
-    stage: SetStage.Active,
-    isActive: true,
-    duration: 600,
-    reps: 1,
-  },
-};
 export const ReadOnly: Story = {
   args: { stage: SetStage.Complete, readOnly: true },
 };

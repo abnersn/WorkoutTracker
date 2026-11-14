@@ -105,7 +105,7 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
   - `auth-state/` (lib): token storage, `AuthProvider`, `useAuth`; loaded once and shared by every remote
   - `api/` (lib): Apollo Client, the auth link and generated GraphQL hooks
   - `workout-repository/` (lib): `WorkoutRepository`, with IndexedDB and GraphQL adapters
-  - `types/` (lib): `Workout`, `Exercise`, `Set`, `WorkoutLog`, `ExerciseType`
+  - `types/` (lib): `Workout`, `Exercise`, `Set`, `WorkoutLog`
   - `reducer/` (lib): the workout state machine: actions (including `UPDATE_SET` and `UPDATE_EXERCISE_RPE`) and set stages
   - `utils/` (lib): `timeFormat`, date formatting (`Intl`), `linkClickHandler`, `genId`, completeness checks and the IndexedDB `Database`
   - `limits/` (lib, project `client-limits`): form hints for sets, reps and weights

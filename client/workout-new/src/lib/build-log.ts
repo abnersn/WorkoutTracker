@@ -2,7 +2,6 @@ import { SetStage, type Workout } from "@workout-tracker/types";
 
 /** Values a set shows when nothing was ever entered for it. */
 export const SET_DEFAULTS = {
-  defaultDurationTime: 0,
   defaultReps: 8,
   defaultWeight: 10,
   defaultRestTime: 30,
@@ -12,7 +11,6 @@ export const SET_DEFAULTS = {
 export function normalizeExercises(workout: Workout): Workout["exercises"] {
   return workout.exercises.map((exercise) => ({
     ...exercise,
-    type: exercise.type ?? "weight",
     rpe: exercise.rpe ?? 5,
     sets: exercise.sets.map((set) => ({
       ...SET_DEFAULTS,

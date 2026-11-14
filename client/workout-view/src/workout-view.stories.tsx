@@ -27,7 +27,6 @@ async function seedLog() {
         {
           id: "bench",
           name: "Bench press",
-          type: "weight",
           rpe: 8,
           sets: [1, 2, 3].map((n) => ({
             id: `bench-${n}`,
@@ -35,7 +34,6 @@ async function seedLog() {
             defaultReps: 8,
             defaultWeight: 60 + n * 5,
             defaultRestTime: 90,
-            defaultDurationTime: 0,
           })),
         },
       ],

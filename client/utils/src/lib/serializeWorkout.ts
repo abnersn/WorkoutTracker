@@ -29,7 +29,6 @@ export function getWorkout(id: string): Workout {
     const exercise: Exercise = {
       id: $exercise.dataset["id"] ?? "",
       name: query($exercise, ".exercise-name").textContent?.trim() ?? "",
-      type: $exercise.dataset["type"],
       sets: [],
     };
 
@@ -38,9 +37,6 @@ export function getWorkout(id: string): Workout {
     )) {
       const set: WorkoutSet = {
         id: $set.dataset["id"] ?? "",
-        defaultDurationTime: Number(
-          $set.querySelector<HTMLElement>(".time .value")?.dataset["value"],
-        ),
         defaultReps: Number(query($set, ".reps .value").dataset["value"]),
         defaultWeight: Number(query($set, ".weight .value").dataset["value"]),
         defaultRestTime: Number(query($set, ".rest .value").dataset["value"]),

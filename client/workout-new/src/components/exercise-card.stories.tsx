@@ -29,7 +29,6 @@ const meta = {
   component: ExerciseCard,
   args: {
     name: "Back squat",
-    onToggleType: () => undefined,
     onMoveUp: () => undefined,
     onMoveDown: () => undefined,
     onAddSet: () => undefined,
@@ -67,19 +66,6 @@ export const Completed: Story = {
       row(SetStage.Complete, { key: "2" }),
       <RpeScale key="rpe" value={7} />,
     ],
-  },
-};
-export const Cardio: Story = {
-  args: {
-    name: "Treadmill",
-    type: "cardio",
-    isLast: true,
-    children: row(SetStage.Idle, {
-      exerciseType: "cardio",
-      duration: 900,
-      isActive: true,
-      isOnly: true,
-    }),
   },
 };
 export const ReadOnly: Story = {

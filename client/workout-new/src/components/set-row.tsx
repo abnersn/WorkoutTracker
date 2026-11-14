@@ -13,16 +13,11 @@ import {
   prefersReducedMotion,
 } from "@workout-tracker/ui";
 
-export type SetFieldName = "duration" | "reps" | "weight" | "rest";
+export type SetFieldName = "reps" | "weight" | "rest";
 
 export interface SetRowProps {
   stage: SetStage;
-  /** Cardio sets show a time and no weight; weight sets show no time. */
-  exerciseType?: "weight" | "cardio";
-  /** Seconds. A negative value means the countdown ran out and is counting up. */
-  duration?: number;
   reps: number;
-  /** Not used by cardio sets. */
   weight?: number;
   /** Seconds, negative once the rest is overrun. */
   rest: number;
@@ -33,10 +28,9 @@ export interface SetRowProps {
   /** How much the steppers change a value. */
   repsStep?: number;
   weightStep?: number;
-  /** Seconds the rest and time steppers change a value by. */
+  /** Seconds the rest stepper changes a value by. */
   restStep?: number;
-  durationStep?: number;
-  /** Formats seconds for the time fields, e.g. 90 -> 1:30. */
+  /** Formats seconds for the rest field, e.g. 90 -> 1:30. */
   formatTime?: (seconds: number) => string;
   onChange?: (field: SetFieldName, value: number) => void;
   /** The row was clicked or one of its fields was focused. */
@@ -111,11 +105,9 @@ function useStageTransition(stage: SetStage) {
   return labelRef;
 }
 
-/** One set: reps, weight and rest. Cardio swaps the weight for a time. */
+/** One set: reps, weight and rest. */
 export function SetRow({
   stage,
-  exerciseType = "weight",
-  duration = 0,
   reps,
   weight = 0,
   rest,
@@ -125,7 +117,6 @@ export function SetRow({
   repsStep = 1,
   weightStep = 5,
   restStep = 15,
-  durationStep = 30,
   formatTime = defaultFormatTime,
   onChange,
   onActivate,
@@ -134,9 +125,7 @@ export function SetRow({
   const timerTone = (value: number, runningStage: SetStage): Tone =>
     stage === runningStage ? (value < 0 ? "danger" : "highlight") : baseTone;
 
-  // While a set runs, its countdown is the number to read; the rest steps back.
-  const isCardio = exerciseType === "cardio";
-  const leadsWithTime = isCardio && stage === SetStage.Active;
+  // While resting, the countdown is the number to read; the other fields step back.
   const leadsWithRest = stage === SetStage.Resting;
   const restOverrun = stage === SetStage.Resting && rest < 0;
   // Colour alone must not carry the news that rest has run out.
@@ -196,14 +185,6 @@ export function SetRow({
     );
   };
 
-  const durationUnit = unit("duration", "Time", duration, durationStep, {
-    tone: timerTone(duration, SetStage.Active),
-    prominent: leadsWithTime,
-    time: true,
-    unit: "s",
-    abs: true,
-    running: stage === SetStage.Active,
-  });
   const restUnit = unit("rest", "Rest", rest, restStep, {
     tone: timerTone(rest, SetStage.Resting),
     prominent: leadsWithRest,
@@ -213,11 +194,8 @@ export function SetRow({
     running: stage === SetStage.Resting,
   });
   const columns = [
-    ...(isCardio && !leadsWithTime ? [durationUnit] : []),
     unit("reps", "Reps", reps, repsStep, { tone: baseTone }),
-    ...(isCardio
-      ? []
-      : [unit("weight", "Weight", weight, weightStep, { tone: baseTone })]),
+    unit("weight", "Weight", weight, weightStep, { tone: baseTone }),
     ...(!leadsWithRest ? [restUnit] : []),
   ];
   const gridStyle = {
@@ -263,7 +241,6 @@ export function SetRow({
             {label.text}
           </p>
         )}
-        {leadsWithTime && durationUnit}
         {leadsWithRest && restUnit}
         <div className="grid gap-2" style={gridStyle}>
           {columns}

@@ -1,10 +1,9 @@
-import { Activity, ChevronDown, ChevronUp, Dumbbell } from "lucide-react";
+import { ChevronDown, ChevronUp, Dumbbell } from "lucide-react";
 import { Children, type ReactNode } from "react";
 import { Button, Card, EmptyMessage, cn, focusRing } from "@workout-tracker/ui";
 
 export interface ExerciseCardProps {
   name: string;
-  type?: "weight" | "cardio";
   isActive?: boolean;
   isFirst?: boolean;
   isLast?: boolean;
@@ -12,7 +11,6 @@ export interface ExerciseCardProps {
   readOnly?: boolean;
   /** Show "Remove set" next to "Add set", for when a set is selected. */
   canRemoveSet?: boolean;
-  onToggleType?: () => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onAddSet?: () => void;
@@ -21,11 +19,6 @@ export interface ExerciseCardProps {
   /** SetRows, then the RpeScale once the exercise is complete. */
   children?: ReactNode;
 }
-
-const typeIcon = {
-  weight: <Dumbbell size={20} />,
-  cardio: <Activity size={20} />,
-} as const;
 
 // Header controls are white chips sitting on the card's inset, so their control
 // radius is concentric with the card corner they share.
@@ -41,13 +34,11 @@ const iconButton = cn(
 /** An exercise: its name, its sets, and the controls to reorder, add and remove. */
 export function ExerciseCard({
   name,
-  type = "weight",
   isActive = false,
   isFirst = false,
   isLast = false,
   readOnly = false,
   canRemoveSet = false,
-  onToggleType,
   onMoveUp,
   onMoveDown,
   onAddSet,
@@ -55,31 +46,20 @@ export function ExerciseCard({
   onRemoveExercise,
   children,
 }: ExerciseCardProps) {
-  const typeLabel = type === "cardio" ? "Cardio" : "Weight";
-  const otherType = type === "cardio" ? "weight" : "cardio";
-  const icon = (
-    <span className="flex h-[1lh] shrink-0 items-center text-indigo-600">
-      {typeIcon[type]}
-    </span>
-  );
-
   return (
-    <section aria-label={name} data-type={type}>
+    <section aria-label={name}>
       <Card isActive={isActive} className="flex flex-col gap-inset">
         <div className="flex items-start gap-3">
-          {readOnly || !onToggleType ? (
-            icon
-          ) : (
-            <button
-              type="button"
-              onClick={onToggleType}
-              aria-label={`${typeLabel} exercise. Switch to ${otherType}.`}
-              title={`${typeLabel} exercise. Switch to ${otherType}.`}
-              className={cn(chip, iconButton, "text-indigo-600")}
-            >
-              {typeIcon[type]}
-            </button>
-          )}
+          <span
+            aria-hidden="true"
+            className={cn(
+              "flex shrink-0 items-center text-indigo-600",
+              // Centre the icon on the name, which is padded for the chips beside it.
+              readOnly ? "h-[1lh]" : "h-11",
+            )}
+          >
+            <Dumbbell size={20} />
+          </span>
           <h3
             className={cn(
               "min-w-0 flex-1 text-lg font-semibold break-words text-indigo-800",

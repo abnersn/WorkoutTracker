@@ -26,7 +26,6 @@ export function ExerciseItem({
   readOnly,
   dispatch,
 }: ExerciseItemProps) {
-  const type = exercise.type === "cardio" ? "cardio" : "weight";
   const isComplete = exercise.sets.length > 0 && !hasIncompleteSets(exercise);
   const payload = { exerciseId: exercise.id };
 
@@ -34,7 +33,6 @@ export function ExerciseItem({
     <SetItem
       key={set.id}
       exerciseId={exercise.id}
-      exerciseType={type}
       set={set}
       isActive={set.id === activeSetId}
       isOnly={exercise.sets.length === 1}
@@ -61,24 +59,11 @@ export function ExerciseItem({
   return (
     <ExerciseCard
       name={exercise.name}
-      type={type}
       isActive={isActive}
       isFirst={isFirst}
       isLast={isLast}
       readOnly={readOnly}
       canRemoveSet={activeSetId !== null}
-      onToggleType={
-        isComplete
-          ? undefined
-          : () =>
-              dispatch({
-                type: "UPDATE_EXERCISE_TYPE",
-                payload: {
-                  ...payload,
-                  type: type === "cardio" ? "weight" : "cardio",
-                },
-              })
-      }
       onMoveUp={() =>
         dispatch({ type: "MOVE_EXERCISE", payload: { ...payload, factor: -1 } })
       }

@@ -144,15 +144,6 @@ describe("reducer", () => {
     expect(result.activeSetId).toBeNull();
   });
 
-  it("UPDATE_EXERCISE_TYPE sets the type of the matching exercise", () => {
-    const result = reducer(makeWorkout(), {
-      type: "UPDATE_EXERCISE_TYPE",
-      payload: { exerciseId: "ex2", type: "machine" },
-    });
-    expect(result.exercises[1].type).toBe("machine");
-    expect(result.exercises[0].type).toBeUndefined();
-  });
-
   it("COMPLETE_EXERCISE activates the next exercise and its first set", () => {
     const result = reducer(makeWorkout(), { type: "COMPLETE_EXERCISE" });
     expect(result.activeExerciseId).toBe("ex2");

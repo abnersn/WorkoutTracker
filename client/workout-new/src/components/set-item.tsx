@@ -11,7 +11,6 @@ import { SetRow, type SetFieldName } from "./set-row";
 
 export interface SetItemProps {
   exerciseId: string;
-  exerciseType: "weight" | "cardio";
   set: WorkoutSet;
   isActive: boolean;
   isOnly: boolean;
@@ -20,7 +19,6 @@ export interface SetItemProps {
 }
 
 const FIELD_TO_KEY = {
-  duration: "defaultDurationTime",
   reps: "defaultReps",
   weight: "defaultWeight",
   rest: "defaultRestTime",
@@ -28,11 +26,10 @@ const FIELD_TO_KEY = {
 
 /**
  * One set wired to the workout: its values live in the reducer, while the
- * time and rest countdowns tick locally while the set is in the matching stage.
+ * rest countdown ticks locally while the set is resting.
  */
 export function SetItem({
   exerciseId,
-  exerciseType,
   set,
   isActive,
   isOnly,
@@ -42,41 +39,30 @@ export function SetItem({
   const { notify } = useNotification();
   const { stage } = set;
 
-  const durationValue =
-    set.defaultDurationTime ?? SET_DEFAULTS.defaultDurationTime;
   const restValue = set.defaultRestTime ?? SET_DEFAULTS.defaultRestTime;
   const reps = set.defaultReps ?? SET_DEFAULTS.defaultReps;
   const weight = set.defaultWeight ?? SET_DEFAULTS.defaultWeight;
 
-  const durationTimer = useTimer("durationTimer", durationValue, -1);
   const restTimer = useTimer("restTimer", restValue, -1);
-  const notified = useRef({ duration: true, rest: true });
+  const notified = useRef(true);
   const previousStage = useRef(stage);
 
-  const isCardio = exerciseType === "cardio";
-
   useEffect(() => {
-    if (isCardio && stage === SetStage.Active) {
-      durationTimer.play();
-    } else {
-      durationTimer.pause();
-    }
     if (stage === SetStage.Resting) {
       restTimer.play();
     } else {
       restTimer.pause();
     }
-    // The timer objects are recreated every render; only the stage drives this.
-  }, [stage, isCardio]);
+    // The timer object is recreated every render; only the stage drives this.
+  }, [stage]);
 
   // A set that is started again begins from its configured values.
   useEffect(() => {
     if (stage === SetStage.Idle && previousStage.current !== SetStage.Idle) {
-      durationTimer.set(durationValue);
       restTimer.set(restValue);
     }
     if (stage === SetStage.Active) {
-      notified.current = { duration: false, rest: false };
+      notified.current = false;
     }
     previousStage.current = stage;
   }, [stage]);
@@ -85,21 +71,12 @@ export function SetItem({
     if (
       stage === SetStage.Resting &&
       restTimer.value === 0 &&
-      !notified.current.rest
+      !notified.current
     ) {
-      notified.current.rest = true;
+      notified.current = true;
       notify("Rest time's up!");
     }
-    if (
-      stage === SetStage.Active &&
-      isCardio &&
-      durationTimer.value === 0 &&
-      !notified.current.duration
-    ) {
-      notified.current.duration = true;
-      notify("Exercise time's up!");
-    }
-  }, [stage, isCardio, restTimer.value, durationTimer.value, notify]);
+  }, [stage, restTimer.value, notify]);
 
   const activate = () =>
     dispatch({
@@ -109,7 +86,6 @@ export function SetItem({
 
   const onChange = (field: SetFieldName, value: number) => {
     if (field === "rest") restTimer.set(value);
-    if (field === "duration") durationTimer.set(value);
     dispatch({
       type: "UPDATE_SET",
       payload: {
@@ -123,8 +99,6 @@ export function SetItem({
   return (
     <SetRow
       stage={stage}
-      exerciseType={exerciseType}
-      duration={durationTimer.value}
       reps={reps}
       weight={weight}
       rest={restTimer.value}

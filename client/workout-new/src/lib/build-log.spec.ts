@@ -41,8 +41,8 @@ describe("buildLog", () => {
     expect(set2).toMatchObject({ stage: SetStage.Complete, ...SET_DEFAULTS });
   });
 
-  it("defaults exercise type and rpe", () => {
-    expect(log.exercises[0]).toMatchObject({ type: "weight", rpe: 5 });
+  it("defaults rpe", () => {
+    expect(log.exercises[0]).toMatchObject({ rpe: 5 });
   });
 
   it("does not mutate the input", () => {
