@@ -171,7 +171,7 @@ Storybook picks port 6006 and offers another if it is taken; pass `-- --port <n>
   - [x] Switch to `createRoot`
   - [x] Stop passing an async function to `useEffect`
   - [x] Correct the `tabuler-nums` typo
-- [ ] **Zephyr**: add `withZephyr()` to each Rspack config and deploy
+- [x] **Zephyr**: add `withZephyr()` to each Rspack config and deploy
 
 **Done when:** the app runs from its Zephyr URL, still storing data in IndexedDB, and each project's Storybook shows its components.
 
@@ -182,7 +182,6 @@ Storybook picks port 6006 and offers another if it is taken; pass `-- --port <n>
   - [ ] `buf.yaml` and `buf.gen.yaml` with the ts-proto options `nestJs=true`, `addGrpcMetadata=true`, `stringEnums=true` and `useDate=false`
   - [ ] A cached `codegen` target, with `dependsOn: ["^codegen"]` in the projects that use it
   - [ ] One set of proto-loader options shared by every server and client
-- [ ] **`server/limits`**
 - [ ] **`server/users-svc`**
   - [ ] Nest gRPC microservice with its own database
   - [ ] `users` collection with a unique, lowercased email
