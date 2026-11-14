@@ -24,4 +24,4 @@ jobs:
       - name: Deploy front ends to Zephyr
         run: npx nx deploy shell
         env:
-          ZE_CI_TOKEN: ${{ secrets.ZE_CI_TOKEN }}
+          ZE_CI_TOKEN: ${{ secrets.ZEPHYR_CI_TOKEN }}
