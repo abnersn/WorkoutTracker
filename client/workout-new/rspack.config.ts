@@ -99,6 +99,9 @@ export default defineConfig((_env, argv) => {
         shared: {
           react: { singleton: true, requiredVersion: "^19" },
           "react-dom": { singleton: true, requiredVersion: "^19" },
+          "react-dom/client": { singleton: true, requiredVersion: "^19" },
+          "react/jsx-runtime": { singleton: true, requiredVersion: "^19" },
+          "react/jsx-dev-runtime": { singleton: true, requiredVersion: "^19" },
           "@apollo/client": { singleton: true },
           "react-router": { singleton: true },
           "@workout-tracker/auth-state": { singleton: true },
