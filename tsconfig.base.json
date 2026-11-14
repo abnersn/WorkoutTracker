@@ -21,14 +21,7 @@
       "@workout-tracker/reducer": ["./client/reducer/src/index.ts"],
       "@workout-tracker/utils": ["./client/utils/src/index.ts"],
       "@workout-tracker/limits": ["./client/limits/src/index.ts"],
-      "@workout-tracker/client-limits": ["./client/limits/src/index.ts"],
-      "@workout-tracker/proto/*": ["./server/proto/src/*"],
-      "@workout-tracker/gateway/*": ["./server/gateway/src/*"],
-      "@workout-tracker/users-svc/*": ["./server/users-svc/src/*"],
-      "@workout-tracker/workouts-svc/*": ["./server/workouts-svc/src/*"],
-      "@workout-tracker/reducer/*": ["./client/reducer/src/*"],
-      "@workout-tracker/types/*": ["./client/types/src/*"],
-      "@workout-tracker/utils/*": ["./client/utils/src/*"]
+      "@workout-tracker/client-limits": ["./client/limits/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

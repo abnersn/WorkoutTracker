@@ -1,1 +1,1 @@
-export * from "@workout-tracker/utils/lib/utils";
+export * from "./lib/utils";

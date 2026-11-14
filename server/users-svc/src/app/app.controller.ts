@@ -1,5 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
-import { AppService } from "@workout-tracker/users-svc/app/app.service";
+import { AppService } from "./app.service";
 
 @Controller()
 export class AppController {

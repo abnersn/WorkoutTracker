@@ -1,4 +1,4 @@
-import { utils } from "@workout-tracker/utils/lib/utils";
+import { utils } from "./utils";
 
 describe("utils", () => {
   it("should work", () => {

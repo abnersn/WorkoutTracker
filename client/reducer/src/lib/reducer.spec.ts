@@ -1,5 +1,5 @@
 import { SetStage, type Workout } from "@workout-tracker/types";
-import { reducer } from "@workout-tracker/reducer/lib/reducer";
+import { reducer } from "./reducer";
 
 function makeWorkout(overrides: Partial<Workout> = {}): Workout {
   return {

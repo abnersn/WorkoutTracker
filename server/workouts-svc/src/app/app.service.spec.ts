@@ -1,5 +1,5 @@
 import { Test } from "@nestjs/testing";
-import { AppService } from "@workout-tracker/workouts-svc/app/app.service";
+import { AppService } from "./app.service";
 
 describe("AppService", () => {
   let service: AppService;

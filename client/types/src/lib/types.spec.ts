@@ -1,4 +1,4 @@
-import { SetStage } from "@workout-tracker/types/lib/types";
+import { SetStage } from "./types";
 
 describe("SetStage", () => {
   it("uses the legacy stage strings", () => {

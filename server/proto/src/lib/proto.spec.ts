@@ -1,4 +1,4 @@
-import { proto } from "@workout-tracker/proto/lib/proto";
+import { proto } from "./proto";
 
 describe("proto", () => {
   it("should work", () => {

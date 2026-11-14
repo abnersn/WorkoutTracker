@@ -1,1 +1,1 @@
-export * from "@workout-tracker/types/lib/types";
+export * from "./lib/types";
