@@ -1,0 +1,28 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": false,
+    "paths": {
+      "@workout-tracker/proto": ["./server/proto/src/index.ts"],
+      "@workout-tracker/types": ["./client/types/src/index.ts"],
+      "@workout-tracker/types/utils": ["./client/types/src/lib/utils.ts"],
+      "@workout-tracker/reducer": ["./client/reducer/src/index.ts"],
+      "@workout-tracker/utils": ["./client/utils/src/index.ts"],
+      "@workout-tracker/ui": ["./client/ui/src/index.ts"],
+      "@workout-tracker/hooks": ["./client/hooks/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

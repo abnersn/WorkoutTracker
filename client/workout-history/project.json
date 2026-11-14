@@ -1,0 +1,38 @@
+{
+  "name": "workout-history",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "client/workout-history/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:client"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "rspack serve --mode=development",
+        "cwd": "client/workout-history"
+      },
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["shell:serve"]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/workout-history",
+        "env": { "ZE_DISABLED": "true" }
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/workout-history",
+        "env": { "ZE_DISABLED": "false" }
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "shell",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "client/shell/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:client"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "rspack serve --mode=development",
+        "cwd": "client/shell"
+      },
+      "readyWhen": {
+        "signal": true
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/shell",
+        "env": { "ZE_DISABLED": "true" }
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/shell",
+        "env": { "ZE_DISABLED": "false" }
+      },
+      "dependsOn": [
+        "workout-new:deploy",
+        "workout-view:deploy",
+        "workout-list:deploy",
+        "workout-history:deploy"
+      ]
+    }
+  }
+}
