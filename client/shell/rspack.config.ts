@@ -29,7 +29,11 @@ export default defineConfig((_env, argv) => {
       clean: true,
     },
     devServer: { port: PORT, historyApiFallback: true, hot: true },
-    resolve: { extensions: ["...", ".ts", ".tsx", ".jsx"] },
+    resolve: {
+      extensions: ["...", ".ts", ".tsx", ".jsx"],
+      // Resolve the @workout-tracker/* workspace aliases from tsconfig.base.json.
+      tsConfig: path.resolve(__dirname, "tsconfig.json"),
+    },
     shared: {
       react: { singleton: true, requiredVersion: "^19" },
       "react-dom": { singleton: true, requiredVersion: "^19" },
@@ -39,6 +43,20 @@ export default defineConfig((_env, argv) => {
     },
     module: {
       rules: [
+        {
+          test: /\.css$/,
+          type: "javascript/auto",
+          use: [
+            "style-loader",
+            "css-loader",
+            {
+              loader: "postcss-loader",
+              options: {
+                postcssOptions: { plugins: ["@tailwindcss/postcss"] },
+              },
+            },
+          ],
+        },
         {
           test: /\.(j|t)sx?$/,
           exclude: [/node_modules/],

@@ -60,4 +60,24 @@ export type WorkoutAction =
   | { type: "ADD_EXERCISE"; payload: { name: string } }
   | { type: "COMPLETE_WORKOUT" }
   | { type: "MOVE_EXERCISE"; payload: { exerciseId: string; factor: number } }
-  | { type: "REMOVE_EXERCISE"; payload: { exerciseId: string } };
+  | { type: "REMOVE_EXERCISE"; payload: { exerciseId: string } }
+  | {
+      type: "UPDATE_SET";
+      payload: {
+        exerciseId: string;
+        setId: string;
+        changes: Partial<
+          Pick<
+            WorkoutSet,
+            | "defaultDurationTime"
+            | "defaultReps"
+            | "defaultWeight"
+            | "defaultRestTime"
+          >
+        >;
+      };
+    }
+  | {
+      type: "UPDATE_EXERCISE_RPE";
+      payload: { exerciseId: string; rpe: number };
+    };

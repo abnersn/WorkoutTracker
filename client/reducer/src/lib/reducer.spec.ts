@@ -214,6 +214,31 @@ describe("reducer", () => {
     expect(result.exercises.map((e) => e.id)).toEqual(["ex2"]);
   });
 
+  it("UPDATE_SET merges the changes into the matching set only", () => {
+    const result = reducer(makeWorkout(), {
+      type: "UPDATE_SET",
+      payload: {
+        exerciseId: "ex1",
+        setId: "s2",
+        changes: { defaultReps: 12, defaultWeight: 40 },
+      },
+    });
+    expect(result.exercises[0].sets[1]).toMatchObject({
+      defaultReps: 12,
+      defaultWeight: 40,
+    });
+    expect(result.exercises[0].sets[0].defaultReps).toBeUndefined();
+  });
+
+  it("UPDATE_EXERCISE_RPE stores the rating on the exercise", () => {
+    const result = reducer(makeWorkout(), {
+      type: "UPDATE_EXERCISE_RPE",
+      payload: { exerciseId: "ex2", rpe: 8 },
+    });
+    expect(result.exercises[1].rpe).toBe(8);
+    expect(result.exercises[0].rpe).toBeUndefined();
+  });
+
   it("throws on an unknown action type", () => {
     expect(() =>
       reducer(makeWorkout(), { type: "BOGUS" } as unknown as Parameters<

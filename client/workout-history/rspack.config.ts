@@ -44,9 +44,27 @@ export default defineConfig((_env, argv) => {
       "@apollo/client": { singleton: true },
       "@workout-tracker/auth-state": { singleton: true },
     },
-    resolve: { extensions: ["...", ".ts", ".tsx", ".jsx"] },
+    resolve: {
+      extensions: ["...", ".ts", ".tsx", ".jsx"],
+      // Resolve the @workout-tracker/* workspace aliases from tsconfig.base.json.
+      tsConfig: path.resolve(__dirname, "tsconfig.json"),
+    },
     module: {
       rules: [
+        {
+          test: /\.css$/,
+          type: "javascript/auto",
+          use: [
+            "style-loader",
+            "css-loader",
+            {
+              loader: "postcss-loader",
+              options: {
+                postcssOptions: { plugins: ["@tailwindcss/postcss"] },
+              },
+            },
+          ],
+        },
         {
           test: /\.(j|t)sx?$/,
           exclude: [/node_modules/],

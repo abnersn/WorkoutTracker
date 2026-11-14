@@ -14,7 +14,7 @@
       "readyWhen": {
         "signal": true
       },
-      "dependsOn": ["shell:serve"]
+      "dependsOn": ["shell:serve", "workout-new:serve"]
     },
     "build": {
       "executor": "nx:run-commands",

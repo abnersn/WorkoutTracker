@@ -4,3 +4,5 @@ export * from "./lib/hasIncompleteSets";
 export * from "./lib/serializeWorkout";
 export * from "./lib/timeFormat";
 export * from "./lib/workoutPersistence";
+export * from "./lib/format";
+export * from "./lib/navigation";

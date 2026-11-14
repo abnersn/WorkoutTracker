@@ -139,6 +139,30 @@ function updateExerciseType(
   return workout;
 }
 
+function updateSet(
+  workout: Workout,
+  exerciseId: string,
+  setId: string,
+  changes: Extract<WorkoutAction, { type: "UPDATE_SET" }>["payload"]["changes"],
+): Workout {
+  const set = findExercise(workout, exerciseId).sets.find(
+    (s) => s.id === setId,
+  );
+  if (set) {
+    Object.assign(set, changes);
+  }
+  return workout;
+}
+
+function updateExerciseRpe(
+  workout: Workout,
+  exerciseId: string,
+  rpe: number,
+): Workout {
+  findExercise(workout, exerciseId).rpe = rpe;
+  return workout;
+}
+
 export function reducer(state: Workout, action: WorkoutAction): Workout {
   const workout = structuredClone(state);
 
@@ -177,6 +201,19 @@ export function reducer(state: Workout, action: WorkoutAction): Workout {
       );
     case "REMOVE_EXERCISE":
       return removeExercise(workout, action.payload.exerciseId);
+    case "UPDATE_SET":
+      return updateSet(
+        workout,
+        action.payload.exerciseId,
+        action.payload.setId,
+        action.payload.changes,
+      );
+    case "UPDATE_EXERCISE_RPE":
+      return updateExerciseRpe(
+        workout,
+        action.payload.exerciseId,
+        action.payload.rpe,
+      );
     default:
       throw new Error();
   }

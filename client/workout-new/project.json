@@ -1,0 +1,26 @@
+{
+  "name": "workout-new",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "client/workout-new/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "rspack serve --mode=development",
+        "cwd": "client/workout-new"
+      },
+      "readyWhen": {
+        "signal": true
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/workout-new"
+      }
+    }
+  }
+}

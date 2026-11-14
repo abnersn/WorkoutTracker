@@ -14,7 +14,7 @@ The browser talks only to the gateway, which keeps no data of its own. It calls 
 
 ```mermaid
 flowchart LR
-  web["<b>Front end</b><br/>shell + 5 remotes<br/><i>Zephyr Cloud</i>"]
+  web["<b>Front end</b><br/>shell + 7 remotes<br/><i>Zephyr Cloud</i>"]
   gateway["<b>Gateway</b><br/>NestJS · GraphQL · JWT<br/>no database<br/><i>Cloud Run, public</i>"]
   users["<b>Users service</b><br/>NestJS · gRPC<br/><i>Cloud Run, private</i>"]
   svc["<b>Workouts service</b><br/>NestJS · gRPC<br/><i>Cloud Run, private</i>"]
@@ -37,14 +37,17 @@ flowchart LR
 
 ### The front end
 
-The shell is the only app the browser loads directly; it pulls in each remote at runtime. Dashed borders mark the train-together bonus.
+The shell is the only app the browser loads directly; it pulls in each remote at runtime. `workout-view` is the one remote that loads another: it renders `workout-new`'s screen in read-only mode, so the exercise and set components exist in one place. Dashed borders mark the train-together bonus.
 
 ```mermaid
 flowchart TB
   shell["<b>shell</b><br/>layout · routes · sign-in guard"]
   shell --> auth["<b>auth</b><br/>sign up · sign in"]
-  shell --> workouts["<b>workouts</b><br/>build and run workouts"]
-  shell --> history["<b>history</b><br/>past workouts"]
+  shell --> list["<b>workout-list</b><br/>saved workouts"]
+  shell --> new["<b>workout-new</b><br/>build and run a workout"]
+  shell --> view["<b>workout-view</b><br/>a finished workout"]
+  shell --> history["<b>workout-history</b><br/>past workouts"]
+  view -.->|"loads the screen at runtime"| new
   shell --> pairing["<b>pairing</b><br/>QR code links two people"]
   shell --> together["<b>train-together</b><br/>shared live screen"]
 
@@ -52,7 +55,7 @@ flowchart TB
   classDef front fill:#dbe7ff,stroke:#2f5fd0,stroke-width:1.5px,color:#0b2263
   classDef bonus fill:#dbe7ff,stroke:#2f5fd0,stroke-width:1.5px,stroke-dasharray:6 4,color:#0b2263
   class shell host
-  class auth,workouts,history front
+  class auth,list,new,view,history front
   class pairing,together bonus
 ```
 
@@ -90,21 +93,21 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
 - `client/`: React front end
   - `shell/` (host): layout, routes and the sign-in guard; loads every remote. _Unit and e2e tests._
   - `auth/` (remote): sign-up and sign-in screens
-  - `workouts/` (remote): workout list, editor and solo training
-  - `history/` (remote): completed workouts
+  - `workout-list/` (remote, port 8104): saved workouts, with add and delete
+  - `workout-new/` (remote, port 8103): the workout screen: build, run, finish and save as a template. Exposes `./App` and `./Workout`. _Unit tests._
+  - `workout-view/` (remote, port 8101): a finished workout, read-only; renders `workoutNew/Workout`
+  - `workout-history/` (remote, port 8102): completed workouts, with delete
   - `pairing/` (remote): shows your QR code and scans a partner's to link two trainings
   - `train-together/` (remote): the shared training screen, with each exercise as it's completed
-  - `ui/` (lib): component library, documented in Storybook
-    - `src/primitives/`: Button, Input, Card, Dialog, Badge
-    - `src/workout/`: ExerciseCard, SetRow, RestTimer, RpeScale, PartnerProgress
+  - `ui/` (lib): generic components, documented in Storybook: Button, Card, Badge, Dialog, Container, TextInput, TextLabel, SectionHeading, EmptyMessage, AddItemForm, plus the `tone` and `motion` helpers
     - `src/theme.css`: the Tailwind theme every remote imports
-  - `hooks/` (lib): `useTimer`, `useNotification`
+  - `hooks/` (lib): `useTimer`, `useNotification`, and `usePersistence` (IndexedDB, deprecated until `workout-repository` replaces it)
   - `auth-state/` (lib): token storage, `AuthProvider`, `useAuth`; loaded once and shared by every remote
   - `api/` (lib): Apollo Client, the auth link and generated GraphQL hooks
   - `workout-repository/` (lib): `WorkoutRepository`, with IndexedDB and GraphQL adapters
   - `types/` (lib): `Workout`, `Exercise`, `Set`, `WorkoutLog`, `ExerciseType`
-  - `reducer/` (lib): the workout state machine: actions and set stages
-  - `utils/` (lib): `formatDuration`, `totalVolume`, `restRemaining`
+  - `reducer/` (lib): the workout state machine: actions (including `UPDATE_SET` and `UPDATE_EXERCISE_RPE`) and set stages
+  - `utils/` (lib): `timeFormat`, date formatting (`Intl`), `linkClickHandler`, `genId`, completeness checks and the IndexedDB `Database`
   - `limits/` (lib, project `client-limits`): form hints for sets, reps and weights
 - `server/`: NestJS back end
   - `gateway/` (app): GraphQL, JWT, guards and DataLoaders; no database. _Unit and e2e tests._
@@ -119,18 +122,31 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
 ### Inside a project
 
 - `<project>/`
-  - `src/`: the code. A library exports only `src/index.ts`.
-  - `tests/`: `*.spec.ts` files, mirroring `src/`
-    - `unit/` and `e2e/`: used instead, when the project has both kinds
-  - `stories/` and `.storybook/`: `ui` only. Stories mirror `src/`.
+  - `src/`: the code. A library exports only `src/index.ts`. Unit specs (`*.spec.ts`) and stories (`*.stories.tsx`) sit next to the file they cover.
+  - `tests/`: planned for the server, `*.spec.ts` files mirroring `src/`, with `unit/` and `e2e/` when a project has both kinds
+  - `.storybook/`: in `ui` and in every client remote
 
 ### Conventions
 
 - File names in kebab-case.
 - Nest code: one feature module per folder, such as `users/users.module.ts`, `users.service.ts`, `users.resolver.ts`.
-- Remotes: `src/screens/` and `src/components/`. A component used by more than one remote moves to `ui`.
-- Libraries are imported through `@workout-tracker/<name>`. Nx project names must be unique, so the two `limits` folders are the projects `client-limits` and `server-limits`. Remotes are never imported, only loaded by the shell.
+- Remotes: components in `src/components/`, each with a story; the federated entry is `src/App.tsx`. A component belongs to the view that uses it. A generic one used by several views goes to `ui`; a view-specific one used by two views (the exercise and set components) stays in `workout-new` and is reached through its exposed `./Workout`.
+- Views take an optional `navigate` prop from the shell, so their links move within the SPA instead of reloading.
+- Strings are plain English; there is no translation layer.
+- Styling: each remote imports its own `src/styles.css` (Tailwind 4 through PostCSS, with `@source` for `ui` and for any remote whose components it renders). Storybook uses the Vite plugin instead.
+- Libraries are imported through `@workout-tracker/<name>`. Nx project names must be unique, so the two `limits` folders are the projects `client-limits` and `server-limits`. Remotes are never imported: the shell loads them, and `workout-view` loads `workout-new` through Module Federation.
 - Generators run with `--e2eTestRunner=none`. Each project's test config points at `tests/`, and projects with e2e tests get a separate `e2e` target with its config in `tests/e2e/`.
+
+## Running locally
+
+```sh
+npx nx serve shell              # the shell on :8100; serve each remote the same way
+npx nx serve workout-view       # also starts the shell and workout-new
+npx nx storybook workout-new    # or ui, workout-view, workout-history, workout-list
+npx nx run-many -t lint test
+```
+
+Storybook picks port 6006 and offers another if it is taken; pass `-- --port <n>` to run several at once. `npx nx build-storybook <project>` writes `storybook-static/`, which is gitignored but should be deleted before linting.
 
 ## Day 1: The Front End on Nx (Still IndexedDB)
 
@@ -138,26 +154,27 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
   - [x] Create it with `create-nx-workspace`, pinned to Node 24
   - [x] Add the plugins: `@nx/react`, `@nx/nest`, `@nx/js`, `@nx/module-federation`, `@nx/storybook`
   - [x] Add the tags and the boundary rule
-- [ ] **`client/types`**, **`client/reducer`**, **`client/utils`**, **`client/limits`**
+- [x] **`client/types`**, **`client/reducer`**, **`client/utils`**, **`client/limits`**
   - [x] Port the types, the reducer and its actions, and the time utilities, with tests in `tests/`
-  - [ ] Stop saving runtime fields (`stage`, `activeSetId`) in workout templates
-  - [ ] Remove `serializeWorkout`'s DOM reads by moving `SetDisplay`'s reps and weight into reducer state
+  - [x] Stop saving runtime fields (`stage`, `activeSetId`) in workout templates
+  - [x] Remove the DOM reads by moving a set's reps, weight, rest and time into reducer state; the views build the log with `buildLog`. `serializeWorkout` is still in `utils`, now unused
 - [x] **`client/ui`** with Storybook
-  - [x] Port Container, Button, DecoratedBlock, RPEScale and SetDisplay to Tailwind 4, with a story each in `stories/`
-  - [x] Load `theme.css` in `.storybook/preview.ts`, and add `@storybook/addon-a11y`
-- [ ] **`client/hooks`**: `useTimer`, `useNotification`
+  - [x] Port the components to Tailwind 4, with a story each. View-specific ones then moved into their remotes (see Conventions)
+  - [x] Load `theme.css` in `.storybook/preview.css`, and add `@storybook/addon-a11y`
+  - [x] Storybook in every remote too
+- [x] **`client/hooks`**: `useTimer`, `useNotification`
 - [ ] **`client/workout-repository`**: the `WorkoutRepository` interface and its IndexedDB adapter
 - [ ] **Module Federation**
-  - [ ] `shell` host, plus the `workouts` and `history` remotes (Rspack)
-  - [ ] React 19 and React Router 7
+  - [x] `shell` host, plus the `workout-list`, `workout-new`, `workout-view` and `workout-history` remotes (Rspack)
+  - [x] React 19 and React Router 7
   - [ ] Share react, react-router, `@apollo/client` and `auth-state` as singletons
 - [x] Fix the old issues:
-  - [ ] Switch to `createRoot`
-  - [ ] Stop passing an async function to `useEffect`
-  - [ ] Correct the `tabuler-nums` typo
+  - [x] Switch to `createRoot`
+  - [x] Stop passing an async function to `useEffect`
+  - [x] Correct the `tabuler-nums` typo
 - [ ] **Zephyr**: add `withZephyr()` to each Rspack config and deploy
 
-**Done when:** the app runs from its Zephyr URL, still storing data in IndexedDB, and `nx storybook ui` shows every component.
+**Done when:** the app runs from its Zephyr URL, still storing data in IndexedDB, and each project's Storybook shows its components.
 
 ## Day 2: Back End, Sign-In and Deploy
 

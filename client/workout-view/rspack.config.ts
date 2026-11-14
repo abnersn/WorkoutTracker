@@ -41,9 +41,27 @@ export default defineConfig((_env, argv) => {
       hot: true,
       headers: { "Access-Control-Allow-Origin": "*" },
     },
-    resolve: { extensions: ["...", ".ts", ".tsx", ".jsx"] },
+    resolve: {
+      extensions: ["...", ".ts", ".tsx", ".jsx"],
+      // Resolve the @workout-tracker/* workspace aliases from tsconfig.base.json.
+      tsConfig: path.resolve(__dirname, "tsconfig.json"),
+    },
     module: {
       rules: [
+        {
+          test: /\.css$/,
+          type: "javascript/auto",
+          use: [
+            "style-loader",
+            "css-loader",
+            {
+              loader: "postcss-loader",
+              options: {
+                postcssOptions: { plugins: ["@tailwindcss/postcss"] },
+              },
+            },
+          ],
+        },
         {
           test: /\.(j|t)sx?$/,
           exclude: [/node_modules/],
@@ -81,6 +99,9 @@ export default defineConfig((_env, argv) => {
       new ModuleFederationPlugin({
         name: NAME,
         filename: "remoteEntry.js",
+        remotes: {
+          workoutNew: "workout_new@http://localhost:8103/remoteEntry.js",
+        },
         exposes: {
           "./App": "./src/App.tsx",
         },

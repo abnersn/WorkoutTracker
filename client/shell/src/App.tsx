@@ -1,5 +1,16 @@
 import { Component, Suspense, type ReactNode } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
+import { Container } from "@workout-tracker/ui";
 import { lazyProvider } from "./mf";
+import "./styles.css";
 
 // ProviderBoundary catches the lazy() rejection that fires when a provider's
 // remoteEntry.js can't be fetched (provider not running, network error,
@@ -33,20 +44,78 @@ class ProviderBoundary extends Component<
   }
 }
 
-const ProviderWorkout = lazyProvider("workoutView", "App");
-const ProviderHistory = lazyProvider("workoutHistory", "App");
+// Every remote receives `navigate`, so its links move within the SPA instead of reloading.
+interface NavigateProps {
+  navigate: (to: string) => void;
+}
+
+const ProviderWorkoutView = lazyProvider<{ id: string } & NavigateProps>(
+  "workoutView",
+  "App",
+);
+const ProviderWorkoutHistory = lazyProvider<NavigateProps>(
+  "workoutHistory",
+  "App",
+);
+const ProviderWorkoutList = lazyProvider<NavigateProps>("workoutList", "App");
+const ProviderWorkoutNew = lazyProvider<
+  { id?: string; fromLogs?: boolean } & NavigateProps
+>("workoutNew", "App");
+
+// "/": the saved workouts above the history.
+function HomeRoute() {
+  const navigate = useNavigate();
+  return (
+    <>
+      <ProviderBoundary name="workoutList">
+        <ProviderWorkoutList navigate={navigate} />
+      </ProviderBoundary>
+      <ProviderBoundary name="workoutHistory">
+        <ProviderWorkoutHistory navigate={navigate} />
+      </ProviderBoundary>
+    </>
+  );
+}
+
+// workouts/new?id=<saved workout, or log key with fromLogs=true> -> run mode.
+function WorkoutNewRoute() {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  return (
+    <ProviderBoundary name="workoutNew">
+      <ProviderWorkoutNew
+        id={params.get("id") ?? ""}
+        fromLogs={params.get("fromLogs") === "true"}
+        navigate={navigate}
+      />
+    </ProviderBoundary>
+  );
+}
+
+// workouts/:id -> view mode. The id comes from the path and is handed to the
+// workoutView remote.
+function WorkoutViewRoute() {
+  const { id = "" } = useParams();
+  const navigate = useNavigate();
+  return (
+    <ProviderBoundary name="workoutView">
+      <ProviderWorkoutView id={id} navigate={navigate} />
+    </ProviderBoundary>
+  );
+}
 
 export function App() {
   return (
-    <main>
-      <h1>shell</h1>
-      <ProviderBoundary name="workoutView">
-        <ProviderWorkout />
-      </ProviderBoundary>
-      <ProviderBoundary name="workoutHistory">
-        <ProviderHistory />
-      </ProviderBoundary>
-    </main>
+    <BrowserRouter>
+      <Container>
+        <Routes>
+          <Route index element={<HomeRoute />} />
+          <Route path="workouts/new" element={<WorkoutNewRoute />} />
+          <Route path="workouts/:id" element={<WorkoutViewRoute />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Container>
+    </BrowserRouter>
   );
 }
 
