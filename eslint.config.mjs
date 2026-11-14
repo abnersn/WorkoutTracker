@@ -40,6 +40,13 @@ export default [
     rules: {},
   },
   {
+    // Storybook's main.ts config typing needs `any` in a few places.
+    files: ["**/.storybook/main.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
     // Named exports only: default exports are forbidden across the repo.
     // Tool config files (ESLint, Jest, rspack), nx-generated App modules and Storybook stories require a default export and are exempt.
     files: [

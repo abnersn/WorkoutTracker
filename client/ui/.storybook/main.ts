@@ -20,12 +20,19 @@ const config: StorybookConfig = {
   viteFinal: async (config) =>
     mergeConfig(config, {
       resolve: {},
-      plugins: [react(), tailwindcss(), tsconfigPaths({
+      plugins: [
+        react(),
+        tailwindcss(),
+        tsconfigPaths({
           loose: true,
           projects: [
-            resolve(dirname(fileURLToPath(import.meta.url)), "../../../tsconfig.base.json"),
+            resolve(
+              dirname(fileURLToPath(import.meta.url)),
+              "../../../tsconfig.base.json",
+            ),
           ],
-        })],
+        }),
+      ],
     }),
 };
 

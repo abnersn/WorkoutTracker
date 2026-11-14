@@ -1,5 +1,10 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { cssToken, easingToken, msToken, prefersReducedMotion } from "../motion";
+import {
+  cssToken,
+  easingToken,
+  msToken,
+  prefersReducedMotion,
+} from "../motion";
 import { cn, toneClass, type Tone } from "./tone";
 import { TextLabel } from "./text-label";
 
