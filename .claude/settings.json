@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__home-assistant__homeassistant__render_template",
+      "mcp__home-assistant__hassio__get_logs",
+      "mcp__home-assistant__homeassistant__search_actions",
+      "mcp__home-assistant__system_log__get_entries",
+      "mcp__home-assistant__search__search",
+      "mcp__home-assistant__homeassistant__GetLiveContext",
+      "Bash(flatpak remote-info *)"
+    ]
+  }
+}

@@ -4,14 +4,7 @@ import {
   type Workout,
   type WorkoutAction,
 } from "@workout-tracker/types";
-
-function genId(): string {
-  return crypto.randomUUID();
-}
-
-function hasIncompleteSets(exercise: Exercise): boolean {
-  return exercise.sets.some((s) => s.stage !== SetStage.Complete);
-}
+import { genId, hasIncompleteSets } from "@workout-tracker/utils";
 
 function findExercise(
   workout: Workout,

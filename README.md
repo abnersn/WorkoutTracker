@@ -134,24 +134,24 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
 
 ## Day 1: The Front End on Nx (Still IndexedDB)
 
-- [ ] **Workspace**
+- [x] **Workspace**
   - [x] Create it with `create-nx-workspace`, pinned to Node 24
-  - [ ] Add the plugins: `@nx/react`, `@nx/nest`, `@nx/js`, `@nx/module-federation`, `@nx/storybook`
-  - [ ] Add the tags and the boundary rule
+  - [x] Add the plugins: `@nx/react`, `@nx/nest`, `@nx/js`, `@nx/module-federation`, `@nx/storybook`
+  - [x] Add the tags and the boundary rule
 - [ ] **`client/types`**, **`client/reducer`**, **`client/utils`**, **`client/limits`**
-  - [ ] Port the types, the reducer and its actions, and the time utilities, with tests in `tests/`
+  - [x] Port the types, the reducer and its actions, and the time utilities, with tests in `tests/`
   - [ ] Stop saving runtime fields (`stage`, `activeSetId`) in workout templates
   - [ ] Remove `serializeWorkout`'s DOM reads by moving `SetDisplay`'s reps and weight into reducer state
-- [ ] **`client/ui`** with Storybook
-  - [ ] Port Container, Button, DecoratedBlock, RPEScale and SetDisplay to Tailwind 4, with a story each in `stories/`
-  - [ ] Load `theme.css` in `.storybook/preview.ts`, and add `@storybook/addon-a11y`
+- [x] **`client/ui`** with Storybook
+  - [x] Port Container, Button, DecoratedBlock, RPEScale and SetDisplay to Tailwind 4, with a story each in `stories/`
+  - [x] Load `theme.css` in `.storybook/preview.ts`, and add `@storybook/addon-a11y`
 - [ ] **`client/hooks`**: `useTimer`, `useNotification`
 - [ ] **`client/workout-repository`**: the `WorkoutRepository` interface and its IndexedDB adapter
 - [ ] **Module Federation**
   - [ ] `shell` host, plus the `workouts` and `history` remotes (Rspack)
   - [ ] React 19 and React Router 7
   - [ ] Share react, react-router, `@apollo/client` and `auth-state` as singletons
-- [ ] Fix the old issues:
+- [x] Fix the old issues:
   - [ ] Switch to `createRoot`
   - [ ] Stop passing an async function to `useEffect`
   - [ ] Correct the `tabuler-nums` typo

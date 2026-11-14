@@ -41,7 +41,7 @@ export default [
   },
   {
     // Named exports only: default exports are forbidden across the repo.
-    // Tool config files (ESLint, Jest) require a default export and are exempt.
+    // Tool config files (ESLint, Jest) and Storybook stories require a default export and are exempt.
     files: [
       "**/*.ts",
       "**/*.tsx",
@@ -56,6 +56,11 @@ export default [
       "**/eslint.config.mjs",
       "**/jest.config.ts",
       "**/jest.config.cts",
+      // Storybook's CSF format requires a default export (the meta object).
+      "**/*.stories.ts",
+      "**/*.stories.tsx",
+      "**/.storybook/main.ts",
+      "**/.storybook/preview.ts",
     ],
     rules: {
       "no-restricted-syntax": [

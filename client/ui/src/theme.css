@@ -1,0 +1,186 @@
+/*
+ * Workout Tracker theme (Tailwind 4).
+ * Ported from the 2021 app: indigo is the neutral brand colour, blue the primary
+ * action, green success, red danger, cyan a running timer. Components never name a
+ * hue; they use `tone-*` utilities and the `tone-<name>` class picks the palette.
+ */
+
+@theme {
+  /*
+   * One inset wraps every surface on all four sides (`p-inset`), and radii nest
+   * concentrically: an outer radius is the inner radius plus the gap between them.
+   * A control sitting on a card's inset: 8px + 16px = a 24px card.
+   */
+  --spacing-inset: 1rem;
+  --radius-control: 0.5rem;
+  --radius-card: calc(var(--radius-control) + var(--spacing-inset));
+  /*
+   * A ghost icon button (44px box, 20px glyph) tucked into an item card's corner sits
+   * 4px from both edges so its glyph lands on the inset; its radius is the item's
+   * (control) radius minus those 4px.
+   */
+  --spacing-corner: calc(var(--spacing-inset) - 0.75rem);
+  --radius-corner: calc(var(--radius-control) - var(--spacing-corner));
+}
+
+@theme inline {
+  --color-tone-50: var(--tone-50);
+  --color-tone-100: var(--tone-100);
+  --color-tone-200: var(--tone-200);
+  --color-tone-400: var(--tone-400);
+  --color-tone-700: var(--tone-700);
+  --color-tone-800: var(--tone-800);
+  --color-tone-solid: var(--tone-solid);
+  --color-tone-solid-hover: var(--tone-solid-hover);
+  --color-tone-solid-active: var(--tone-solid-active);
+}
+
+@layer components {
+  /*
+   * "solid" is the filled-button colour, dark enough for white text at 4.5:1.
+   * Neutral is a deep indigo ink so it never reads as the primary blue.
+   */
+  .tone-neutral {
+    --tone-50: var(--color-indigo-50);
+    --tone-100: var(--color-indigo-100);
+    --tone-200: var(--color-indigo-200);
+    --tone-400: var(--color-indigo-400);
+    --tone-700: var(--color-indigo-700);
+    --tone-800: var(--color-indigo-800);
+    --tone-solid: var(--color-indigo-900);
+    --tone-solid-hover: var(--color-indigo-800);
+    --tone-solid-active: var(--color-indigo-950);
+  }
+  .tone-primary {
+    --tone-50: var(--color-blue-50);
+    --tone-100: var(--color-blue-100);
+    --tone-200: var(--color-blue-200);
+    --tone-400: var(--color-blue-400);
+    --tone-700: var(--color-blue-700);
+    --tone-800: var(--color-blue-800);
+    --tone-solid: var(--color-blue-600);
+    --tone-solid-hover: var(--color-blue-700);
+    --tone-solid-active: var(--color-blue-800);
+  }
+  .tone-success {
+    --tone-50: var(--color-green-50);
+    --tone-100: var(--color-green-100);
+    --tone-200: var(--color-green-200);
+    --tone-400: var(--color-green-400);
+    --tone-700: var(--color-green-700);
+    --tone-800: var(--color-green-800);
+    --tone-solid: var(--color-green-700);
+    --tone-solid-hover: var(--color-green-800);
+    --tone-solid-active: var(--color-green-900);
+  }
+  .tone-danger {
+    --tone-50: var(--color-red-50);
+    --tone-100: var(--color-red-100);
+    --tone-200: var(--color-red-200);
+    --tone-400: var(--color-red-400);
+    --tone-700: var(--color-red-700);
+    --tone-800: var(--color-red-800);
+    --tone-solid: var(--color-red-600);
+    --tone-solid-hover: var(--color-red-700);
+    --tone-solid-active: var(--color-red-800);
+  }
+  .tone-highlight {
+    --tone-50: var(--color-cyan-50);
+    --tone-100: var(--color-cyan-100);
+    --tone-200: var(--color-cyan-200);
+    --tone-400: var(--color-cyan-400);
+    --tone-700: var(--color-cyan-700);
+    --tone-800: var(--color-cyan-800);
+    --tone-solid: var(--color-cyan-700);
+    --tone-solid-hover: var(--color-cyan-800);
+    --tone-solid-active: var(--color-cyan-900);
+  }
+
+  /* Numbers line up in every timer, rep and weight field. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* RPE slider: a green-to-red track, a white thumb ringed in the current level. */
+  .rpe-range {
+    --rpe-track: linear-gradient(
+      90deg,
+      #10b981,
+      #49b364,
+      #68ac48,
+      #81a42d,
+      #999a0f,
+      #af8e00,
+      #c37f00,
+      #d66f13,
+      #e55b2c,
+      #ef4444
+    );
+    appearance: none;
+    width: 100%;
+    height: 2rem;
+    background: transparent;
+    cursor: pointer;
+  }
+  .rpe-range:disabled {
+    cursor: default;
+  }
+  .rpe-range:focus {
+    outline: none;
+  }
+  .rpe-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--rpe-track);
+  }
+  .rpe-range::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--rpe-track);
+  }
+  .rpe-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: calc((6px - 1.5rem) / 2);
+    border-radius: 9999px;
+    border: 3px solid var(--rpe-color);
+    background: white;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+    /* The ring warms or cools with the effort instead of jumping a colour. */
+    transition: border-color 180ms ease-out;
+  }
+  .rpe-range::-moz-range-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+    box-sizing: border-box;
+    border-radius: 9999px;
+    border: 3px solid var(--rpe-color);
+    background: white;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+    /* The ring warms or cools with the effort instead of jumping a colour. */
+    transition: border-color 180ms ease-out;
+  }
+  .rpe-range:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-indigo-600);
+    outline-offset: 2px;
+  }
+  .rpe-range:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--color-indigo-600);
+    outline-offset: 2px;
+  }
+}
+
+/* Browser surfaces that would otherwise keep their defaults. */
+@layer base {
+  ::selection {
+    background: var(--color-indigo-200);
+    color: var(--color-indigo-950);
+  }
+  input {
+    caret-color: var(--color-indigo-600);
+  }
+  html {
+    overscroll-behavior: none;
+  }
+}
