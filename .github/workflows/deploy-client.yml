@@ -1,0 +1,27 @@
+name: Deploy client to Zephyr
+
+on:
+  push:
+    tags:
+      - "staging-*"   # -> Zephyr staging environment
+      - "v*"          # -> Zephyr production environment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deploy front ends to Zephyr
+        run: npx nx deploy shell
+        env:
+          ZE_CI_TOKEN: ${{ secrets.ZE_CI_TOKEN }}
