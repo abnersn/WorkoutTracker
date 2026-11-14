@@ -4,6 +4,7 @@ import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxReadySignalPlugin } from "@nx/rspack/ready-signal";
 import { withZephyr } from "zephyr-rspack-plugin";
 import { ReactRefreshRspackPlugin } from "@rspack/plugin-react-refresh";
+import { sharedDependencies } from "../../module-federation.shared.mjs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -99,13 +100,7 @@ export default defineConfig((_env, argv) => {
         exposes: {
           "./App": "./src/App.tsx",
         },
-        shared: {
-          react: { singleton: true, requiredVersion: "^19" },
-          "react-dom": { singleton: true, requiredVersion: "^19" },
-          "@apollo/client": { singleton: true },
-          "react-router": { singleton: true },
-          "@workout-tracker/auth-state": { singleton: true },
-        },
+        shared: sharedDependencies,
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),

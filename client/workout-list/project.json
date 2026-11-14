@@ -19,6 +19,8 @@
     },
     "build": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "outputs": ["{projectRoot}/dist"],
       "options": {
         "command": "rspack build --mode=production",
         "cwd": "client/workout-list",
