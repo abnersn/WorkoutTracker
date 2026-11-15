@@ -1,4 +1,4 @@
-import { SetStage } from "../generated/workouts/v1/workouts";
+import { SetStage } from "./generated/workouts/v1/workouts";
 
 /** A wire value this build doesn't know, e.g. a newer client or server sent it. */
 export class UnrecognizedEnumError extends Error {
