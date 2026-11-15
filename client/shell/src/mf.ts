@@ -12,6 +12,9 @@ export function lazyProvider<Props = unknown>(
     const mod = await loadRemote<{ default: ComponentType<Props> }>(
       `${alias}/${exposeName}`,
     );
-    return { default: mod!.default };
+    if (!mod) {
+      throw new Error(`Remote module "${alias}/${exposeName}" failed to load`);
+    }
+    return { default: mod.default };
   });
 }

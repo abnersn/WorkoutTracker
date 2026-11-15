@@ -41,7 +41,19 @@ export default [
       "**/*.mjs",
     ],
     // Override or add rules here
-    rules: {},
+    rules: {
+      // A leading underscore marks a binding as intentionally unused,
+      // e.g. dropping a key with `const { key: _key, ...rest } = obj`.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
   },
   {
     // Require explicit return types on functions and methods.
