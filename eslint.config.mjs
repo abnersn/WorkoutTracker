@@ -14,7 +14,11 @@ export default [
         "error",
         {
           enforceBuildableLibDependency: true,
-          allow: ["^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$"],
+          allow: [
+            "^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$",
+            // Shared module-federation deps, imported by each app's rspack config.
+            "^.*/module-federation\\.shared\\.mjs$",
+          ],
           depConstraints: [
             {
               sourceTag: "*",
@@ -38,21 +42,6 @@ export default [
     ],
     // Override or add rules here
     rules: {},
-  },
-  {
-    // Require `import type` for imports used only as types.
-    // Excluded from server/: Nest DI and decorator metadata need runtime class references.
-    files: ["**/*.ts", "**/*.tsx", "**/*.cts", "**/*.mts"],
-    ignores: ["server/**"],
-    rules: {
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        {
-          prefer: "type-imports",
-          fixStyle: "inline-type-imports",
-        },
-      ],
-    },
   },
   {
     // Require explicit return types on functions and methods.

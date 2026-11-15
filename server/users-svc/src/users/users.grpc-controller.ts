@@ -8,7 +8,7 @@ import {
   UsersServiceControllerMethods,
   type VerifyCredentialsRequest,
 } from "@workout-tracker/proto";
-import { type UsersService } from "./users.service";
+import { UsersService } from "./users.service";
 import { UsersErrorsFilter } from "./user-errors.filter";
 import { Payload } from "@nestjs/microservices";
 import { z } from "zod";

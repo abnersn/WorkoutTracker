@@ -22,26 +22,22 @@
     "JavaScript": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
-      "code_actions_on_format": { "source.fixAll.eslint": true }
+      "format_on_save": "on"
     },
     "JSX": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
-      "code_actions_on_format": { "source.fixAll.eslint": true }
+      "format_on_save": "on"
     },
     "TypeScript": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
-      "code_actions_on_format": { "source.fixAll.eslint": true }
+      "format_on_save": "on"
     },
     "TSX": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on",
-      "code_actions_on_format": { "source.fixAll.eslint": true }
+      "format_on_save": "on"
     },
     "JSON": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "JSONC": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
