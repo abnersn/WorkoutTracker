@@ -38,7 +38,7 @@ export default defineConfig((_env, argv) => {
       uniqueName: NAME,
       clean: true,
     },
-    devServer: { port: PORT, historyApiFallback: true, hot: true },
+    devServer: { port: PORT, historyApiFallback: true, hot: true, open: true },
     resolve: {
       extensions: ["...", ".ts", ".tsx", ".jsx"],
       // Resolve the @workout-tracker/* workspace aliases from tsconfig.base.json.

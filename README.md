@@ -1,27 +1,46 @@
-# Workout Tracker: 3-Day Build Plan
+# Workout Tracker
 
-A portfolio rebuild of the 2021 WorkoutTracker SPA: an Nx monorepo with Module Federation front ends on Zephyr, a NestJS GraphQL gateway, two NestJS gRPC services, and MongoDB.
+A workout app where you build routines, run them set by set with a rest timer and RPE, and look back at what you did. It's a rebuild of a 2021 single-page app, and the point of the rebuild is the architecture: a **micro-frontend** UI talking to a **backend-for-frontend (BFF)** gateway, with small gRPC services behind it.
 
-**Auth:** email + password. The users service stores and checks passwords; the gateway issues a JWT. No roles: every query is scoped to its owner.
+**Stack:** Nx monorepo · React 19 · Module Federation (Rspack) on Zephyr Cloud · NestJS GraphQL gateway · NestJS gRPC services · MongoDB Atlas · Cloud Run
 
-**Language:** English only, no i18n.
+## What you get
+
+- Sign up and sign in with email and password.
+- Build a workout from exercises and sets, and save it as a template.
+- Run a workout live, with a rest timer and an RPE scale per exercise.
+- Browse finished workouts in your history.
+- Your data is yours: every query is scoped to the signed-in user.
+
+## The big idea
+
+The front end is split into **independent apps** (a shell and five remotes) that are stitched together in the browser at runtime. The browser talks to **one backend**, a GraphQL gateway shaped around what the screens need. The gateway holds no data. It calls two small gRPC services, and each service owns its own database.
+
+So each layer has one job:
+
+| Layer         | Job                                                                 |
+| ------------- | ------------------------------------------------------------------- |
+| Shell         | Layout, routing, the sign-in guard. Loads the remotes.              |
+| Remotes       | One screen or feature each. Built and deployed on their own.        |
+| Gateway (BFF) | One GraphQL endpoint for the UI. Auth, validation, error mapping.   |
+| Services      | Domain logic and storage (users, workouts). Private, gRPC only.     |
 
 ## Architecture
 
 ### The system
 
-The browser talks only to the gateway, which keeps no data of its own. It calls the users and workouts services over gRPC, and each service owns its own database on one Atlas cluster.
+The browser only ever sees the gateway. The services are private and only accept calls from the gateway's service account.
 
 ```mermaid
 flowchart LR
-  web["<b>Front end</b><br/>shell + 7 remotes<br/><i>Zephyr Cloud</i>"]
+  web["<b>Front end</b><br/>shell + 5 remotes<br/><i>Zephyr Cloud</i>"]
   gateway["<b>Gateway</b><br/>NestJS · GraphQL · JWT<br/>no database<br/><i>Cloud Run, public</i>"]
   users["<b>Users service</b><br/>NestJS · gRPC<br/><i>Cloud Run, private</i>"]
   svc["<b>Workouts service</b><br/>NestJS · gRPC<br/><i>Cloud Run, private</i>"]
   usersDb[("<b>users</b><br/><i>Atlas</i>")]
-  workoutsDb[("<b>workouts · logs<br/>sessions</b><br/><i>Atlas</i>")]
+  workoutsDb[("<b>workouts · logs</b><br/><i>Atlas</i>")]
 
-  web -->|"GraphQL + WebSocket"| gateway
+  web -->|GraphQL| gateway
   gateway -->|gRPC| users
   gateway -->|gRPC| svc
   users --> usersDb
@@ -35,9 +54,15 @@ flowchart LR
   class usersDb,workoutsDb data
 ```
 
+**Why a BFF gateway?** The UI asks for exactly the data a screen needs in one round trip, and never learns that two services exist. Passwords, JWTs, rate limits and error translation live in one place. Swapping or splitting a service later doesn't touch the front end.
+
+**Why gRPC between the gateway and services?** A typed contract (`.proto` files, checked with `buf`) that both sides generate code from. Breaking it fails CI rather than production.
+
+**Why a database per service?** Each service can change its schema, scale, or move to another store without asking anyone. The cost is that joins happen in the gateway, so it batches lookups with DataLoader.
+
 ### The front end
 
-The shell is the only app the browser loads directly; it pulls in each remote at runtime. Remotes never load each other: `workout-new` and `workout-view` both render the workout screen from the `ui` library (`workout-view` in read-only mode), so the exercise and set components exist in one place. Dashed borders mark the train-together bonus.
+The shell is the only app the browser loads directly. It pulls in each remote at runtime through Module Federation. Remotes never load each other. When two remotes need the same screen, such as `workout-new` and `workout-view` (read-only), they render it from the shared `ui` library.
 
 ```mermaid
 flowchart TB
@@ -47,16 +72,14 @@ flowchart TB
   shell --> new["<b>workout-new</b><br/>build and run a workout"]
   shell --> view["<b>workout-view</b><br/>a finished workout"]
   shell --> history["<b>workout-history</b><br/>past workouts"]
-  shell --> pairing["<b>pairing</b><br/>QR code links two people"]
-  shell --> together["<b>train-together</b><br/>shared live screen"]
 
   classDef host fill:#b8cdfb,stroke:#1f449e,stroke-width:3px,color:#0b2263
   classDef front fill:#dbe7ff,stroke:#2f5fd0,stroke-width:1.5px,color:#0b2263
-  classDef bonus fill:#dbe7ff,stroke:#2f5fd0,stroke-width:1.5px,stroke-dasharray:6 4,color:#0b2263
   class shell host
   class auth,list,new,view,history front
-  class pairing,together bonus
 ```
+
+**Why micro-frontends?** Each remote has its own build, dev server, Storybook and deploy. A change to `workout-history` ships without rebuilding the rest, and in a bigger team it would belong to a different squad. React, React Router, Apollo Client and the auth state are shared singletons, so the pieces behave like one app.
 
 ### Delivery
 
@@ -64,230 +87,153 @@ One pipeline tests every change, then ships each part to where it runs.
 
 ```mermaid
 flowchart LR
-  ci["<b>GitHub Actions</b><br/>test, then deploy"]
-  ci -->|front ends| zephyr["<b>Zephyr Cloud</b>"]
-  ci -->|"gateway + 2 services"| run["<b>Cloud Run</b>"]
-  ci -->|Storybook| pages["<b>GitHub Pages</b>"]
+  ci["<b>GitHub Actions</b><br/>verify, then deploy"]
+  ci -->|"1. services"| run["<b>Cloud Run</b>"]
+  run -->|"2. gateway"| run
+  ci -->|"3. front ends"| zephyr["<b>Zephyr Cloud</b>"]
 
   classDef front fill:#dbe7ff,stroke:#2f5fd0,stroke-width:1.5px,color:#0b2263
   classDef back fill:#ffe9cf,stroke:#d9730d,stroke-width:1.5px,color:#4d2600
   classDef tool fill:#e9edf2,stroke:#5b6b7f,stroke-width:1.5px,color:#1f2a37
   class ci tool
-  class zephyr,pages front
+  class zephyr front
   class run back
 ```
 
-## Workspace
+Pushing a `staging-*` tag deploys staging, and a `v*` tag deploys production. The order matters: services first, then the gateway, then the front ends, so a new UI never calls an old gateway.
 
-> [!NOTE] Boundary rules
->
-> - Two top-level folders, `client/` and `server/`. They never import each other, and nothing is shared between them.
-> - A library lives on the side that imports it. A value both sides need, such as an input limit, goes in that side's own `limits` library; the server's copy is the one enforced.
-> - Every project is tagged `scope:client` or `scope:server` (matching its folder) and `type:app` or `type:lib`. `@nx/enforce-module-boundaries` turns the rules into lint errors.
+## Scalability
 
-### Projects
+- **Stateless backends.** The gateway and both services keep nothing in memory between requests, so Cloud Run can add or remove instances freely.
+- **Scale each piece alone.** If workouts get hot, scale `workouts-svc` and leave `users-svc` at its minimum. The databases are separate too.
+- **Batched reads.** A DataLoader in the gateway turns "last run of each workout" from N calls into one.
+- **Independent front-end deploys.** Remotes are built and published separately, so teams don't queue behind one build.
+- **Fast builds as the repo grows.** Nx caches results and runs only what a change affects. Module boundary rules (`scope:client`, `scope:server`, `type:app`, `type:lib`) are lint errors, so the structure doesn't rot.
 
-Each line reads: folder (kind): what it holds. Projects with end-to-end tests say so.
+## Reliability
 
-- `client/`: React front end
-  - `shell/` (host): layout, routes and the sign-in guard; loads every remote. _Unit and e2e tests._
-  - `auth/` (remote, port 8105): sign-up and sign-in screens
-  - `workout-list/` (remote, port 8104): saved workouts, with add and delete
-  - `workout-new/` (remote, port 8103): build, run, finish and save a workout as a template; renders `ui`'s `Workout`
-  - `workout-view/` (remote, port 8101): a finished workout, read-only; renders `ui`'s `Workout` with `mode="view"`
-  - `workout-history/` (remote, port 8102): completed workouts, with delete
-  - `pairing/` (remote): shows your QR code and scans a partner's to link two trainings
-  - `train-together/` (remote): the shared training screen, with each exercise as it's completed
-  - `ui/` (lib): generic components, documented in Storybook: Button, Card, Badge, Dialog, Container, TextInput, TextLabel, SectionHeading, EmptyMessage, AddItemForm, plus the `tone` and `motion` helpers. Also the workout screen shared by `workout-new` and `workout-view`: `Workout` (the only part exported), its exercise and set components, and `buildLog`. _Unit tests._
-    - `src/theme.css`: the Tailwind theme every remote imports
-  - `hooks/` (lib): `useTimer`, `useNotification`, and the data hooks (`useWorkouts`, `useLogs`, `useWorkoutRun`, `useLoggedWorkout`, `useWorkoutActions`), which hide the GraphQL calls behind the domain types. _Unit tests._
-  - `auth-state/` (lib): token storage, `AuthProvider`, `useAuth`; loaded once and shared by every remote
-  - `api/` (lib): Apollo Client with the auth link, the generated GraphQL types, `mountApp` (every app's bootstrap) and a mock client for Storybook
-  - `types/` (lib): `Workout`, `Exercise`, `Set`, `WorkoutLog`
-  - `reducer/` (lib): the workout state machine: actions (including `UPDATE_SET` and `UPDATE_EXERCISE_RPE`) and set stages
-  - `utils/` (lib): `timeFormat`, date formatting (`Intl`), `linkClickHandler`, `genId`, completeness checks and the in-progress run kept in localStorage
-  - `limits/` (lib, project `client-limits`): form hints for sets, reps and weights
-- `server/`: NestJS back end
-  - `gateway/` (app): GraphQL, JWT, guards and DataLoaders; no database. _Unit and e2e tests._
-    - `src/`: one folder per feature: `auth/`, `users/`, `workouts/`, `sessions/`, `graphql/`
-  - `users-svc/` (app): the `users` collection and argon2 hashing; gRPC `CreateUser`, `VerifyCredentials`, `GetUsers`. _Unit and e2e tests._
-  - `workouts-svc/` (app): workouts, logs and train-together sessions, with change streams. _Unit and e2e tests._
-  - `proto/` (lib): the `.proto` files (`workouts`, `sessions`, `users`), buf config, generated code and loader options
-  - `limits/` (lib, project `server-limits`): the input limits the server enforces
-- `tools/`: Docker and deploy scripts
-- `nx.json`, `package.json`, `tsconfig.base.json`
+- **Private services.** On Cloud Run, the services accept only the gateway's service account (`roles/run.invoker`), and the gateway signs each call with a Google ID token.
+- **Deadlines on every gRPC call**, so a slow service fails fast instead of hanging the request.
+- **Fail at boot, not at 2 a.m.** Every server validates its environment with zod and refuses to start if anything is missing. Staging never falls back to development values.
+- **Typed errors end to end.** gRPC errors are mapped to GraphQL errors in one filter. Failed sign-ins return one generic error, so the API doesn't reveal which emails exist.
+- **Safe auth basics.** Passwords are hashed with argon2id, sign-in is rate limited per caller, and every query is filtered by owner. Asking for someone else's workout returns "not found".
+- **Contracts checked in CI.** `verify.yml` runs format, lint, type-check, unit tests, builds, `buf lint`, and confirms the generated proto and GraphQL code match their sources.
+- **Secrets stay out of the repo.** Deployed values live in Secret Manager. CI authenticates to GCP with Workload Identity Federation instead of stored keys.
 
-### Inside a project
+## Run it locally
 
-- `<project>/`
-  - `src/`: the code. A library exports only `src/index.ts`. Unit specs (`*.spec.ts`) and stories (`*.stories.tsx`) sit next to the file they cover.
-  - `tests/`: planned for the server, `*.spec.ts` files mirroring `src/`, with `unit/` and `e2e/` when a project has both kinds
-  - `.storybook/`: in `ui` and in every client remote
+### What you need
 
-### Conventions
+| Requirement          | Version | Why                                           |
+| -------------------- | ------- | --------------------------------------------- |
+| Node.js              | 22+     | CI and the Docker images use 26               |
+| npm                  | 10+     | Ships with Node                               |
+| Docker with Compose  | recent  | Runs MongoDB as a single-node replica set     |
+| Free ports           |         | 8100 to 8105 (front ends), 3000 (gateway), 27017 (MongoDB), 50051 and 50052 (gRPC) |
 
-- File names in kebab-case.
-- Nest code: one feature module per folder, such as `users/users.module.ts`, `users.service.ts`, `users.resolver.ts`.
-- Remotes: components in `src/components/`, each with a story; the federated entry is `src/App.tsx`. A component belongs to the view that uses it. One used by several views goes to `ui`, including the workout screen that `workout-new` and `workout-view` share. Remotes never load each other's code at runtime.
-- Views take an optional `navigate` prop from the shell, so their links move within the SPA instead of reloading.
-- Strings are plain English; there is no translation layer.
-- Styling: each remote imports its own `src/styles.css` (Tailwind 4 through PostCSS, with `@source` for `ui` and for any remote whose components it renders). Storybook uses the Vite plugin instead.
-- Libraries are imported through `@workout-tracker/<name>`. Nx project names must be unique, so the two `limits` folders are the projects `client-limits` and `server-limits`. Remotes are never imported: only the shell loads them, through Module Federation.
-- Generators run with `--e2eTestRunner=none`. Each project's test config points at `tests/`, and projects with e2e tests get a separate `e2e` target with its config in `tests/e2e/`.
+No cloud account is needed to run locally. Zephyr is only switched on for the `deploy` target.
 
-## Running locally
+### Steps
 
 ```sh
-npx nx serve shell              # the shell on :8100; serve each remote the same way
-npx nx serve workout-view       # also starts the shell
-npx nx storybook workout-new    # or ui, workout-view, workout-history, workout-list
-npx nx run-many -t lint typecheck test
+# 1. Install
+npm install
+
+# 2. Give the gateway a JWT secret (32+ characters; this file is gitignored)
+echo "JWT_SECRET=$(openssl rand -hex 32)" > server/gateway/.env.development.local
+
+# 3. Start MongoDB in Docker, then every app in the workspace
+npm run dev
 ```
 
-Every project has a `typecheck` target (`tsc --noEmit` on each of its tsconfigs), added by `tools/nx/typecheck-plugin.js`. Builds don't check types: Rspack and Jest only strip them.
+Then open **http://localhost:8100**, create an account, and build a workout.
 
-The servers' debuggers listen on 9229 (gateway), 9230 (users-svc) and 9231 (workouts-svc), which `.vscode/launch.json` and `.zed/debug.json` expect.
+### Handy commands
+
+```sh
+npx nx serve shell                 # just the shell on :8100
+npx nx serve workout-view          # one remote (also starts the shell)
+npx nx storybook ui                # component docs; also works for each remote
+npx nx run-many -t lint typecheck test   # what CI runs
+npx nx graph                       # see how the projects depend on each other
+```
+
+Debuggers listen on 9229 (gateway), 9230 (users-svc) and 9231 (workouts-svc). The VS Code and Zed configs in the repo already point at them.
 
 ### Environments
 
-There are three: `development`, `staging` and `production`. The Nx configuration name picks one, and Nx loads the matching env files (first value found wins; shell variables beat all of them):
+There are three: `development`, `staging` and `production`. The Nx configuration name picks one, and `npm run dev:staging` runs local processes against staging's database. Env files come in layers:
 
-```sh
-npm run dev           # development: starts MongoDB in Docker, then every app
-npm run dev:staging   # staging: local processes against staging's database
-npx nx serve gateway -c production
+| File                               | Committed | Holds                                                    |
+| ---------------------------------- | --------- | -------------------------------------------------------- |
+| `.env.<config>` (root)             | yes       | `APP_ENV`                                                |
+| `server/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI`    |
+| `server/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`           |
+| `server/<app>/.env.<config>.local` | no        | secrets: `JWT_SECRET`, a hosted `MONGODB_URI`            |
+
+## Tour of the repo
+
+Two top-level folders, `client/` and `server/`. They never import each other. Anything both sides need, like an input limit, gets its own copy on each side, and the server's copy is the one that's enforced.
+
+```text
+client/
+  shell/            host app: layout, routes, sign-in guard (:8100)
+  auth/             remote: sign up and sign in (:8105)
+  workout-list/     remote: saved workouts (:8104)
+  workout-new/      remote: build, run and save a workout (:8103)
+  workout-view/     remote: a finished workout, read-only (:8101)
+  workout-history/  remote: completed workouts (:8102)
+  ui/               component library with Storybook, plus the shared Workout screen
+  hooks/            useTimer, useNotification, and data hooks that hide GraphQL
+  api/              Apollo Client, generated GraphQL types, mountApp
+  auth-state/       token storage and AuthProvider, shared by every remote
+  reducer/          the workout state machine
+  types/            Workout, Exercise, Set, WorkoutLog
+  utils/            time and date formatting, small helpers
+
+server/
+  gateway/          GraphQL BFF: auth, guards, DataLoaders, error mapping
+  users-svc/        users collection, argon2 hashing, gRPC
+  workouts-svc/     workouts and logs, gRPC
+  proto/            .proto contracts, buf config, generated code
+  helpers/          env validation, error helpers shared by the servers
+
+tools/
+  docker/           one Dockerfile that runs any of the three servers
+  nx/               a local Nx plugin that adds a typecheck target
+.github/workflows/  verify.yml (every PR) and deploy.yml (tags)
 ```
 
-| File                               | Committed | Holds                                                                   |
-| ---------------------------------- | --------- | ----------------------------------------------------------------------- |
-| `.env.<config>` (root)             | yes       | `APP_ENV`                                                               |
-| `server/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI`                   |
-| `server/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`, for every configuration |
-| `server/<app>/.env.<config>.local` | no        | that app's secrets: `JWT_SECRET`, a hosted `MONGODB_URI`                |
+Good places to start poking around:
 
-`APP_ENV` is what the code reads; `NODE_ENV` only says how the bundle was built, and staging runs a production build. Every server validates its environment at boot and refuses to start if anything is missing, so a staging run never falls back to development values. Deployed environments set the same variables on Cloud Run instead of using files.
+- `client/shell/rspack.config.ts` and `client/shell/src/mf.ts` for how remotes are wired in.
+- `client/reducer/src/lib/reducer.ts` for the workout state machine.
+- `server/proto/protos/` for the contracts between the gateway and services.
+- `server/gateway/src/workouts/` for a resolver, a gRPC client and a DataLoader side by side.
+- `.github/workflows/deploy.yml` for the tier-by-tier deploy.
 
-### Deploying
+Libraries are imported as `@workout-tracker/<name>`. Remotes are never imported, only loaded by the shell at runtime.
 
-`verify.yml` checks every pull request and push to `main`: formatting, lint, type-check, tests, builds, that the generated proto and GraphQL code matches its sources, and `buf lint`.
+## Deploying your own copy
 
-Pushing a `staging-*` tag deploys the whole stack to staging, and a `v*` tag deploys it to production. `deploy.yml` runs tier by tier: `verify.yml` first, then the services and the gateway to Cloud Run, then the front ends to Zephyr, so a new front end never calls an old gateway. The front-end job builds the shell with `GATEWAY_URL` set to the gateway it just deployed; the shell's `deploy` target refuses to build without it. Staging services get a `-staging` suffix; both environments share one GCP project. Each server runs from `tools/docker/server.Dockerfile`, built from its `nx run <app>:prune` output.
-
-On Cloud Run, the services listen on the `PORT` Cloud Run gives them and accept only calls from the gateway's service account (`roles/run.invoker`). The gateway calls them over TLS with a Google ID token (`GRPC_AUTH=google-id-token`). Locally, the services listen on loopback and the gateway calls them in plaintext. The gateway trusts one proxy hop (Cloud Run's front end), so the sign-in rate limit counts each caller's own address.
-
-One-time setup for `deploy.yml`:
+You'll need a GCP project, a MongoDB Atlas cluster and a Zephyr Cloud account. One-time setup for `deploy.yml`:
 
 - An Artifact Registry Docker repository named `workout-tracker` in `GCP_REGION`.
 - Three service accounts: a deployer (Cloud Run Admin, Artifact Registry Writer, and Service Account User on the other two), the gateway's runtime account, and the services' runtime account. Both runtime accounts need Secret Manager Secret Accessor.
-- Secret Manager secrets, per environment (`staging`, `production`): `jwt-secret-<env>`, `users-mongodb-uri-<env>` and `workouts-mongodb-uri-<env>`.
-- Repository variables: `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WIF_PROVIDER` (Workload Identity Federation for this repository), `GCP_DEPLOY_SA`, `GCP_GATEWAY_SA`, `GCP_SERVICES_SA`.
-- GitHub environments `staging` and `production`, each with a `CORS_ORIGINS` variable: the comma-separated origins of that environment's Zephyr URL, plus `http://localhost:8100` for staging.
+- Secret Manager secrets per environment (`staging`, `production`): `jwt-secret-<env>`, `users-mongodb-uri-<env>` and `workouts-mongodb-uri-<env>`.
+- Repository variables: `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WIF_PROVIDER`, `GCP_DEPLOY_SA`, `GCP_GATEWAY_SA`, `GCP_SERVICES_SA`.
+- GitHub environments `staging` and `production`, each with a `CORS_ORIGINS` variable listing that environment's Zephyr URL (plus `http://localhost:8100` for staging).
 - A `ZEPHYR_CI_TOKEN` repository secret.
 
-Storybook picks port 6006 and offers another if it is taken; pass `-- --port <n>` to run several at once. `npx nx build-storybook <project>` writes `storybook-static/`, which is gitignored but should be deleted before linting.
+The front-end job builds the shell with `GATEWAY_URL` set to the gateway it just deployed, and the shell's `deploy` target refuses to build without it.
 
-## Day 1: The Front End on Nx (Still IndexedDB)
+## Limits and what's next
 
-- [x] **Workspace**
-  - [x] Create it with `create-nx-workspace`, pinned to Node 24
-  - [x] Add the plugins: `@nx/react`, `@nx/nest`, `@nx/js`, `@nx/module-federation`, `@nx/storybook`
-  - [x] Add the tags and the boundary rule
-- [x] **`client/types`**, **`client/reducer`**, **`client/utils`**, **`client/limits`**
-  - [x] Port the types, the reducer and its actions, and the time utilities, with tests in `tests/`
-  - [x] Stop saving runtime fields (`stage`, `activeSetId`) in workout templates
-  - [x] Remove the DOM reads by moving a set's reps, weight, rest and time into reducer state; the views build the log with `buildLog`. `serializeWorkout` is still in `utils`, now unused
-- [x] **`client/ui`** with Storybook
-  - [x] Port the components to Tailwind 4, with a story each. View-specific ones then moved into their remotes (see Conventions)
-  - [x] Load `theme.css` in `.storybook/preview.css`, and add `@storybook/addon-a11y`
-  - [x] Storybook in every remote too
-- [x] **`client/hooks`**: `useTimer`, `useNotification`
-- [x] **`client/workout-repository`**: the `WorkoutRepository` interface and its IndexedDB adapter
-- [x] **Module Federation**
-  - [x] `shell` host, plus the `workout-list`, `workout-new`, `workout-view` and `workout-history` remotes (Rspack)
-  - [x] React 19 and React Router 7
-  - [x] Share react, react-router, `@apollo/client` and `auth-state` as singletons
-- [x] Fix the old issues:
-  - [x] Switch to `createRoot`
-  - [x] Stop passing an async function to `useEffect`
-  - [x] Correct the `tabuler-nums` typo
-- [x] **Zephyr**: add `withZephyr()` to each Rspack config and deploy
+- Tests are unit tests today. End-to-end tests (gateway against an in-memory MongoDB, Playwright for the UI) are still on the list.
+- A "train together" mode (QR pairing and a shared live screen over GraphQL subscriptions) is designed but not built.
+- Left out on purpose: offline support, data import, GitHub sign-in, email verification, password reset and refresh tokens.
+- English only, no i18n.
 
-**Done when:** the app runs from its Zephyr URL, still storing data in IndexedDB, and each project's Storybook shows its components.
+## License
 
-## Day 2: Back End, Sign-In and Deploy
-
-- [ ] **`server/proto`**
-  - [ ] `workouts.proto` and `users.proto` (packages `workouts.v1` and `users.v1`)
-  - [ ] `buf.yaml` and `buf.gen.yaml` with the ts-proto options `nestJs=true`, `addGrpcMetadata=true`, `stringEnums=true` and `useDate=false`
-  - [ ] A cached `codegen` target, with `dependsOn: ["^codegen"]` in the projects that use it
-  - [ ] One set of proto-loader options shared by every server and client
-- [ ] **`server/users-svc`**
-  - [ ] Nest gRPC microservice with its own database
-  - [ ] `users` collection with a unique, lowercased email
-  - [ ] `CreateUser` and `VerifyCredentials` with argon2id; one error for any failed check
-  - [ ] `GetUsers`, a batch lookup by ID
-  - [ ] Unit tests in `tests/unit/`, e2e tests over gRPC in `tests/e2e/`
-- [ ] **`server/workouts-svc`**
-  - [ ] Nest gRPC microservice with its own database
-  - [ ] Mongoose schemas typed from the generated code, plus a `toProto` mapper
-  - [ ] Every query filtered by `ownerId`, returning NOT_FOUND for other users' data
-  - [ ] Create, read, update and delete for workouts, plus logs
-  - [ ] `GetLastRuns` aggregation
-  - [ ] Unit and e2e tests
-- [ ] **`server/gateway`**
-  - [ ] Configuration validated with zod; no database connection
-  - [ ] `signUp` and `signIn` call users-svc, then issue a 7-day JWT; `me` reads it
-  - [ ] Global guard, `@Public()`, `@CurrentUser()`
-  - [ ] Rate limiting with `@nestjs/throttler`
-  - [ ] Code-first GraphQL types, resolvers and `toGql` mappers
-  - [ ] DataLoader for `lastRunAt`
-  - [ ] Map gRPC errors to GraphQL errors
-  - [ ] Unit and e2e tests
-- [ ] **Front end**
-  - [ ] `client/api`: Apollo Client, the auth link and generated hooks
-  - [ ] `client/auth-state`: `AuthProvider` and `useAuth`
-  - [ ] `auth` remote: sign-up and sign-in screens
-  - [ ] Shell redirects signed-out users to sign-in
-  - [ ] GraphQL adapter for `WorkoutRepository`
-- [ ] **Local setup**: Docker Compose running MongoDB as a single-node replica set
-- [ ] **Deploy**
-  - [ ] MongoDB Atlas free cluster, one database per service
-  - [ ] Secrets in Secret Manager
-  - [ ] Dockerfiles
-  - [ ] `gateway` on Cloud Run, public
-  - [ ] `users-svc` and `workouts-svc` on Cloud Run with `--use-http2`, private
-  - [ ] `roles/run.invoker` for the gateway, and a Google ID token on each of its gRPC calls
-  - [ ] CORS restricted to the Zephyr origin
-
-**Done when:** you can sign up on the deployed app and your workouts persist in Atlas.
-
-## Day 3 Morning: Quality
-
-- [ ] **Tests**
-  - [ ] Gateway e2e against `MongoMemoryReplSet`: sign up, create and list workouts, and confirm a second user can't see them
-  - [ ] Shell e2e with Playwright: sign up, build a workout, run it
-- [ ] **CI on pull requests**: `nx affected -t lint test e2e build`, plus `buf lint`, `buf breaking` and a check that generated code is up to date
-- [ ] **CI on main**
-  - [ ] Deploy tier by tier (services, then gateway, then front ends), using Workload Identity Federation instead of stored keys
-  - [ ] Publish Storybook to GitHub Pages
-- [ ] **README**: these diagrams, how to run locally, and the tradeoffs chosen
-
-## Day 3 Afternoon: Train Together (Bonus)
-
-- [ ] **`sessions.proto`**: `StartSession`, `JoinSession`, `ReportProgress`, and `WatchSession` as a server stream
-- [ ] **Session schema**: join code, participants, and `expiresAt` with a TTL index
-- [ ] **workouts-svc**: change stream → Observable that sends the current snapshot first and closes the stream when the client disconnects
-- [ ] **Gateway**
-  - [ ] `sessionUpdated` subscription bridged from the gRPC stream, authenticated through graphql-ws `connectionParams`
-  - [ ] Partner display names from users-svc's `GetUsers`, batched with a DataLoader
-- [ ] **`pairing` remote**: show a QR code with the join link (`qrcode`), scan a partner's with the camera (`@zxing/browser`)
-- [ ] **`train-together` remote**: each completed exercise for both partners, and a shared rest timer based on `resting_until`
-- [ ] **Shell e2e**: two Playwright browser contexts pair and train together
-- [ ] Deploy, then demo with two accounts on two devices
-
-## Cut (Unless Time Is Left Over)
-
-- PWA offline support
-- Data import
-- GitHub sign-in
-- Email verification, password reset and refresh tokens
+MIT
