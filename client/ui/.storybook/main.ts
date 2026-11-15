@@ -17,6 +17,21 @@ const config: StorybookConfig = {
     options: {},
   },
 
+  // The published site is composed: this Storybook is the host and the
+  // remotes' Storybooks load inside it, each in a sibling folder (see
+  // .github/workflows/storybook.yml). Storybook needs absolute URLs here, so
+  // the workflow passes the site's address as STORYBOOK_SITE_URL. Without it
+  // (local runs and plain builds) the host stands alone.
+  refs: (_config, { configType }) => {
+    const site = process.env.STORYBOOK_SITE_URL?.replace(/\/$/, "");
+    if (configType !== "PRODUCTION" || !site) return {};
+    return Object.fromEntries(
+      ["workout-new", "workout-view", "workout-list", "workout-history"].map(
+        (name) => [name, { title: name, url: `${site}/${name}/` }],
+      ),
+    );
+  },
+
   viteFinal: async (config) =>
     mergeConfig(config, {
       resolve: {},

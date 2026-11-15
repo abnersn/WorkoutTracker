@@ -133,17 +133,9 @@ The shared UI lives in `client/ui`. It holds the building blocks every remote us
 
 Every component has a story next to it (`button.tsx`, `button.stories.tsx`), and the `a11y` addon checks each one for accessibility problems. Remotes get their own Storybook for the views they own, such as the saved-workout card or the history list. The `workout-new` and `workout-view` stories run against a mock Apollo client from `client/api`, so you can work on those screens without starting the backend.
 
-The published site has one Storybook per project:
+The published site is one view. The `ui` Storybook is the host, and the four remote Storybooks (`workout-new`, `workout-view`, `workout-list`, `workout-history`) show up in its sidebar through [Storybook composition](https://storybook.js.org/docs/sharing/storybook-composition). Each is still a separate build, so a remote's docs stay with the remote.
 
-| Storybook         | What's in it                             |
-| ----------------- | ---------------------------------------- |
-| `ui`              | primitives and the shared workout screen |
-| `workout-new`     | building and running a workout           |
-| `workout-view`    | a finished workout, read-only            |
-| `workout-list`    | saved workouts                           |
-| `workout-history` | past workouts                            |
-
-To run one locally, use `npx nx storybook ui` (or any project above). `.github/workflows/storybook.yml` builds all five and publishes them to GitHub Pages. It only runs for `main`.
+To run one locally, use `npx nx storybook ui` (or any remote). Locally each runs alone; the combined view only exists on the published site. `.github/workflows/storybook.yml` builds all five and publishes them to GitHub Pages. It only runs for `main`.
 
 ## Run it locally
 

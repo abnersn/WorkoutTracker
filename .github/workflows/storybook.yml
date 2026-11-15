@@ -1,6 +1,6 @@
 name: Storybook
 
-# Publishes every Storybook to GitHub Pages. Always built from main: the
+# Publishes every Storybook to GitHub Pages as one composed view. Always built from main: the
 # trigger is a push to main, and manual runs are refused on any other branch.
 on:
   push:
@@ -30,17 +30,22 @@ jobs:
 
       - run: npm ci
 
+      # One view: the ui Storybook is the host, and the other four load inside
+      # it through Storybook's composition (refs in client/ui/.storybook).
+      # Refs need absolute URLs, so the host is built knowing the site address.
       - name: Build every Storybook
-        run: npx nx run-many -t build-storybook
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          export STORYBOOK_SITE_URL="https://$owner.github.io/${GITHUB_REPOSITORY#*/}"
+          npx nx run-many -t build-storybook
 
-      # One folder per Storybook, plus a landing page that links to them.
+      # The host sits at the site root, each remote in its own folder.
       - name: Assemble the site
         run: |
-          mkdir site
-          for project in ui workout-list workout-new workout-view workout-history; do
+          cp -r client/ui/storybook-static site
+          for project in workout-list workout-new workout-view workout-history; do
             cp -r "client/$project/storybook-static" "site/$project"
           done
-          cp tools/pages/index.html site/index.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
