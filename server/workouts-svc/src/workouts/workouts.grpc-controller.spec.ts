@@ -9,19 +9,12 @@ import {
   protoLoaderOptions,
   workoutsGrpcOptions,
 } from "@workout-tracker/proto";
-import { APP_GUARD } from "@nestjs/core";
-import {
-  errors,
-  INTERNAL_SECRET_METADATA,
-  InternalSecretGuard,
-} from "@workout-tracker/helpers";
-import { toUserId, toWorkoutId } from "./ids";
+import { errors, USER_ID_METADATA } from "@workout-tracker/helpers";
+import { toLogId, toUserId, toWorkoutId } from "./ids";
 import { WorkoutsGrpcController } from "./workouts.grpc-controller";
 import { WorkoutsService } from "./workouts.service";
-import { USER_ID_METADATA } from "./user-id";
 
 const PROTO_DIR = join(__dirname, "../../../proto/protos");
-const SECRET = "s".repeat(32);
 const USER_ID = "64b000000000000000000001";
 const WORKOUT_ID = "64b0000000000000000000aa";
 
@@ -74,10 +67,9 @@ function makeClient(url: string): Client {
   };
 }
 
-// What the gateway will send: the internal secret plus the caller's id.
+// What the gateway sends: the caller's id.
 function asUser(...ids: string[]): grpc.Metadata {
   const metadata = new grpc.Metadata();
-  metadata.add(INTERNAL_SECRET_METADATA, SECRET);
   for (const id of ids) {
     metadata.add(USER_ID_METADATA, id);
   }
@@ -99,17 +91,14 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
     updateLog: jest.fn(),
     deleteLog: jest.fn(),
     getLastRuns: jest.fn(),
+    getPreviousRun: jest.fn(),
   };
 
   beforeAll(async () => {
     const url = `127.0.0.1:${await freePort()}`;
     const moduleRef = await Test.createTestingModule({
       controllers: [WorkoutsGrpcController],
-      providers: [
-        { provide: WorkoutsService, useValue: service },
-        // Registered as in WorkoutsModule, so the guard runs over real gRPC.
-        { provide: APP_GUARD, useValue: new InternalSecretGuard(SECRET) },
-      ],
+      providers: [{ provide: WorkoutsService, useValue: service }],
     }).compile();
     app = moduleRef.createNestMicroservice<MicroserviceOptions>({
       transport: Transport.GRPC,
@@ -126,31 +115,6 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
   });
 
   beforeEach(() => jest.resetAllMocks());
-
-  describe(`${INTERNAL_SECRET_METADATA} metadata`, () => {
-    const withSecret = (secret?: string): grpc.Metadata => {
-      const metadata = new grpc.Metadata();
-      if (secret !== undefined) {
-        metadata.add(INTERNAL_SECRET_METADATA, secret);
-      }
-      metadata.add(USER_ID_METADATA, USER_ID);
-      return metadata;
-    };
-
-    it.each([
-      ["missing", withSecret()],
-      ["wrong", withSecret("t".repeat(32))],
-    ])("returns PERMISSION_DENIED when it is %s", async (_, metadata) => {
-      const err = await client
-        .call("ListWorkouts")({}, metadata)
-        .catch((e: grpc.ServiceError) => e);
-
-      expect((err as grpc.ServiceError).code).toBe(
-        grpc.status.PERMISSION_DENIED,
-      );
-      expect(service.listWorkouts).not.toHaveBeenCalled();
-    });
-  });
 
   describe(`${USER_ID_METADATA} metadata`, () => {
     it("passes the caller's id to the service on a list call", async () => {
@@ -249,6 +213,48 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
         grpc.status.INVALID_ARGUMENT,
       );
       expect(service.getLastRuns).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("GetPreviousRun", () => {
+    const LOG_ID = "64b0000000000000000000cc";
+
+    it("returns the previous run", async () => {
+      service.getPreviousRun.mockResolvedValue({
+        ...workout,
+        id: "64b0000000000000000000dd",
+        workoutId: WORKOUT_ID,
+      });
+      const res = await client.call("GetPreviousRun")(
+        { logId: LOG_ID },
+        asUser(USER_ID),
+      );
+      expect(service.getPreviousRun).toHaveBeenCalledWith(
+        toUserId(USER_ID),
+        toLogId(LOG_ID),
+      );
+      expect(res).toMatchObject({
+        log: { id: "64b0000000000000000000dd", workoutId: WORKOUT_ID },
+      });
+    });
+
+    it("leaves log unset for a first run", async () => {
+      service.getPreviousRun.mockResolvedValue(undefined);
+      const res = await client.call("GetPreviousRun")(
+        { logId: LOG_ID },
+        asUser(USER_ID),
+      );
+      expect(res).toEqual({ log: null });
+    });
+
+    it("returns INVALID_ARGUMENT for a malformed id", async () => {
+      const err = await client
+        .call("GetPreviousRun")({ logId: "nope" }, asUser(USER_ID))
+        .catch((e: grpc.ServiceError) => e);
+      expect((err as grpc.ServiceError).code).toBe(
+        grpc.status.INVALID_ARGUMENT,
+      );
+      expect(service.getPreviousRun).not.toHaveBeenCalled();
     });
   });
 });

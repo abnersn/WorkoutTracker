@@ -46,6 +46,9 @@
         "development": {
           "buildTarget": "users-svc:build:development"
         },
+        "staging": {
+          "buildTarget": "users-svc:build:production"
+        },
         "production": {
           "buildTarget": "users-svc:build:production"
         }

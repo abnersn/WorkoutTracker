@@ -7,6 +7,8 @@ import {
   type GetLastRunsRequest,
   type GetLastRunsResponse,
   type GetLogRequest,
+  type GetPreviousRunRequest,
+  type GetPreviousRunResponse,
   type GetWorkoutRequest,
   type ListLogsRequest,
   type ListLogsResponse,
@@ -74,6 +76,7 @@ export const createLogSchema = z.object({ log: logEntrySchema });
 export const updateLogSchema = z.object({
   log: logEntrySchema.extend({ id: objectId }),
 });
+export const getPreviousRunSchema = z.object({ logId: objectId });
 // Matches the DataLoader batch the gateway sends for one page.
 export const getLastRunsSchema = z.object({
   workoutIds: z.array(objectId).max(100),
@@ -183,6 +186,18 @@ export class WorkoutsGrpcController implements WorkoutsServiceController {
       lastRuns: await this.workouts.getLastRuns(
         userIdFrom(metadata),
         req.workoutIds.map(toWorkoutId),
+      ),
+    };
+  }
+
+  async getPreviousRun(
+    @Payload(new ZodPipe(getPreviousRunSchema)) req: GetPreviousRunRequest,
+    @Ctx() metadata: Metadata,
+  ): Promise<GetPreviousRunResponse> {
+    return {
+      log: await this.workouts.getPreviousRun(
+        userIdFrom(metadata),
+        toLogId(req.logId),
       ),
     };
   }

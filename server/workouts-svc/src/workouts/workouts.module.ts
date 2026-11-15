@@ -1,12 +1,7 @@
 import { Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import {
-  type Env,
-  InternalSecretGuard,
-  validateEnv,
-} from "@workout-tracker/helpers";
+import { type Env, validateEnv } from "@workout-tracker/helpers";
 import {
   LogEntryRecord,
   LogEntrySchema,
@@ -36,15 +31,8 @@ import { WorkoutsService } from "./workouts.service";
     ]),
   ],
   controllers: [WorkoutsGrpcController],
-  providers: [
-    WorkoutsService,
-    {
-      // Rejects any call without the shared INTERNAL_SECRET.
-      provide: APP_GUARD,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService<Env, true>) =>
-        new InternalSecretGuard(config.get("INTERNAL_SECRET")),
-    },
-  ],
+  // No auth guard: only the gateway's service account may invoke this service
+  // (Cloud Run IAM), and locally it listens on loopback only.
+  providers: [WorkoutsService],
 })
 export class WorkoutsModule {}

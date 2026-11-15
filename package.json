@@ -5,7 +5,8 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev": "nx run-many -t serve -p tag:scope:client --parallel=10"
+    "dev": "docker compose up -d --wait && nx run-many -t serve -p tag:type:app -c development --parallel=12",
+    "dev:staging": "nx run-many -t serve -p tag:type:app -c staging --parallel=12"
   },
   "private": true,
   "devDependencies": {

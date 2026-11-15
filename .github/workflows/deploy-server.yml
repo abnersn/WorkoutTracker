@@ -1,0 +1,97 @@
+name: Deploy servers to Cloud Run
+
+# Same tags as deploy-client.yml, so one tag releases the whole stack.
+on:
+  push:
+    tags:
+      - "staging-*" # -> staging (services suffixed -staging)
+      - "v*" # -> production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Per-environment values (vars.CORS_ORIGINS) live in the GitHub
+    # environment; shared ones (project, region, accounts) in repo variables.
+    environment: ${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
+    concurrency:
+      group: deploy-server-${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write # Workload Identity Federation
+    env:
+      APP_ENV: ${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
+      SUFFIX: ${{ startsWith(github.ref_name, 'staging-') && '-staging' || '' }}
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      REGISTRY: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/workout-tracker
+      GATEWAY_SA: ${{ vars.GCP_GATEWAY_SA }}
+      SERVICES_SA: ${{ vars.GCP_SERVICES_SA }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the servers
+        run: npx nx run-many -t prune -p gateway users-svc workouts-svc
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and push the images
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          for app in gateway users-svc workouts-svc; do
+            image="$REGISTRY/$app:$GITHUB_SHA"
+            docker build -f tools/docker/server.Dockerfile -t "$image" "dist/server/$app"
+            docker push "$image"
+          done
+
+      # Private: gRPC over HTTP/2, callable only by the gateway's account.
+      - name: Deploy users-svc and workouts-svc
+        run: |
+          for app in users-svc workouts-svc; do
+            name="$app$SUFFIX"
+            secret="${app%-svc}-mongodb-uri-$APP_ENV"
+            gcloud run deploy "$name" \
+              --project "$PROJECT" --region "$REGION" --quiet \
+              --image "$REGISTRY/$app:$GITHUB_SHA" \
+              --use-http2 \
+              --no-allow-unauthenticated \
+              --service-account "$SERVICES_SA" \
+              --set-env-vars "APP_ENV=$APP_ENV" \
+              --set-secrets "MONGODB_URI=$secret:latest"
+            gcloud run services add-iam-policy-binding "$name" \
+              --project "$PROJECT" --region "$REGION" --quiet \
+              --member "serviceAccount:$GATEWAY_SA" \
+              --role roles/run.invoker >/dev/null
+          done
+
+      # Public: deployed last, so it never points at a service that isn't up.
+      - name: Deploy the gateway
+        env:
+          CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
+        run: |
+          grpc_url() {
+            url=$(gcloud run services describe "$1$SUFFIX" \
+              --project "$PROJECT" --region "$REGION" \
+              --format 'value(status.url)')
+            echo "${url#https://}:443"
+          }
+          # "^@^" makes @ the separator, since CORS_ORIGINS contains commas.
+          gcloud run deploy "gateway$SUFFIX" \
+            --project "$PROJECT" --region "$REGION" --quiet \
+            --image "$REGISTRY/gateway:$GITHUB_SHA" \
+            --allow-unauthenticated \
+            --service-account "$GATEWAY_SA" \
+            --set-env-vars "^@^APP_ENV=$APP_ENV@GRPC_AUTH=google-id-token@USERS_GRPC_URL=$(grpc_url users-svc)@WORKOUTS_GRPC_URL=$(grpc_url workouts-svc)@CORS_ORIGINS=$CORS_ORIGINS" \
+            --set-secrets "JWT_SECRET=jwt-secret-$APP_ENV:latest"

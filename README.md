@@ -145,6 +145,39 @@ npx nx storybook workout-new    # or ui, workout-view, workout-history, workout-
 npx nx run-many -t lint test
 ```
 
+### Environments
+
+There are three: `development`, `staging` and `production`. The Nx configuration name picks one, and Nx loads the matching env files (first value found wins; shell variables beat all of them):
+
+```sh
+npm run dev           # development: starts MongoDB in Docker, then every app
+npm run dev:staging   # staging: local processes against staging's database
+npx nx serve gateway -c production
+```
+
+| File                               | Committed | Holds                                                                   |
+| ---------------------------------- | --------- | ----------------------------------------------------------------------- |
+| `.env.<config>` (root)             | yes       | `APP_ENV`                                                               |
+| `server/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI`                   |
+| `server/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`, for every configuration |
+| `server/<app>/.env.<config>.local` | no        | that app's secrets: `JWT_SECRET`, a hosted `MONGODB_URI`                |
+
+`APP_ENV` is what the code reads; `NODE_ENV` only says how the bundle was built, and staging runs a production build. Every server validates its environment at boot and refuses to start if anything is missing, so a staging run never falls back to development values. Deployed environments set the same variables on Cloud Run instead of using files.
+
+### Deploying
+
+Pushing a `staging-*` tag deploys the whole stack to staging, and a `v*` tag deploys it to production: `deploy-client.yml` ships the front ends to Zephyr, and `deploy-server.yml` ships the servers to Cloud Run. Staging services get a `-staging` suffix; both environments share one GCP project. Each server runs from `tools/docker/server.Dockerfile`, built from its `nx run <app>:prune` output.
+
+On Cloud Run, the services listen on the `PORT` Cloud Run gives them and accept only calls from the gateway's service account (`roles/run.invoker`). The gateway calls them over TLS with a Google ID token (`GRPC_AUTH=google-id-token`). Locally, the services listen on loopback and the gateway calls them in plaintext.
+
+One-time setup for `deploy-server.yml`:
+
+- An Artifact Registry Docker repository named `workout-tracker` in `GCP_REGION`.
+- Three service accounts: a deployer (Cloud Run Admin, Artifact Registry Writer, and Service Account User on the other two), the gateway's runtime account, and the services' runtime account. Both runtime accounts need Secret Manager Secret Accessor.
+- Secret Manager secrets, per environment (`staging`, `production`): `jwt-secret-<env>`, `users-mongodb-uri-<env>` and `workouts-mongodb-uri-<env>`.
+- Repository variables: `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WIF_PROVIDER` (Workload Identity Federation for this repository), `GCP_DEPLOY_SA`, `GCP_GATEWAY_SA`, `GCP_SERVICES_SA`.
+- GitHub environments `staging` and `production`, each with a `CORS_ORIGINS` variable: the comma-separated origins of that environment's Zephyr URL, plus `http://localhost:8100` for staging.
+
 Storybook picks port 6006 and offers another if it is taken; pass `-- --port <n>` to run several at once. `npx nx build-storybook <project>` writes `storybook-static/`, which is gitignored but should be deleted before linting.
 
 ## Day 1: The Front End on Nx (Still IndexedDB)

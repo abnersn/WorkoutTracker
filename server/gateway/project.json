@@ -46,6 +46,9 @@
         "development": {
           "buildTarget": "gateway:build:development"
         },
+        "staging": {
+          "buildTarget": "gateway:build:production"
+        },
         "production": {
           "buildTarget": "gateway:build:production"
         }

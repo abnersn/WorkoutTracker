@@ -320,4 +320,64 @@ describe("WorkoutsService", () => {
       expect(logs.model.aggregate).not.toHaveBeenCalled();
     });
   });
+
+  describe("getPreviousRun", () => {
+    const viewedDate = new Date("2026-01-10T00:00:00.000Z");
+    const viewed = {
+      _id: toLogId(LOG_ID),
+      userId: USER_ID,
+      workoutId: toWorkoutId(WORKOUT_ID),
+      date: viewedDate,
+    };
+
+    it("finds the caller's newest earlier run of the same workout", async () => {
+      const { service, logs } = setup();
+      const previousId = new Types.ObjectId();
+      logs.exec.mockResolvedValueOnce(viewed).mockResolvedValueOnce({
+        ...viewed,
+        _id: previousId,
+        name: "Push day",
+        date: new Date("2026-01-02T03:04:05.000Z"),
+        duration: 60,
+        isComplete: true,
+        exercises: [],
+      });
+
+      const res = await service.getPreviousRun(USER_ID, toLogId(LOG_ID));
+
+      expect(logs.model.findOne).toHaveBeenNthCalledWith(1, {
+        _id: toLogId(LOG_ID),
+        userId: USER_ID,
+      });
+      expect(logs.model.findOne).toHaveBeenNthCalledWith(2, {
+        userId: USER_ID,
+        workoutId: toWorkoutId(WORKOUT_ID),
+        date: { $lt: viewedDate },
+      });
+      expect(res).toMatchObject({
+        id: previousId.toString(),
+        workoutId: WORKOUT_ID,
+        date: { seconds: 1767323045, nanos: 0 },
+      });
+    });
+
+    it("returns undefined for a workout's first run", async () => {
+      const { service, logs } = setup();
+      logs.exec.mockResolvedValueOnce(viewed).mockResolvedValueOnce(null);
+
+      await expect(
+        service.getPreviousRun(USER_ID, toLogId(LOG_ID)),
+      ).resolves.toBeUndefined();
+    });
+
+    it("returns NOT_FOUND for a log the caller doesn't own", async () => {
+      const { service, logs } = setup();
+      logs.exec.mockResolvedValueOnce(null);
+
+      await expect(
+        service.getPreviousRun(USER_ID, toLogId(LOG_ID)),
+      ).rejects.toThrow(errors.NotFoundError);
+      expect(logs.model.findOne).toHaveBeenCalledTimes(1);
+    });
+  });
 });

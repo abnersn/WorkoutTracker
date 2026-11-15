@@ -46,6 +46,9 @@
         "development": {
           "buildTarget": "workouts-svc:build:development"
         },
+        "staging": {
+          "buildTarget": "workouts-svc:build:production"
+        },
         "production": {
           "buildTarget": "workouts-svc:build:production"
         }

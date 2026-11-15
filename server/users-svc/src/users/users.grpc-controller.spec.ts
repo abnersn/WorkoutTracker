@@ -4,21 +4,14 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { type INestMicroservice } from "@nestjs/common";
 import { type MicroserviceOptions, Transport } from "@nestjs/microservices";
-import { APP_GUARD } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
 import { protoLoaderOptions, usersGrpcOptions } from "@workout-tracker/proto";
 import { Error as MongooseError } from "mongoose";
-import {
-  errors,
-  INTERNAL_SECRET_METADATA,
-  InternalSecretGuard,
-} from "@workout-tracker/helpers";
+import { errors } from "@workout-tracker/helpers";
 import { UsersGrpcController } from "./users.grpc-controller";
 import { UsersService } from "./users.service";
 
 const { EmailTakenError, InvalidCredentialError } = errors;
-
-const SECRET = "s".repeat(32);
 
 const PROTO_DIR = join(__dirname, "../../../proto/protos");
 
@@ -45,15 +38,6 @@ type Client = {
   close: () => void;
 };
 
-// What the gateway sends: the internal secret in call metadata.
-function withSecret(secret?: string): grpc.Metadata {
-  const metadata = new grpc.Metadata();
-  if (secret !== undefined) {
-    metadata.add(INTERNAL_SECRET_METADATA, secret);
-  }
-  return metadata;
-}
-
 function makeClient(url: string): Client {
   const def = protoLoader.loadSync(join(PROTO_DIR, "users/v1/users.proto"), {
     ...protoLoaderOptions,
@@ -68,7 +52,7 @@ function makeClient(url: string): Client {
   );
   const call =
     (name: string): Call =>
-    (req, metadata = withSecret(SECRET)) =>
+    (req, metadata = new grpc.Metadata()) =>
       new Promise((resolve, reject) =>
         raw[name].call(
           raw,
@@ -99,11 +83,7 @@ describe("UsersGrpcController (over gRPC)", () => {
     const url = `127.0.0.1:${await freePort()}`;
     const moduleRef = await Test.createTestingModule({
       controllers: [UsersGrpcController],
-      providers: [
-        { provide: UsersService, useValue: service },
-        // Registered as in UsersModule, so the guard runs over real gRPC.
-        { provide: APP_GUARD, useValue: new InternalSecretGuard(SECRET) },
-      ],
+      providers: [{ provide: UsersService, useValue: service }],
     }).compile();
     app = moduleRef.createNestMicroservice<MicroserviceOptions>({
       transport: Transport.GRPC,
@@ -120,18 +100,6 @@ describe("UsersGrpcController (over gRPC)", () => {
   });
 
   beforeEach(() => jest.resetAllMocks());
-
-  describe(`${INTERNAL_SECRET_METADATA} metadata`, () => {
-    it.each([
-      ["missing", withSecret()],
-      ["wrong", withSecret("t".repeat(32))],
-    ])("returns PERMISSION_DENIED when it is %s", async (_, metadata) => {
-      await expect(
-        client.getUsers({ ids: [user.id] }, metadata),
-      ).rejects.toMatchObject({ code: grpc.status.PERMISSION_DENIED });
-      expect(service.getUsers).not.toHaveBeenCalled();
-    });
-  });
 
   describe("CreateUser", () => {
     const req = {

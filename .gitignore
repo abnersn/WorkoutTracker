@@ -1,6 +1,10 @@
 # See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+# Committed: .env.serve and .env.<configuration> (non-secret, per environment).
+# Never committed: secrets, which go in .env.<configuration>.local.
 .env
+.env.local
+.env.*.local
 
 # compiled output
 dist

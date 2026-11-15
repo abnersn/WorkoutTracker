@@ -2,17 +2,17 @@ import { ApolloServerPluginLandingPageDisabled } from "@apollo/server/plugin/dis
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { Module, ValidationPipe } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { GraphQLModule } from "@nestjs/graphql";
 import type { Request, Response } from "express";
 import { join } from "node:path";
 import { AuthModule } from "../auth/auth.module";
 import { GrpcErrorFilter } from "../graphql/grpc-error-filter";
+import { toValidationGraphQLError } from "../graphql/validation-error";
 import { UsersModule } from "../users/users.module";
-import { validateEnv } from "./env";
-
-const isProduction = process.env.NODE_ENV === "production";
+import { WorkoutsModule } from "../workouts/workouts.module";
+import { type Env, validateEnv } from "./env";
 
 @Module({
   imports: [
@@ -21,26 +21,40 @@ const isProduction = process.env.NODE_ENV === "production";
       ignoreEnvFile: true,
       validate: validateEnv,
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: isProduction
-        ? true
-        : join(process.cwd(), "server/gateway/src/schema.gql"),
-      sortSchema: true,
-      introspection: !isProduction,
-      playground: false,
-      plugins: [
-        isProduction
-          ? ApolloServerPluginLandingPageDisabled()
-          : ApolloServerPluginLandingPageLocalDefault(),
-      ],
-      context: ({ req, res }: { req: Request; res: Response }) => ({
-        req,
-        res,
-      }),
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) => {
+        const appEnv = config.get("APP_ENV", { infer: true });
+        // Introspection and the Sandbox stay on in staging for debugging.
+        const exposeTooling = appEnv !== "production";
+        return {
+          // Only a local dev run rewrites the committed schema file.
+          autoSchemaFile:
+            appEnv === "development"
+              ? join(process.cwd(), "server/gateway/src/schema.gql")
+              : true,
+          sortSchema: true,
+          introspection: exposeTooling,
+          // Without this, a gRPC failure in a field resolver (lastRunAt) skips
+          // GrpcErrorFilter and reaches the client unmasked.
+          fieldResolverEnhancers: ["filters"],
+          playground: false,
+          plugins: [
+            exposeTooling
+              ? ApolloServerPluginLandingPageLocalDefault()
+              : ApolloServerPluginLandingPageDisabled(),
+          ],
+          context: ({ req, res }: { req: Request; res: Response }) => ({
+            req,
+            res,
+          }),
+        };
+      },
     }),
     AuthModule,
     UsersModule,
+    WorkoutsModule,
   ],
   providers: [
     {
@@ -48,6 +62,7 @@ const isProduction = process.env.NODE_ENV === "production";
       useValue: new ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
+        exceptionFactory: toValidationGraphQLError,
       }),
     },
     {

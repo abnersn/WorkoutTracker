@@ -273,6 +273,22 @@ export class WorkoutsService {
     return deleteOrThrow(this.logs, id, userId, "log");
   }
 
+  // The caller's newest run of the same workout dated strictly before this
+  // log, or undefined for a workout's first run. Served by the
+  // { userId, workoutId, date } index. Same-date runs break ties by _id, so
+  // the answer is stable.
+  async getPreviousRun(
+    userId: UserId,
+    id: LogId,
+  ): Promise<LogEntry | undefined> {
+    const log = await findOrThrow(this.logs, id, userId, "log");
+    const previous = await this.logs
+      .findOne({ userId, workoutId: log.workoutId, date: { $lt: log.date } })
+      .sort({ date: -1, _id: -1 })
+      .exec();
+    return previous ? toLog(previous) : undefined;
+  }
+
   // The newest log date of each workout, in one grouped query. Ids that
   // were never run, or belong to another user, simply match no logs.
   async getLastRuns(

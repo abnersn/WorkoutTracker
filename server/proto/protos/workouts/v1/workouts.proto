@@ -76,6 +76,7 @@ service WorkoutsService {
   rpc UpdateLog(UpdateLogRequest) returns (LogEntry);
   rpc DeleteLog(DeleteLogRequest) returns (google.protobuf.Empty);
   rpc GetLastRuns(GetLastRunsRequest) returns (GetLastRunsResponse);
+  rpc GetPreviousRun(GetPreviousRunRequest) returns (GetPreviousRunResponse);
 }
 
 message ListWorkoutsRequest {}
@@ -123,4 +124,15 @@ message LastRun {
 }
 message GetLastRunsResponse {
   repeated LastRun last_runs = 1;
+}
+
+// The run of the same workout just before the given log: the caller's
+// newest log with that workout_id and an earlier date. Lets the history
+// view compare a run against the last one without listing every log.
+message GetPreviousRunRequest {
+  string log_id = 1;
+}
+message GetPreviousRunResponse {
+  // Unset when the log is its workout's first run.
+  LogEntry log = 1;
 }

@@ -7,18 +7,95 @@ type AuthPayload {
   user: User!
 }
 
+input CreateLogInput {
+  activeExerciseId: ID
+  activeSetId: ID
+  date: DateTime!
+  duration: Int!
+  exercises: [ExerciseInput!]!
+  isComplete: Boolean!
+  name: String!
+
+  """The saved workout this was run from."""
+  workoutId: ID!
+}
+
+input CreateWorkoutInput {
+  exercises: [ExerciseInput!]! = []
+  name: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+type Exercise {
+  id: ID!
+  name: String!
+
+  """1 to 10."""
+  rpe: Int
+  sets: [WorkoutSet!]!
+}
+
+input ExerciseInput {
+  """Omit for a new exercise; the server assigns its id."""
+  id: ID
+  name: String!
+  rpe: Int
+  sets: [WorkoutSetInput!]!
+}
+
+type LogEntry {
+  activeExerciseId: ID
+  activeSetId: ID
+  date: DateTime!
+
+  """Seconds."""
+  duration: Int!
+  exercises: [Exercise!]!
+  id: ID!
+  isComplete: Boolean!
+  name: String!
+  workoutId: ID!
+}
+
 type Mutation {
+  createLog(input: CreateLogInput!): LogEntry!
+  createWorkout(input: CreateWorkoutInput!): Workout!
+
+  """Returns the deleted id."""
+  deleteLog(id: ID!): ID!
+
+  """Returns the deleted id. Logs run from it are kept."""
+  deleteWorkout(id: ID!): ID!
   signIn(input: SignInInput!): AuthPayload!
   signUp(input: SignUpInput!): AuthPayload!
+  updateLog(input: UpdateLogInput!): LogEntry!
+  updateWorkout(input: UpdateWorkoutInput!): Workout!
 }
 
 type Query {
+  log(id: ID!): LogEntry!
+
+  """Newest first."""
+  logs: [LogEntry!]!
   me: User!
+
+  """
+  The run of the same workout just before this log; null for its first run.
+  """
+  previousRun(logId: ID!): LogEntry
+  workout(id: ID!): Workout!
+  workouts: [Workout!]!
+}
+
+enum SetStage {
+  ACTIVE
+  COMPLETE
+  IDLE
+  RESTING
 }
 
 input SignInInput {
@@ -32,9 +109,79 @@ input SignUpInput {
   password: String!
 }
 
+input UpdateLogInput {
+  activeExerciseId: ID
+  activeSetId: ID
+  date: DateTime
+  duration: Int
+
+  """Replaces every exercise."""
+  exercises: [ExerciseInput!]
+  id: ID!
+  isComplete: Boolean
+  name: String
+}
+
+input UpdateWorkoutInput {
+  """Replaces every exercise."""
+  exercises: [ExerciseInput!]
+  id: ID!
+  name: String
+}
+
 type User {
   createdAt: DateTime!
   displayName: String!
   email: String!
   id: ID!
+}
+
+type Workout {
+  activeExerciseId: ID
+  activeSetId: ID
+  date: DateTime!
+
+  """Seconds."""
+  duration: Int!
+  exercises: [Exercise!]!
+  id: ID!
+  isComplete: Boolean!
+
+  """When this workout was last run; null if never."""
+  lastRunAt: DateTime
+  name: String!
+}
+
+type WorkoutSet {
+  defaultReps: Int
+
+  """Seconds."""
+  defaultRestTime: Int
+
+  """Always kg."""
+  defaultWeight: Float
+  id: ID!
+
+  """Epoch ms the set started resting."""
+  restStartedAt: Float
+  stage: SetStage!
+}
+
+input WorkoutSetInput {
+  defaultReps: Int
+
+  """Seconds."""
+  defaultRestTime: Int
+
+  """Always kg."""
+  defaultWeight: Float
+
+  """Omit for a new set; the server assigns its id."""
+  id: ID
+
+  """Epoch ms. Ignored on saved workouts."""
+  restStartedAt: Float
+
+  """Defaults to IDLE. Ignored on saved workouts."""
+  stage: SetStage
 }

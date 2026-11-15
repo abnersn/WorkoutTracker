@@ -8,6 +8,7 @@ import {
   usersGrpcOptions,
 } from "@workout-tracker/proto";
 import { join } from "node:path";
+import { grpcCredentials } from "../app/grpc-credentials";
 import { deadline } from "../app/grpc-deadline";
 import { USERS_CLIENT, UsersClient } from "./users.client";
 
@@ -17,19 +18,23 @@ import { USERS_CLIENT, UsersClient } from "./users.client";
       {
         name: USERS_CLIENT,
         inject: [ConfigService],
-        useFactory: (config: ConfigService<Env, true>) => ({
-          transport: Transport.GRPC,
-          options: {
-            ...usersGrpcOptions(
-              join(__dirname, "protos"),
-              config.get("USERS_GRPC_URL", { infer: true }),
-            ),
-            channelOptions: deadline(
-              `${USERS_V1_PACKAGE_NAME}.${USERS_SERVICE_NAME}`,
-              5,
-            ),
-          },
-        }),
+        useFactory: (config: ConfigService<Env, true>) => {
+          const url = config.get("USERS_GRPC_URL", { infer: true });
+          return {
+            transport: Transport.GRPC,
+            options: {
+              ...usersGrpcOptions(join(__dirname, "protos"), url),
+              credentials: grpcCredentials(
+                config.get("GRPC_AUTH", { infer: true }),
+                url,
+              ),
+              channelOptions: deadline(
+                `${USERS_V1_PACKAGE_NAME}.${USERS_SERVICE_NAME}`,
+                5,
+              ),
+            },
+          };
+        },
       },
     ]),
   ],

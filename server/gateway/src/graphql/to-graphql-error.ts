@@ -24,9 +24,23 @@ const PUBLIC_CODES: Partial<Record<number, string>> = {
   [status.FAILED_PRECONDITION]: "FAILED_PRECONDITION",
 };
 
+// Statuses the caller can act on, but whose details are internal (ABORTED
+// carries a Mongoose VersionError message), so they get a fixed message.
+const FIXED_MESSAGES: Partial<Record<number, [string, string]>> = {
+  [status.ABORTED]: [
+    "CONFLICT",
+    "This was changed at the same time elsewhere. Reload and try again.",
+  ],
+};
+
 const logger = new Logger("GrpcErrors");
 
 export function toGraphQLError(err: GrpcError): GraphQLError {
+  const fixed = FIXED_MESSAGES[err.code];
+  if (fixed) {
+    const [code, message] = fixed;
+    return new GraphQLError(message, { extensions: { code } });
+  }
   const code = PUBLIC_CODES[err.code];
   if (code) {
     return new GraphQLError(err.details, { extensions: { code } });

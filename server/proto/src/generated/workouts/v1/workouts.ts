@@ -157,6 +157,20 @@ export interface GetLastRunsResponse {
   lastRuns: LastRun[];
 }
 
+/**
+ * The run of the same workout just before the given log: the caller's
+ * newest log with that workout_id and an earlier date. Lets the history
+ * view compare a run against the last one without listing every log.
+ */
+export interface GetPreviousRunRequest {
+  logId: string;
+}
+
+export interface GetPreviousRunResponse {
+  /** Unset when the log is its workout's first run. */
+  log: LogEntry | undefined;
+}
+
 export const WORKOUTS_V1_PACKAGE_NAME = "workouts.v1";
 
 export interface WorkoutsServiceClient {
@@ -181,6 +195,8 @@ export interface WorkoutsServiceClient {
   deleteLog(request: DeleteLogRequest, metadata?: Metadata): Observable<Empty>;
 
   getLastRuns(request: GetLastRunsRequest, metadata?: Metadata): Observable<GetLastRunsResponse>;
+
+  getPreviousRun(request: GetPreviousRunRequest, metadata?: Metadata): Observable<GetPreviousRunResponse>;
 }
 
 export interface WorkoutsServiceController {
@@ -214,6 +230,11 @@ export interface WorkoutsServiceController {
     request: GetLastRunsRequest,
     metadata?: Metadata,
   ): Promise<GetLastRunsResponse> | Observable<GetLastRunsResponse> | GetLastRunsResponse;
+
+  getPreviousRun(
+    request: GetPreviousRunRequest,
+    metadata?: Metadata,
+  ): Promise<GetPreviousRunResponse> | Observable<GetPreviousRunResponse> | GetPreviousRunResponse;
 }
 
 export function WorkoutsServiceControllerMethods() {
@@ -230,6 +251,7 @@ export function WorkoutsServiceControllerMethods() {
       "updateLog",
       "deleteLog",
       "getLastRuns",
+      "getPreviousRun",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

@@ -6,9 +6,11 @@ import { Env } from "./app/env";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const port = app.get<ConfigService<Env, true>>(ConfigService).get("PORT", {
-    infer: true,
-  });
+  const config = app.get<ConfigService<Env, true>>(ConfigService);
+  // The client sends its JWT in the Authorization header, not a cookie, so
+  // credentialed CORS isn't needed.
+  app.enableCors({ origin: config.get("CORS_ORIGINS", { infer: true }) });
+  const port = config.get("PORT", { infer: true });
   await app.listen(port);
   // Set when Nx waits for this server to be ready
   if (process.env.NX_READY_SIGNAL_SOCKET) {
