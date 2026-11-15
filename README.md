@@ -18,12 +18,12 @@ The front end is split into **independent apps** (a shell and five remotes) that
 
 So each layer has one job:
 
-| Layer         | Job                                                                 |
-| ------------- | ------------------------------------------------------------------- |
-| Shell         | Layout, routing, the sign-in guard. Loads the remotes.              |
-| Remotes       | One screen or feature each. Built and deployed on their own.        |
-| Gateway (BFF) | One GraphQL endpoint for the UI. Auth, validation, error mapping.   |
-| Services      | Domain logic and storage (users, workouts). Private, gRPC only.     |
+| Layer         | Job                                                               |
+| ------------- | ----------------------------------------------------------------- |
+| Shell         | Layout, routing, the sign-in guard. Loads the remotes.            |
+| Remotes       | One screen or feature each, with its own build and deploy target. |
+| Gateway (BFF) | One GraphQL endpoint for the UI. Auth, validation, error mapping. |
+| Services      | Domain logic and storage (users, workouts). Private, gRPC only.   |
 
 ## Architecture
 
@@ -58,7 +58,7 @@ flowchart LR
 
 **Why gRPC between the gateway and services?** A typed contract (`.proto` files, checked with `buf`) that both sides generate code from. Breaking it fails CI rather than production.
 
-**Why a database per service?** Each service can change its schema, scale, or move to another store without asking anyone. The cost is that joins happen in the gateway, so it batches lookups with DataLoader.
+**Why a database per service?** `users-svc` and `workouts-svc` each get their own database (`users`, `workouts`) and their own connection string, and neither can read the other's data. Each can change its schema, or move to a different cluster or store, by changing one setting. Locally both databases sit on the same MongoDB container, and nothing in the repo forces them onto separate clusters. The cost is that there are no cross-service joins, so anything that needs both sides is assembled in the gateway.
 
 ### The front end
 
@@ -79,7 +79,7 @@ flowchart TB
   class auth,list,new,view,history front
 ```
 
-**Why micro-frontends?** Each remote has its own build, dev server, Storybook and deploy. A change to `workout-history` ships without rebuilding the rest, and in a bigger team it would belong to a different squad. React, React Router, Apollo Client and the auth state are shared singletons, so the pieces behave like one app.
+**Why micro-frontends?** Each remote has its own build, dev server and Zephyr deploy target, and most have their own Storybook. A remote can be built, served and deployed without touching the others, and in a bigger team each would belong to a different squad. React, React Router, Apollo Client and the auth state are shared singletons, so the pieces behave like one app. (The current pipeline deploys the shell and every remote together on each tag, which keeps versions in step for a one-person project.)
 
 ### Delivery
 
@@ -104,32 +104,57 @@ Pushing a `staging-*` tag deploys staging, and a `v*` tag deploys production. Th
 
 ## Scalability
 
-- **Stateless backends.** The gateway and both services keep nothing in memory between requests, so Cloud Run can add or remove instances freely.
-- **Scale each piece alone.** If workouts get hot, scale `workouts-svc` and leave `users-svc` at its minimum. The databases are separate too.
-- **Batched reads.** A DataLoader in the gateway turns "last run of each workout" from N calls into one.
-- **Independent front-end deploys.** Remotes are built and published separately, so teams don't queue behind one build.
-- **Fast builds as the repo grows.** Nx caches results and runs only what a change affects. Module boundary rules (`scope:client`, `scope:server`, `type:app`, `type:lib`) are lint errors, so the structure doesn't rot.
+- **Stateless backends.** Sessions are JWTs and all data lives in MongoDB, so Cloud Run can add or remove instances freely. One caveat: the sign-in rate limiter counts in memory, so its limit applies per gateway instance. A shared store such as Redis would fix that if it ever mattered.
+- **Scale each piece alone.** If workouts get hot, scale `workouts-svc` and leave `users-svc` alone. Each service has its own database and connection string, so splitting them onto separate clusters later is a config change.
+- **Batched reads.** The gateway uses a DataLoader for each workout's `lastRunAt`. A list of 50 workouts costs one `GetLastRuns` gRPC call (batches of up to 100), not 50.
+- **Independently deployable front ends.** Every remote has its own build and Zephyr deploy target, so a team could ship its remote without waiting on the others.
+- **Builds that keep up with the repo.** Nx caches task results, and `nx affected` can limit work to what a change touches (CI currently runs everything). Module boundary rules (`scope:client`, `scope:server`, `type:app`, `type:lib`) are lint errors, so the structure doesn't rot.
 
 ## Reliability
 
 - **Private services.** On Cloud Run, the services accept only the gateway's service account (`roles/run.invoker`), and the gateway signs each call with a Google ID token.
 - **Deadlines on every gRPC call**, so a slow service fails fast instead of hanging the request.
 - **Fail at boot, not at 2 a.m.** Every server validates its environment with zod and refuses to start if anything is missing. Staging never falls back to development values.
-- **Typed errors end to end.** gRPC errors are mapped to GraphQL errors in one filter. Failed sign-ins return one generic error, so the API doesn't reveal which emails exist.
-- **Safe auth basics.** Passwords are hashed with argon2id, sign-in is rate limited per caller, and every query is filtered by owner. Asking for someone else's workout returns "not found".
+- **Typed errors end to end.** gRPC errors are mapped to GraphQL errors in one filter. A failed sign-in gives the same error for a wrong email or a wrong password, and unknown emails still run a decoy hash so response times match.
+- **Safe auth basics.** Passwords are hashed with argon2, and sign-in and sign-up are limited to 5 attempts a minute per caller. Every workout query is filtered by owner, so asking for someone else's workout returns "not found". (Sign-up does say when an email is taken.)
 - **Contracts checked in CI.** `verify.yml` runs format, lint, type-check, unit tests, builds, `buf lint`, and confirms the generated proto and GraphQL code match their sources.
 - **Secrets stay out of the repo.** Deployed values live in Secret Manager. CI authenticates to GCP with Workload Identity Federation instead of stored keys.
+
+## Component library
+
+**Browse it live: https://abnersn.github.io/WorkoutTracker/** (rebuilt from `main` on every push).
+
+The shared UI lives in `client/ui`. It holds the building blocks every remote uses, so a button looks and behaves the same on every screen no matter which micro-frontend renders it.
+
+- **Primitives:** `Button`, `Card`, `Badge`, `Dialog`, `Container`, `TextLabel`, `SectionHeading`, `EmptyMessage`, `AddItemForm`, `Skeleton`, plus the `tone` and `motion` helpers.
+- **The workout screen:** `Workout` and its exercise, set, stepper and RPE pieces. Both `workout-new` and `workout-view` render it, which is why a remote never needs to load another remote.
+- **One theme:** `src/theme.css` is the Tailwind 4 theme that every remote imports.
+- **Narrow exports:** a library exposes only what's in its `src/index.ts`. Of the workout screen, only `Workout` is public.
+
+Every component has a story next to it (`button.tsx`, `button.stories.tsx`), and the `a11y` addon checks each one for accessibility problems. Remotes get their own Storybook for the views they own, such as the saved-workout card or the history list. The `workout-new` and `workout-view` stories run against a mock Apollo client from `client/api`, so you can work on those screens without starting the backend.
+
+The published site has one Storybook per project:
+
+| Storybook         | What's in it                             |
+| ----------------- | ---------------------------------------- |
+| `ui`              | primitives and the shared workout screen |
+| `workout-new`     | building and running a workout           |
+| `workout-view`    | a finished workout, read-only            |
+| `workout-list`    | saved workouts                           |
+| `workout-history` | past workouts                            |
+
+To run one locally, use `npx nx storybook ui` (or any project above). `.github/workflows/storybook.yml` builds all five and publishes them to GitHub Pages. It only runs for `main`.
 
 ## Run it locally
 
 ### What you need
 
-| Requirement          | Version | Why                                           |
-| -------------------- | ------- | --------------------------------------------- |
-| Node.js              | 22+     | CI and the Docker images use 26               |
-| npm                  | 10+     | Ships with Node                               |
-| Docker with Compose  | recent  | Runs MongoDB as a single-node replica set     |
-| Free ports           |         | 8100 to 8105 (front ends), 3000 (gateway), 27017 (MongoDB), 50051 and 50052 (gRPC) |
+| Requirement         | Version | Why                                                                                |
+| ------------------- | ------- | ---------------------------------------------------------------------------------- |
+| Node.js             | 22+     | CI and the Docker images use 26                                                    |
+| npm                 | 10+     | Ships with Node                                                                    |
+| Docker with Compose | recent  | Runs MongoDB as a single-node replica set                                          |
+| Free ports          |         | 8100 to 8105 (front ends), 3000 (gateway), 27017 (MongoDB), 50051 and 50052 (gRPC) |
 
 No cloud account is needed to run locally. Zephyr is only switched on for the `deploy` target.
 
@@ -164,12 +189,12 @@ Debuggers listen on 9229 (gateway), 9230 (users-svc) and 9231 (workouts-svc). Th
 
 There are three: `development`, `staging` and `production`. The Nx configuration name picks one, and `npm run dev:staging` runs local processes against staging's database. Env files come in layers:
 
-| File                               | Committed | Holds                                                    |
-| ---------------------------------- | --------- | -------------------------------------------------------- |
-| `.env.<config>` (root)             | yes       | `APP_ENV`                                                |
-| `server/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI`    |
-| `server/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`           |
-| `server/<app>/.env.<config>.local` | no        | secrets: `JWT_SECRET`, a hosted `MONGODB_URI`            |
+| File                               | Committed | Holds                                                 |
+| ---------------------------------- | --------- | ----------------------------------------------------- |
+| `.env.<config>` (root)             | yes       | `APP_ENV`                                             |
+| `server/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI` |
+| `server/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`        |
+| `server/<app>/.env.<config>.local` | no        | secrets: `JWT_SECRET`, a hosted `MONGODB_URI`         |
 
 ## Tour of the repo
 
