@@ -30,7 +30,7 @@ import { WORKOUTS_CLIENT, WorkoutsClient } from "./workouts.client";
               ),
               channelOptions: deadline(
                 `${WORKOUTS_V1_PACKAGE_NAME}.${WORKOUTS_SERVICE_NAME}`,
-                5,
+                20,
               ),
             },
           };

@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { ClientsModule, Transport } from "@nestjs/microservices";
-import { Env } from "../app/env";
 import {
   USERS_SERVICE_NAME,
   USERS_V1_PACKAGE_NAME,
   usersGrpcOptions,
 } from "@workout-tracker/proto";
 import { join } from "node:path";
+import { Env } from "../app/env";
 import { grpcCredentials } from "../app/grpc-credentials";
 import { deadline } from "../app/grpc-deadline";
 import { USERS_CLIENT, UsersClient } from "./users.client";
@@ -30,7 +30,7 @@ import { USERS_CLIENT, UsersClient } from "./users.client";
               ),
               channelOptions: deadline(
                 `${USERS_V1_PACKAGE_NAME}.${USERS_SERVICE_NAME}`,
-                5,
+                20,
               ),
             },
           };
