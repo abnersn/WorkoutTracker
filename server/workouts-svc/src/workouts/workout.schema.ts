@@ -14,7 +14,13 @@ export const SET_STAGES = [
 export class WorkoutSetRecord {
   _id!: Types.ObjectId;
 
-  @Prop({ required: true, enum: SET_STAGES, default: SetStage.IDLE })
+  // `type` must be explicit: the build can't infer it from an imported enum.
+  @Prop({
+    type: String,
+    required: true,
+    enum: SET_STAGES,
+    default: SetStage.IDLE,
+  })
   stage!: SetStage;
 
   @Prop({ min: 0 })
