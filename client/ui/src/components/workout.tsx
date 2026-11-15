@@ -1,20 +1,26 @@
-import { useEffect, useState } from "react";
-import type { Workout as WorkoutData } from "@workout-tracker/types";
-import { usePersistenceState } from "@workout-tracker/hooks";
+import { useState } from "react";
+import {
+  useLoggedWorkout,
+  useWorkoutActions,
+  useWorkoutRun,
+  type DataError,
+} from "@workout-tracker/hooks";
 import {
   clearActiveSession,
   isSessionFor,
   loadActiveSession,
   saveActiveSession,
+  secondsSince,
   sessionHref,
   type ActiveSession,
 } from "@workout-tracker/utils";
+import { buildLog, tallyWorkout } from "../lib/build-log";
 import { WorkoutScreenSkeleton } from "./skeleton";
 import { StatusMessage } from "./status-message";
 import { WorkoutScreen } from "./workout-screen";
 
 export interface WorkoutProps {
-  /** Template id (new), or the numeric log key as a string when `fromLogs`/`mode="view"`. */
+  /** Saved workout id (new), or a log id when `fromLogs`/`mode="view"`. */
   id: string;
   mode?: "new" | "view";
   /** In new mode: `id` is a history entry to repeat rather than a saved workout. */
@@ -24,17 +30,7 @@ export interface WorkoutProps {
   navigate?: (to: string) => void;
 }
 
-type LoadState =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | {
-      status: "ready";
-      workout: WorkoutData;
-      /** Set when an unfinished run of this workout was picked back up. */
-      startedAt?: number;
-    };
-
-/** Loads a workout from IndexedDB and shows it. Used by workout-new and workout-view. */
+/** Loads a workout and shows it. Used by workout-new and workout-view. */
 export function Workout({
   id,
   mode = "new",
@@ -42,73 +38,35 @@ export function Workout({
   finished = false,
   navigate,
 }: WorkoutProps): React.JSX.Element {
-  const { db, error: dbError } = usePersistenceState();
-  const [state, setState] = useState<LoadState>({ status: "loading" });
-  // A different workout left running: offered back instead of silently replaced.
-  const [otherSession, setOtherSession] = useState<ActiveSession | null>(null);
-  // The previous run of the same workout, for "vs last time" on the summary.
-  const [previous, setPrevious] = useState<WorkoutData | null>(null);
   const isView = mode === "view";
+  // Read once on mount. An unfinished run of this workout is picked back up;
+  // a different one is offered back instead of silently replaced.
+  const [session] = useState(() => (isView ? null : loadActiveSession()));
+  const resumed = isSessionFor(session, id, fromLogs) ? session : null;
+  const otherSession: ActiveSession | null = resumed ? null : session;
 
-  useEffect(() => {
-    if (!id || !db) {
+  const run = useWorkoutRun(id, {
+    fromLogs,
+    skip: isView || resumed !== null,
+  });
+  const logged = useLoggedWorkout(id, { skip: !isView });
+  const { finishWorkout, rateWorkout, saveTemplate } = useWorkoutActions();
+
+  const workout = resumed?.workout ?? (isView ? logged.workout : run.workout);
+  const error = isView ? logged.error : run.error;
+
+  // Saves the run this one replaces to the history, as if it had been
+  // finished when it was last touched.
+  const saveOtherSession = async (): Promise<void> => {
+    if (!otherSession) {
       return;
     }
-    let cancelled = false;
-
-    if (!isView) {
-      const session = loadActiveSession();
-      if (isSessionFor(session, id, fromLogs)) {
-        setState({
-          status: "ready",
-          workout: session.workout,
-          startedAt: session.startedAt,
-        });
-        return;
-      }
-      setOtherSession(session);
-    }
-
-    db.loadWorkoutLogById(id, !isView, fromLogs)
-      .then(async (workout) => {
-        if (cancelled) {
-          return;
-        }
-        setState({ status: "ready", workout });
-        if (!isView) {
-          return;
-        }
-        const logs = await db.getAllLogs();
-        const viewed = logs.find((log) => log.persistenceKey === Number(id));
-        const before = logs
-          .filter(
-            (log) =>
-              viewed !== undefined &&
-              log.workoutId === viewed.workoutId &&
-              new Date(log.date).getTime() < workout.date.getTime(),
-          )
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-          )[0];
-        if (!cancelled && before) {
-          setPrevious({ ...before, date: new Date(before.date) });
-        }
-      })
-      .catch(() => {
-        if (cancelled) {
-          return;
-        }
-        setState({
-          status: "error",
-          message: isView
-            ? "This workout isn't in your history any more. It may have been deleted."
-            : "This workout couldn't be found. It may have been deleted.",
-        });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [db, id, isView, fromLogs]);
+    const { workout: other, startedAt, updatedAt = Date.now() } = otherSession;
+    await finishWorkout(
+      buildLog(other, secondsSince(startedAt, updatedAt), new Date(updatedAt)),
+    );
+    clearActiveSession();
+  };
 
   if (!id) {
     return (
@@ -121,29 +79,22 @@ export function Workout({
       </StatusMessage>
     );
   }
-  if (dbError) {
+  if (error) {
     return (
       <StatusMessage
-        title="Your workouts couldn't be opened"
+        title={
+          error.kind === "not-found"
+            ? "Workout not found"
+            : "Your workouts couldn't be opened"
+        }
         navigate={navigate}
         action={{ label: "Back to workouts", href: "/" }}
       >
-        {dbError}
+        {notFoundMessage(error, isView)}
       </StatusMessage>
     );
   }
-  if (state.status === "error") {
-    return (
-      <StatusMessage
-        title="Workout not found"
-        navigate={navigate}
-        action={{ label: "Back to workouts", href: "/" }}
-      >
-        {state.message}
-      </StatusMessage>
-    );
-  }
-  if (state.status === "loading") {
+  if (!workout) {
     return <WorkoutScreenSkeleton label="Loading workout" />;
   }
 
@@ -151,43 +102,47 @@ export function Workout({
     <WorkoutScreen
       // A different workout must start from clean timers and reducer state.
       key={`${mode}:${id}:${fromLogs}`}
-      workout={state.workout}
+      workout={workout}
       mode={mode}
       navigate={navigate}
-      startedAt={state.startedAt}
+      startedAt={resumed?.startedAt}
       replacing={
         otherSession && {
           name: otherSession.workout.name,
           href: sessionHref(otherSession),
+          logged: tallyWorkout(otherSession.workout).logged,
         }
       }
+      onSaveReplaced={saveOtherSession}
       reuseHref={`/workouts/new?id=${id}&fromLogs=true`}
       finished={finished}
-      previous={previous}
-      onRated={async (workout) => {
-        if (!db) {
-          throw new Error("Workouts aren't open yet.");
-        }
-        await db.updateLogEntry(Number(id), workout);
-      }}
-      onProgress={(workout, startedAt) =>
-        saveActiveSession({ sourceId: id, fromLogs, startedAt, workout })
+      previous={logged.previous}
+      onRated={(rated) => rateWorkout(id, rated)}
+      onProgress={(progress, startedAt) =>
+        saveActiveSession({
+          sourceId: id,
+          fromLogs,
+          startedAt,
+          updatedAt: Date.now(),
+          workout: progress,
+        })
       }
       onDiscard={clearActiveSession}
       onFinish={async (log) => {
-        if (!db) {
-          throw new Error("Workouts aren't open yet.");
-        }
-        const key = await db.saveLogEntry(log);
+        const logId = await finishWorkout(log);
         clearActiveSession();
-        return key;
+        return logId;
       }}
-      onSaveTemplate={async (exercises) => {
-        if (!db) {
-          throw new Error("Workouts aren't open yet.");
-        }
-        await db.saveWorkoutTemplate(state.workout.id, exercises);
-      }}
+      onSaveTemplate={(exercises) => saveTemplate(workout.id, exercises)}
     />
   );
+}
+
+function notFoundMessage(error: DataError, isView: boolean): string {
+  if (error.kind === "unavailable") {
+    return error.message;
+  }
+  return isView
+    ? "This workout isn't in your history any more. It may have been deleted."
+    : "This workout couldn't be found. It may have been deleted.";
 }

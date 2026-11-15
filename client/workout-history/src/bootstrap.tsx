@@ -1,14 +1,5 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { mountApp } from "@workout-tracker/api";
 import { App } from "./App";
 
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error("#root element not found");
-}
-
-createRoot(container).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+// Standalone serve only; inside the shell, the shell provides the data layer.
+mountApp(<App />);

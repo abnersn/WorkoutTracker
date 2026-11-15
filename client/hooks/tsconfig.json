@@ -2,6 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
+    // The data hooks reach auth-state's provider (TSX) through @workout-tracker/api.
+    "jsx": "react-jsx",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "importHelpers": true,

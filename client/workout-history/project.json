@@ -10,7 +10,8 @@
       "continuous": true,
       "options": {
         "command": "rspack serve --mode=development",
-        "cwd": "client/workout-history"
+        "cwd": "client/workout-history",
+        "env": { "ZE_DISABLED": "true" }
       },
       "readyWhen": {
         "signal": true

@@ -3,9 +3,9 @@ import { HistoryList } from "./history-list";
 
 const day = 24 * 3600 * 1000;
 const entries = [
-  { key: 1, name: "Push day", date: new Date(Date.now() - 3 * day) },
-  { key: 2, name: "Pull day", date: new Date(Date.now() - 5 * day) },
-  { key: 3, name: "Legs", date: new Date(Date.now() - day) },
+  { id: "1", name: "Push day", date: new Date(Date.now() - 3 * day) },
+  { id: "2", name: "Pull day", date: new Date(Date.now() - 5 * day) },
+  { id: "3", name: "Legs", date: new Date(Date.now() - day) },
 ];
 
 const meta = {
@@ -30,7 +30,7 @@ export const LongName: Story = {
   args: {
     entries: [
       {
-        key: 9,
+        id: "9",
         name: "Upper body hypertrophy block, week 3, heavy singles then back-off volume",
         date: new Date(),
       },

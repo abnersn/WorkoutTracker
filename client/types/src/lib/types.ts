@@ -38,11 +38,10 @@ export interface Workout {
 }
 
 /**
- * A finished workout saved to the "logs" store. `id` identifies this log;
- * `workoutId` is the saved workout it was run from. IndexedDB adds
- * persistenceKey on read.
+ * A finished workout in the history. `id` identifies this log; `workoutId`
+ * is the saved workout it was run from.
  */
-export type LogEntry = Workout & { workoutId: string; persistenceKey?: number };
+export type LogEntry = Workout & { workoutId: string };
 
 export type WorkoutAction =
   | { type: "SET_WORKOUT"; payload: Workout }

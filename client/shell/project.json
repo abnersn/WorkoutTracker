@@ -10,7 +10,8 @@
       "continuous": true,
       "options": {
         "command": "rspack serve --mode=development",
-        "cwd": "client/shell"
+        "cwd": "client/shell",
+        "env": { "ZE_DISABLED": "true" }
       },
       "readyWhen": {
         "signal": true
@@ -38,7 +39,8 @@
         "workout-new:deploy",
         "workout-view:deploy",
         "workout-list:deploy",
-        "workout-history:deploy"
+        "workout-history:deploy",
+        "auth:deploy"
       ]
     }
   }

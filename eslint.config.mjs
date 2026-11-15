@@ -109,6 +109,7 @@ export default [
       "**/eslint.config.mjs",
       "**/jest.config.ts",
       "**/rspack.config.ts",
+      "**/codegen.ts",
       // Module-federation app modules: consumers load these via lazy(), which needs a default export.
       "client/*/src/App.tsx",
       "**/jest.config.cts",

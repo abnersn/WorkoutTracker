@@ -46,14 +46,19 @@ export interface WorkoutScreenProps {
   reuseHref?: string;
   /** Epoch ms the workout clock started: an unfinished run being picked back up. */
   startedAt?: number;
-  /** Another workout is still in progress; starting this one ends it. */
-  replacing?: { name: string; href: string } | null;
+  /**
+   * Another workout is still in progress; starting this one ends it. `logged`
+   * is how many of its sets are done, which decides whether it can be saved.
+   */
+  replacing?: { name: string; href: string; logged: number } | null;
+  /** Saves the workout in `replacing` to the history before this one starts. */
+  onSaveReplaced?: () => Promise<void>;
   /** Called after every change while the workout runs, so a reload loses nothing. */
   onProgress?: (workout: Workout, startedAt: number) => void;
   /** The person threw this run away. */
   onDiscard?: () => void;
-  /** Saves the history entry; resolves to its key so the summary can open. */
-  onFinish?: (log: LogEntry) => Promise<number | void>;
+  /** Saves the history entry; resolves to its id so the summary can open. */
+  onFinish?: (log: LogEntry) => Promise<string | void>;
   onSaveTemplate?: (exercises: Workout["exercises"]) => Promise<void>;
   /** View mode, opened straight after finishing: celebrate, then "Done". */
   finished?: boolean;
@@ -77,6 +82,7 @@ export function WorkoutScreen({
   reuseHref,
   startedAt: resumedAt,
   replacing,
+  onSaveReplaced,
   onProgress,
   onDiscard,
   onFinish,
@@ -96,9 +102,13 @@ export function WorkoutScreen({
   const lastStageTap = useRef(0);
   const { requestNotificationPermission, hasAskedPermission } =
     useNotification();
-  const [dialog, setDialog] = useState<"finish" | "discard" | null>(null);
+  const [dialog, setDialog] = useState<
+    "finish" | "discard" | "replace" | null
+  >(null);
   const [finishError, setFinishError] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [replaceError, setReplaceError] = useState<string | null>(null);
+  const [isSavingReplaced, setIsSavingReplaced] = useState(false);
   const [undo, setUndo] = useState<Undo | null>(null);
   const [alertsDismissed, setAlertsDismissed] = useState(false);
   const [templateStatus, setTemplateStatus] = useState<string | null>(null);
@@ -206,16 +216,37 @@ export function WorkoutScreen({
     rawDispatch({ type: "UPDATE_SET_STAGE", payload: { now: Date.now() } });
   };
 
+  // Starting over another run: save it first if asked, then start this one.
+  // If the save fails nothing starts, so the other run is still there to retry.
+  const startReplacing = async (save: boolean): Promise<void> => {
+    if (save && onSaveReplaced) {
+      setIsSavingReplaced(true);
+      setReplaceError(null);
+      try {
+        await onSaveReplaced();
+      } catch {
+        setReplaceError(
+          `Couldn't save ${replacing?.name ?? "it"} to your history. Try again, or start without saving.`,
+        );
+        return;
+      } finally {
+        setIsSavingReplaced(false);
+      }
+    }
+    setDialog(null);
+    startWorkout();
+  };
+
   const finish = async (): Promise<void> => {
     setIsFinishing(true);
     setFinishError(null);
     try {
-      const key = await onFinish?.(buildLog(workout, timer.value));
+      const logId = await onFinish?.(buildLog(workout, timer.value));
       timer.pause();
       rawDispatch({ type: "COMPLETE_WORKOUT" });
       setDialog(null);
-      if (typeof key === "number") {
-        navigate?.(`/workouts/${key}?finished=true`);
+      if (logId) {
+        navigate?.(`/workouts/${logId}?finished=true`);
       }
     } catch {
       // The run stays exactly as it was; nothing is lost by trying again.
@@ -367,7 +398,18 @@ export function WorkoutScreen({
     }
     if (firstWithSets) {
       return (
-        <Button tone="primary" icon={<Play size={20} />} onClick={startWorkout}>
+        <Button
+          tone="primary"
+          icon={<Play size={20} />}
+          onClick={() => {
+            if (replacing) {
+              setReplaceError(null);
+              setDialog("replace");
+            } else {
+              startWorkout();
+            }
+          }}
+        >
           Start workout
         </Button>
       );
@@ -439,8 +481,8 @@ export function WorkoutScreen({
         )}
         {replacing && !timer.isRunning && !isView && (
           <p className="rounded-card border border-amber-200 bg-amber-50 p-inset text-base text-amber-900">
-            {replacing.name} is still in progress. Starting this workout ends it
-            without saving.{" "}
+            {replacing.name} is still in progress. Starting this workout ends
+            it.{" "}
             <a
               href={replacing.href}
               onClick={linkClickHandler(replacing.href, navigate)}
@@ -616,6 +658,79 @@ export function WorkoutScreen({
       >
         Nothing from this session will be saved. This can't be undone.
       </Dialog>
+      {replacing && (
+        <Dialog
+          open={dialog === "replace"}
+          // With nothing logged there's nothing to save; only confirm the end.
+          title={
+            replacing.logged > 0
+              ? `Save ${replacing.name} first?`
+              : `End ${replacing.name}?`
+          }
+          onClose={() => {
+            if (!isSavingReplaced) {
+              setDialog(null);
+            }
+          }}
+          actions={
+            replacing.logged > 0 ? (
+              <>
+                <Button
+                  variant="ghost"
+                  className="mr-auto"
+                  disabled={isSavingReplaced}
+                  onClick={() => setDialog(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="ghost"
+                  tone="danger"
+                  disabled={isSavingReplaced}
+                  onClick={() => void startReplacing(false)}
+                >
+                  Don&apos;t save
+                </Button>
+                <Button
+                  tone="success"
+                  data-autofocus
+                  disabled={isSavingReplaced}
+                  onClick={() => void startReplacing(true)}
+                >
+                  {isSavingReplaced ? "Saving…" : "Save and start"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  data-autofocus
+                  onClick={() => setDialog(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  tone="primary"
+                  onClick={() => void startReplacing(false)}
+                >
+                  Start workout
+                </Button>
+              </>
+            )
+          }
+        >
+          <p>
+            {replacing.logged > 0
+              ? `${replacing.name} is still in progress, with ${replacing.logged} ${replacing.logged === 1 ? "set" : "sets"} logged. Save them to your history before starting ${workout.name}?`
+              : `${replacing.name} is still in progress, but nothing is logged in it yet. Starting ${workout.name} ends it.`}
+          </p>
+          {replaceError && (
+            <p role="alert" className="mt-2 font-medium text-red-700">
+              {replaceError}
+            </p>
+          )}
+        </Dialog>
+      )}
     </section>
   );
 }

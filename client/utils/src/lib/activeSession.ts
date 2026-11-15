@@ -11,6 +11,11 @@ export interface ActiveSession {
   fromLogs: boolean;
   /** Epoch ms when the workout clock started; elapsed time is derived from it. */
   startedAt: number;
+  /**
+   * Epoch ms of the last change. A run left behind is saved with this as its
+   * end, so time spent away from it isn't counted.
+   */
+  updatedAt?: number;
   /** Epoch ms when the resting set began its rest, if one is resting. */
   restStartedAt?: number;
   workout: Workout;

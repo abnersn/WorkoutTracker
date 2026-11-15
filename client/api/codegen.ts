@@ -9,7 +9,15 @@ const config: CodegenConfig = {
     "client/api/src/gql/": {
       preset: "client",
       presetConfig: { fragmentMasking: false },
-      config: { nonOptionalTypename: true, skipTypeNameForRoot: true },
+      config: {
+        nonOptionalTypename: true,
+        skipTypeNameForRoot: true,
+        // DateTime arrives as an ISO string; the hooks turn it into a Date.
+        scalars: { DateTime: "string" },
+        // String unions, so they line up with the domain enums in
+        // @workout-tracker/types without a runtime mapping table.
+        enumsAsTypes: true,
+      },
     },
   },
 };

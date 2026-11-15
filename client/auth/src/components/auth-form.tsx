@@ -20,6 +20,8 @@ export interface AuthFormProps extends AuthScreenProps {
   pendingLabel: string;
   loading: boolean;
   error?: { message: string };
+  /** Why the person is here, e.g. they were signed out. */
+  notice?: string;
   /** Sends the form and resolves to the session token, if one came back. */
   submit: (form: FormData) => Promise<string | undefined>;
   /** The link to the other screen, e.g. "No account yet? Sign up". */
@@ -39,6 +41,7 @@ export function AuthForm({
   pendingLabel,
   loading,
   error,
+  notice,
   submit,
   alternative,
   navigate,
@@ -70,6 +73,11 @@ export function AuthForm({
       <SectionHeading level={1} flush>
         {title}
       </SectionHeading>
+      {notice && (
+        <p role="status" className="text-tone-700">
+          {notice}
+        </p>
+      )}
       {children}
       {error && (
         <p role="alert" className="text-red-700">

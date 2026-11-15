@@ -10,8 +10,8 @@ import { formatDateTime } from "@workout-tracker/utils";
 import { WorkoutSummaryCard } from "./workout-summary-card";
 
 export interface HistoryEntry {
-  /** Key of the log in the database. */
-  key: number;
+  /** The log's id. */
+  id: string;
   name: string;
   date: Date;
 }
@@ -19,7 +19,7 @@ export interface HistoryEntry {
 export interface HistoryListProps {
   /** `null` while the history is still loading. */
   entries: HistoryEntry[] | null;
-  onRemove?: (key: number) => void;
+  onRemove?: (id: string) => void;
   navigate?: (to: string) => void;
 }
 
@@ -50,10 +50,10 @@ export function HistoryList({
       ) : (
         <ul className="flex flex-col gap-inset p-4">
           {sorted.map((entry) => (
-            <li key={entry.key}>
+            <li key={entry.id}>
               <WorkoutSummaryCard
                 name={entry.name}
-                href={`/workouts/${entry.key}`}
+                href={`/workouts/${entry.id}`}
                 meta={formatDateTime(new Date(entry.date))}
                 navigate={navigate}
                 onRemove={onRemove && (() => setPendingRemoval(entry))}
@@ -75,7 +75,7 @@ export function HistoryList({
               tone="danger"
               onClick={() => {
                 if (pendingRemoval) {
-                  onRemove?.(pendingRemoval.key);
+                  onRemove?.(pendingRemoval.id);
                 }
                 setPendingRemoval(null);
               }}

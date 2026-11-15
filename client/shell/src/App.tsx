@@ -19,6 +19,7 @@ import {
 import { type AuthScreen, useAuth } from "@workout-tracker/auth-state";
 import { lazyProvider } from "./mf";
 import { RequireAuth } from "./require-auth";
+import { SignOutButton } from "./sign-out-button";
 import "./styles.css";
 
 // ProviderBoundary catches the lazy() rejection that fires when a provider's
@@ -145,15 +146,22 @@ function HomeRoute(): React.JSX.Element {
     document.title = "Workout Tracker";
   }, []);
   return (
-    // The two sections are flex items of one column, so the space between them
-    // comes from `gap`, not from margins on either remote.
-    <div className="flex flex-1 flex-col gap-6 pb-8">
-      <ProviderBoundary name="workoutList">
-        <ProviderWorkoutList navigate={navigate} />
-      </ProviderBoundary>
-      <ProviderBoundary name="workoutHistory">
-        <ProviderWorkoutHistory navigate={navigate} />
-      </ProviderBoundary>
+    <div className="flex flex-1 flex-col pb-8">
+      {/* Account actions belong to the shell; only home offers them, so a
+          mid-workout tap can't sign anyone out. */}
+      <header className="flex justify-end px-4 pt-2">
+        <SignOutButton />
+      </header>
+      {/* The two sections are flex items of one column, so the space between
+          them comes from `gap`, not from margins on either remote. */}
+      <div className="flex flex-1 flex-col gap-6">
+        <ProviderBoundary name="workoutList">
+          <ProviderWorkoutList navigate={navigate} />
+        </ProviderBoundary>
+        <ProviderBoundary name="workoutHistory">
+          <ProviderWorkoutHistory navigate={navigate} />
+        </ProviderBoundary>
+      </div>
     </div>
   );
 }

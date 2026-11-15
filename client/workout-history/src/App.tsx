@@ -1,8 +1,7 @@
 // Exposed by the federation plugin as 'workoutHistory/App'.
 // Consumers render it lazily via `lazyProvider('workoutHistory', 'App')`.
-import { useEffect, useState } from "react";
-import { usePersistence } from "@workout-tracker/hooks";
-import { HistoryList, type HistoryEntry } from "./components/history-list";
+import { useLogs } from "@workout-tracker/hooks";
+import { HistoryList } from "./components/history-list";
 import "./styles.css";
 
 export interface AppProps {
@@ -10,38 +9,9 @@ export interface AppProps {
 }
 
 export function App({ navigate }: AppProps): React.JSX.Element {
-  const db = usePersistence();
-  const [entries, setEntries] = useState<HistoryEntry[] | null>(null);
-
-  useEffect(() => {
-    if (!db) {
-      return;
-    }
-    let cancelled = false;
-    db.getAllLogs().then((logs) => {
-      if (cancelled) {
-        return;
-      }
-      setEntries(
-        logs.map((log) => ({
-          key: log.persistenceKey,
-          name: log.name,
-          date: new Date(log.date),
-        })),
-      );
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [db]);
-
-  const remove = async (key: number): Promise<void> => {
-    await db?.eraseLogEntry(key);
-    setEntries((current) => (current ?? []).filter((e) => e.key !== key));
-  };
-
+  const { logs, deleteLog } = useLogs();
   return (
-    <HistoryList entries={entries} onRemove={remove} navigate={navigate} />
+    <HistoryList entries={logs} onRemove={deleteLog} navigate={navigate} />
   );
 }
 

@@ -100,13 +100,12 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
   - `train-together/` (remote): the shared training screen, with each exercise as it's completed
   - `ui/` (lib): generic components, documented in Storybook: Button, Card, Badge, Dialog, Container, TextInput, TextLabel, SectionHeading, EmptyMessage, AddItemForm, plus the `tone` and `motion` helpers. Also the workout screen shared by `workout-new` and `workout-view`: `Workout` (the only part exported), its exercise and set components, and `buildLog`. _Unit tests._
     - `src/theme.css`: the Tailwind theme every remote imports
-  - `hooks/` (lib): `useTimer`, `useNotification`, and `usePersistence` (IndexedDB, deprecated until `workout-repository` replaces it)
+  - `hooks/` (lib): `useTimer`, `useNotification`, and the data hooks (`useWorkouts`, `useLogs`, `useWorkoutRun`, `useLoggedWorkout`, `useWorkoutActions`), which hide the GraphQL calls behind the domain types. _Unit tests._
   - `auth-state/` (lib): token storage, `AuthProvider`, `useAuth`; loaded once and shared by every remote
-  - `api/` (lib): Apollo Client, the auth link and generated GraphQL hooks
-  - `workout-repository/` (lib): `WorkoutRepository`, with IndexedDB and GraphQL adapters
+  - `api/` (lib): Apollo Client with the auth link, the generated GraphQL types, `mountApp` (every app's bootstrap) and a mock client for Storybook
   - `types/` (lib): `Workout`, `Exercise`, `Set`, `WorkoutLog`
   - `reducer/` (lib): the workout state machine: actions (including `UPDATE_SET` and `UPDATE_EXERCISE_RPE`) and set stages
-  - `utils/` (lib): `timeFormat`, date formatting (`Intl`), `linkClickHandler`, `genId`, completeness checks and the IndexedDB `Database`
+  - `utils/` (lib): `timeFormat`, date formatting (`Intl`), `linkClickHandler`, `genId`, completeness checks and the in-progress run kept in localStorage
   - `limits/` (lib, project `client-limits`): form hints for sets, reps and weights
 - `server/`: NestJS back end
   - `gateway/` (app): GraphQL, JWT, guards and DataLoaders; no database. _Unit and e2e tests._

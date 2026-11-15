@@ -10,7 +10,8 @@
       "continuous": true,
       "options": {
         "command": "rspack serve --mode=development",
-        "cwd": "client/workout-view"
+        "cwd": "client/workout-view",
+        "env": { "ZE_DISABLED": "true" }
       },
       "readyWhen": {
         "signal": true

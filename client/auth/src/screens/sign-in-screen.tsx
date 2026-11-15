@@ -1,5 +1,6 @@
 import { useMutation } from "@apollo/client/react";
 import { graphql } from "@workout-tracker/api";
+import { useAuth } from "@workout-tracker/auth-state";
 import {
   AuthForm,
   readText,
@@ -21,6 +22,7 @@ const SignIn = graphql(/* GraphQL */ `
 
 export function SignInScreen(props: AuthScreenProps): React.JSX.Element {
   const [signIn, { loading, error }] = useMutation(SignIn);
+  const { expired } = useAuth();
 
   async function submit(form: FormData): Promise<string | undefined> {
     const { data } = await signIn({
@@ -42,6 +44,11 @@ export function SignInScreen(props: AuthScreenProps): React.JSX.Element {
       pendingLabel="Signing in…"
       loading={loading}
       error={error}
+      notice={
+        expired
+          ? "You've been signed out. Sign in again to carry on where you were."
+          : undefined
+      }
       submit={submit}
       alternative={{
         prompt: "No account yet?",
