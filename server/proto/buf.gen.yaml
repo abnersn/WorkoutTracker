@@ -7,4 +7,5 @@ plugins:
     opt:
       - nestJs=true
       - addGrpcMetadata=true
+      - stringEnums=true
       - useDate=false

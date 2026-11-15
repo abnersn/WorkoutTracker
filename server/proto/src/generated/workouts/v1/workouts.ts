@@ -15,14 +15,17 @@ export const protobufPackage = "workouts.v1";
 
 export const protobufFileName = "workouts/v1/workouts.proto";
 
-/** Mirrors SetStage in client/types. */
+/**
+ * Mirrors SetStage in client/types. The value names are the client's strings
+ * ("IDLE", "ACTIVE", ...) so they match exactly with string enums on; that is
+ * why buf.yaml skips the enum prefix and zero-value rules.
+ */
 export enum SetStage {
-  SET_STAGE_UNSPECIFIED = 0,
-  SET_STAGE_IDLE = 1,
-  SET_STAGE_ACTIVE = 2,
-  SET_STAGE_RESTING = 3,
-  SET_STAGE_COMPLETE = 4,
-  UNRECOGNIZED = -1,
+  IDLE = "IDLE",
+  ACTIVE = "ACTIVE",
+  RESTING = "RESTING",
+  COMPLETE = "COMPLETE",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 /** Mirrors WorkoutSet in client/types. */

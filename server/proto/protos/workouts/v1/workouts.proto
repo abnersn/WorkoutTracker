@@ -5,13 +5,14 @@ package workouts.v1;
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-// Mirrors SetStage in client/types.
+// Mirrors SetStage in client/types. The value names are the client's strings
+// ("IDLE", "ACTIVE", ...) so they match exactly with string enums on; that is
+// why buf.yaml skips the enum prefix and zero-value rules.
 enum SetStage {
-  SET_STAGE_UNSPECIFIED = 0;
-  SET_STAGE_IDLE = 1;
-  SET_STAGE_ACTIVE = 2;
-  SET_STAGE_RESTING = 3;
-  SET_STAGE_COMPLETE = 4;
+  IDLE = 0;
+  ACTIVE = 1;
+  RESTING = 2;
+  COMPLETE = 3;
 }
 
 // Mirrors WorkoutSet in client/types.

@@ -1,6 +1,14 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "analytics": false,
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^codegen", "^build"]
+    },
+    "test": {
+      "dependsOn": ["^codegen"]
+    }
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
