@@ -19,7 +19,7 @@ export function UndoNotice({
   onUndo,
   onDismiss,
   timeout = 8000,
-}: UndoNoticeProps) {
+}: UndoNoticeProps): React.JSX.Element {
   useEffect(() => {
     const t = setTimeout(onDismiss, timeout);
     return () => clearTimeout(t);

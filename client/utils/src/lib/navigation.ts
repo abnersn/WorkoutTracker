@@ -9,7 +9,9 @@ export function linkClickHandler(
   href: string,
   navigate?: (to: string) => void,
 ): ((event: MouseEvent<HTMLElement>) => void) | undefined {
-  if (!navigate) return undefined;
+  if (!navigate) {
+    return undefined;
+  }
   return (event) => {
     if (
       event.defaultPrevented ||

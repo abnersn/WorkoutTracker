@@ -1,5 +1,5 @@
-import { SetStage } from "../generated/workouts/v1/workouts";
-import { requireKnownSetStage, UnrecognizedEnumError } from "./enums";
+import { SetStage } from "./generated/workouts/v1/workouts";
+import { requireKnownSetStage, UnrecognizedEnumError } from "./exercise-types";
 
 describe("requireKnownSetStage", () => {
   it.each([

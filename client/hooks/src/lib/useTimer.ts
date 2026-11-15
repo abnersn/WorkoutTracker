@@ -83,7 +83,7 @@ export function useTimer(
   }, [isRunning, isBackground, increment, floor]);
 
   useEffect(() => {
-    const onVisibilityChange = () => setIsBackground(isPageHidden());
+    const onVisibilityChange = (): void => setIsBackground(isPageHidden());
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", onVisibilityChange);

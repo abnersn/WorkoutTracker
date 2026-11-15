@@ -11,7 +11,7 @@ class MockNotification {
   }
 }
 
-function installNotification() {
+function installNotification(): void {
   Object.defineProperty(window, "Notification", {
     value: MockNotification,
     configurable: true,
@@ -19,7 +19,7 @@ function installNotification() {
   });
 }
 
-function removeNotification() {
+function removeNotification(): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).Notification;
 }

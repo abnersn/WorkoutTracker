@@ -24,7 +24,11 @@ export interface HistoryListProps {
 }
 
 /** Finished workouts, newest first. */
-export function HistoryList({ entries, onRemove, navigate }: HistoryListProps) {
+export function HistoryList({
+  entries,
+  onRemove,
+  navigate,
+}: HistoryListProps): React.JSX.Element {
   const [pendingRemoval, setPendingRemoval] = useState<HistoryEntry | null>(
     null,
   );
@@ -70,7 +74,9 @@ export function HistoryList({ entries, onRemove, navigate }: HistoryListProps) {
             <Button
               tone="danger"
               onClick={() => {
-                if (pendingRemoval) onRemove?.(pendingRemoval.key);
+                if (pendingRemoval) {
+                  onRemove?.(pendingRemoval.key);
+                }
                 setPendingRemoval(null);
               }}
             >

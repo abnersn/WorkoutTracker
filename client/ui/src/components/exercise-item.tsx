@@ -39,7 +39,7 @@ export function ExerciseItem({
   running = false,
   editing = false,
   dispatch,
-}: ExerciseItemProps) {
+}: ExerciseItemProps): React.JSX.Element {
   const isComplete = exercise.sets.length > 0 && !hasIncompleteSets(exercise);
   // Unrated when the summary opened: stays adjustable after the first touch.
   const wasUnrated = useRef(exercise.rpe === undefined);

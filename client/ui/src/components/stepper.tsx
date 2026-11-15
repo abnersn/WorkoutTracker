@@ -34,7 +34,7 @@ export function Stepper({
   onIncrement,
   disableDecrement = false,
   className,
-}: StepperProps) {
+}: StepperProps): React.JSX.Element {
   return (
     <div
       role="group"

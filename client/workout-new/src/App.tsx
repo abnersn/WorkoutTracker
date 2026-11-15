@@ -10,7 +10,11 @@ export interface AppProps {
   navigate?: (to: string) => void;
 }
 
-export function App({ id = "", fromLogs = false, navigate }: AppProps) {
+export function App({
+  id = "",
+  fromLogs = false,
+  navigate,
+}: AppProps): React.JSX.Element {
   return <Workout id={id} fromLogs={fromLogs} navigate={navigate} />;
 }
 

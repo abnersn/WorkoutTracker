@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { useTimer } from "./useTimer";
 
-function setVisibility(state: DocumentVisibilityState) {
+function setVisibility(state: DocumentVisibilityState): void {
   Object.defineProperty(document, "visibilityState", {
     value: state,
     configurable: true,

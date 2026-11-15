@@ -10,21 +10,25 @@ export interface AppProps {
   navigate?: (to: string) => void;
 }
 
-export function App({ navigate }: AppProps) {
+export function App({ navigate }: AppProps): React.JSX.Element {
   const db = usePersistence();
   const [workouts, setWorkouts] = useState<SavedWorkout[] | null>(null);
   // Read once: a workout left running (refresh, Back, phone locked) is offered back first.
   const [session] = useState(loadActiveSession);
 
   useEffect(() => {
-    if (!db) return;
+    if (!db) {
+      return;
+    }
     let cancelled = false;
     (async () => {
       const [saved, logs] = await Promise.all([
         db.getAllWorkouts(),
         db.getAllLogs(),
       ]);
-      if (cancelled) return;
+      if (cancelled) {
+        return;
+      }
       setWorkouts(
         saved.map((workout) => {
           const dates = logs
@@ -40,7 +44,7 @@ export function App({ navigate }: AppProps) {
     };
   }, [db]);
 
-  const add = async (name: string) => {
+  const add = async (name: string): Promise<void> => {
     const workout = { id: genId(), name, exercises: [] };
     await db?.saveWorkout({
       ...workout,
@@ -52,7 +56,7 @@ export function App({ navigate }: AppProps) {
     setWorkouts((current) => [...(current ?? []), { id: workout.id, name }]);
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<void> => {
     await db?.eraseWorkout(id);
     setWorkouts((current) => (current ?? []).filter((w) => w.id !== id));
   };

@@ -9,15 +9,19 @@ export interface AppProps {
   navigate?: (to: string) => void;
 }
 
-export function App({ navigate }: AppProps) {
+export function App({ navigate }: AppProps): React.JSX.Element {
   const db = usePersistence();
   const [entries, setEntries] = useState<HistoryEntry[] | null>(null);
 
   useEffect(() => {
-    if (!db) return;
+    if (!db) {
+      return;
+    }
     let cancelled = false;
     db.getAllLogs().then((logs) => {
-      if (cancelled) return;
+      if (cancelled) {
+        return;
+      }
       setEntries(
         logs.map((log) => ({
           key: log.persistenceKey,
@@ -31,7 +35,7 @@ export function App({ navigate }: AppProps) {
     };
   }, [db]);
 
-  const remove = async (key: number) => {
+  const remove = async (key: number): Promise<void> => {
     await db?.eraseLogEntry(key);
     setEntries((current) => (current ?? []).filter((e) => e.key !== key));
   };

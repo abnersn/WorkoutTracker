@@ -6,6 +6,6 @@ export type WorkoutSummaryCardProps = LinkCardProps;
 export function WorkoutSummaryCard({
   tone = "primary",
   ...props
-}: WorkoutSummaryCardProps) {
+}: WorkoutSummaryCardProps): React.JSX.Element {
   return <LinkCard tone={tone} {...props} />;
 }

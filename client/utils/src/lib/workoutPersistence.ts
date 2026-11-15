@@ -218,7 +218,9 @@ export class Database {
     const tx = this.database.transaction("logs", "readwrite");
     const store = tx.objectStore("logs");
     const existing = await store.get(key);
-    if (!existing) throw new Error(`Log entry not found: ${key}`);
+    if (!existing) {
+      throw new Error(`Log entry not found: ${key}`);
+    }
     // The log keeps its own id and the link to its workout.
     await store.put(
       { ...log, id: existing.id, workoutId: existing.workoutId },

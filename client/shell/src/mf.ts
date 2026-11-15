@@ -7,7 +7,7 @@ import { loadRemote } from "@module-federation/runtime";
 export function lazyProvider<Props = unknown>(
   alias: string,
   exposeName: string,
-) {
+): React.LazyExoticComponent<ComponentType<Props>> {
   return lazy(async () => {
     const mod = await loadRemote<{ default: ComponentType<Props> }>(
       `${alias}/${exposeName}`,

@@ -8,7 +8,7 @@ const LOG_KEY = 9001;
 // The screen reads IndexedDB, which Storybook's browser has: seed one past workout
 // and open it the way "Do it again" does (`fromLogs`). The screen's own components
 // have their stories in the ui library.
-async function seedLog() {
+async function seedLog(): Promise<void> {
   const db = await openDB("workoutTracker", 1, {
     upgrade(db) {
       db.createObjectStore("workouts", { keyPath: "id" });

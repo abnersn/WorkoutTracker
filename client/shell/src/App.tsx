@@ -27,14 +27,14 @@ class ProviderBoundary extends Component<
   { error: Error | null }
 > {
   state = { error: null as Error | null };
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): { error: Error } {
     return { error };
   }
-  componentDidCatch(error: Error) {
+  componentDidCatch(error: Error): void {
     // The technical detail is for developers; people get a way forward.
     console.error(`Remote "${this.props.name}" failed to load`, error);
   }
-  render() {
+  render(): React.JSX.Element {
     if (this.state.error) {
       return (
         <div role="alert" className="flex flex-col items-start gap-3 px-4 py-6">
@@ -90,7 +90,7 @@ const ProviderWorkoutNew = lazyProvider<
 >("workoutNew", "App");
 
 // "/": the saved workouts above the history.
-function HomeRoute() {
+function HomeRoute(): React.JSX.Element {
   const navigate = useNavigate();
   useEffect(() => {
     document.title = "Workout Tracker";
@@ -110,7 +110,7 @@ function HomeRoute() {
 }
 
 // workouts/new?id=<saved workout, or log key with fromLogs=true> -> run mode.
-function WorkoutNewRoute() {
+function WorkoutNewRoute(): React.JSX.Element {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   return (
@@ -127,7 +127,7 @@ function WorkoutNewRoute() {
 // workouts/:id -> view mode. The id comes from the path and is handed to the
 // workoutView remote.
 // workouts/:id?finished=true -> the session that was just finished.
-function WorkoutViewRoute() {
+function WorkoutViewRoute(): React.JSX.Element {
   const { id = "" } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -142,7 +142,7 @@ function WorkoutViewRoute() {
   );
 }
 
-export function App() {
+export function App(): React.JSX.Element {
   return (
     <BrowserRouter>
       <Container>

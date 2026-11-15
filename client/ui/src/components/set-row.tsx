@@ -64,7 +64,9 @@ const CHECK_LENGTH = 24;
  * authored moment in a set's life. Only real transitions play: a list of
  * finished sets renders still.
  */
-function useStageTransition(stage: SetStage) {
+function useStageTransition(
+  stage: SetStage,
+): React.RefObject<HTMLParagraphElement | null> {
   const labelRef = useRef<HTMLParagraphElement>(null);
   const previous = useRef(stage);
 
@@ -72,7 +74,9 @@ function useStageTransition(stage: SetStage) {
     const before = previous.current;
     previous.current = stage;
     const el = labelRef.current;
-    if (before === stage || !el?.animate) return;
+    if (before === stage || !el?.animate) {
+      return;
+    }
     const reduced = prefersReducedMotion();
 
     el.animate(
@@ -127,7 +131,7 @@ export function SetRow({
   formatTime = defaultFormatTime,
   onChange,
   onActivate,
-}: SetRowProps) {
+}: SetRowProps): React.JSX.Element {
   const baseTone: Tone = stage === SetStage.Complete ? "success" : "neutral";
   const timerTone = (value: number, runningStage: SetStage): Tone =>
     // Running over is normal between heavy sets: blue "go" rather than red alarm.
@@ -144,7 +148,7 @@ export function SetRow({
 
   // While resting only the countdown takes input; the set just done is logged.
   const showSteppers = isActive && !readOnly;
-  const stepperFor = (key: SetFieldName) =>
+  const stepperFor = (key: SetFieldName): boolean =>
     showSteppers && (!leadsWithRest || key === "rest");
   // Sets that are neither done nor underway recede.
   const quiet = stage === SetStage.Idle && !isActive;
@@ -167,7 +171,7 @@ export function SetRow({
       /** What the steppers say they change, e.g. "weight in kilograms". */
       spoken?: string;
     },
-  ) => {
+  ): React.JSX.Element => {
     const current = options.abs ? Math.abs(value) : value;
     // A clock past zero shows how far over it is; say so, or 0:15 reads as time left.
     const isOver = options.running && value < 0;

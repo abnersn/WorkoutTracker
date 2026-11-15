@@ -23,14 +23,16 @@ import { SavedWorkoutCard } from "./saved-workout-card";
  * kg or lb, for display only. Weights are stored in kg, so switching changes
  * how they are shown and nothing that is saved.
  */
-function UnitSwitch() {
+function UnitSwitch(): React.JSX.Element {
   const [unit, setUnit] = useWeightUnit();
   const options: { value: WeightUnit; label: string }[] = [
     { value: "kg", label: "kg" },
     { value: "lb", label: "lb" },
   ];
-  const choose = (next: WeightUnit) => {
-    if (next !== unit) setUnit(next);
+  const choose = (next: WeightUnit): void => {
+    if (next !== unit) {
+      setUnit(next);
+    }
   };
   return (
     <fieldset className="tone-neutral mx-4 mb-6 flex flex-wrap items-center gap-3">
@@ -97,7 +99,7 @@ export function WorkoutList({
   onAdd,
   onRemove,
   navigate,
-}: WorkoutListProps) {
+}: WorkoutListProps): React.JSX.Element {
   const [pendingRemoval, setPendingRemoval] = useState<SavedWorkout | null>(
     null,
   );
@@ -171,7 +173,9 @@ export function WorkoutList({
             <Button
               tone="danger"
               onClick={() => {
-                if (pendingRemoval) onRemove(pendingRemoval.id);
+                if (pendingRemoval) {
+                  onRemove(pendingRemoval.id);
+                }
                 setPendingRemoval(null);
               }}
             >

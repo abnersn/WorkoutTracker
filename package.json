@@ -71,19 +71,23 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.14.7",
     "@grpc/proto-loader": "^0.8.1",
-    "@grpc/reflection": "^1.0.4",
     "@module-federation/enhanced": "^2.4.0",
     "@module-federation/runtime": "^2.4.0",
     "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^12.1.1",
     "@nestjs/core": "^11.0.0",
     "@nestjs/microservices": "^11.2.10",
+    "@nestjs/mongoose": "^12.0.1",
     "@nestjs/platform-express": "^11.0.0",
+    "argon2": "^0.45.2",
     "idb": "^8.0.4",
     "lucide-react": "^1.73.0",
+    "mongoose": "^9.12.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
   },
   "allowScripts": {
     "@parcel/watcher@2.6.0": true,

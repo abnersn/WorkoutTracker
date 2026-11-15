@@ -8,6 +8,8 @@ export function fromDate(date: Date): Timestamp {
 
 // With defaults: true, a missing Timestamp arrives as null.
 export function toDate(ts: Timestamp | null | undefined): Date {
-  if (ts == null) throw new TypeError("Expected a Timestamp");
+  if (ts == null) {
+    throw new TypeError("Expected a Timestamp");
+  }
   return new Date(ts.seconds * 1_000 + Math.floor(ts.nanos / 1_000_000));
 }

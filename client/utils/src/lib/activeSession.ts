@@ -23,7 +23,9 @@ const KEY = "workoutTracker.activeSession";
 export function loadActiveSession(): ActiveSession | null {
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
     const session = JSON.parse(raw) as ActiveSession;
     if (!session?.workout || typeof session.startedAt !== "number") {
       return null;
@@ -70,6 +72,8 @@ export function secondsSince(startedAt: number, now = Date.now()): number {
 /** The route that reopens a session. */
 export function sessionHref(session: ActiveSession): string {
   const params = new URLSearchParams({ id: session.sourceId });
-  if (session.fromLogs) params.set("fromLogs", "true");
+  if (session.fromLogs) {
+    params.set("fromLogs", "true");
+  }
   return `/workouts/new?${params}`;
 }

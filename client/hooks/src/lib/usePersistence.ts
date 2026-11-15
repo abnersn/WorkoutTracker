@@ -26,10 +26,14 @@ export function usePersistenceState(): PersistenceState {
     database
       .init()
       .then(() => {
-        if (!cancelled) setState({ db: database, error: null });
+        if (!cancelled) {
+          setState({ db: database, error: null });
+        }
       })
       .catch((error: unknown) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         setState({
           db: null,
           error:

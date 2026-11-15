@@ -5,7 +5,7 @@ import { cn } from "./tone";
 export function Container({
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>) {
+}: HTMLAttributes<HTMLDivElement>): React.JSX.Element {
   return (
     <div
       className={cn(

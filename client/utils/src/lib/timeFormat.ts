@@ -8,7 +8,7 @@ export function timeFormat(seconds: number): string {
   }
 
   const whole = Math.floor(seconds);
-  const pad = (val: number) => `${val % 60}`.padStart(2, "0");
+  const pad = (val: number): string => `${val % 60}`.padStart(2, "0");
   const minutes = Math.floor(whole / 60);
 
   if (minutes >= 60) {

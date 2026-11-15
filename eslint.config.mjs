@@ -40,6 +40,51 @@ export default [
     rules: {},
   },
   {
+    // Require `import type` for imports used only as types.
+    // Excluded from server/: Nest DI and decorator metadata need runtime class references.
+    files: ["**/*.ts", "**/*.tsx", "**/*.cts", "**/*.mts"],
+    ignores: ["server/**"],
+    rules: {
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
+        },
+      ],
+    },
+  },
+  {
+    // Require explicit return types on functions and methods.
+    files: ["**/*.ts", "**/*.tsx", "**/*.cts", "**/*.mts"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": [
+        "error",
+        {
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true,
+          allowHigherOrderFunctions: true,
+        },
+      ],
+    },
+  },
+  {
+    // Always use braces around if/else/for/while/do bodies.
+    files: [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.cts",
+      "**/*.mts",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.cjs",
+      "**/*.mjs",
+    ],
+    rules: {
+      curly: ["error", "all"],
+    },
+  },
+  {
     // Storybook's main.ts config typing needs `any` in a few places.
     files: ["**/.storybook/main.ts"],
     rules: {

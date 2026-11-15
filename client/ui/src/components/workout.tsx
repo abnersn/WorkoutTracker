@@ -41,7 +41,7 @@ export function Workout({
   fromLogs = false,
   finished = false,
   navigate,
-}: WorkoutProps) {
+}: WorkoutProps): React.JSX.Element {
   const { db, error: dbError } = usePersistenceState();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   // A different workout left running: offered back instead of silently replaced.
@@ -51,7 +51,9 @@ export function Workout({
   const isView = mode === "view";
 
   useEffect(() => {
-    if (!id || !db) return;
+    if (!id || !db) {
+      return;
+    }
     let cancelled = false;
 
     if (!isView) {
@@ -69,9 +71,13 @@ export function Workout({
 
     db.loadWorkoutLogById(id, !isView, fromLogs)
       .then(async (workout) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         setState({ status: "ready", workout });
-        if (!isView) return;
+        if (!isView) {
+          return;
+        }
         const logs = await db.getAllLogs();
         const viewed = logs.find((log) => log.persistenceKey === Number(id));
         const before = logs
@@ -89,7 +95,9 @@ export function Workout({
         }
       })
       .catch(() => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         setState({
           status: "error",
           message: isView
@@ -157,7 +165,9 @@ export function Workout({
       finished={finished}
       previous={previous}
       onRated={async (workout) => {
-        if (!db) throw new Error("Workouts aren't open yet.");
+        if (!db) {
+          throw new Error("Workouts aren't open yet.");
+        }
         await db.updateLogEntry(Number(id), workout);
       }}
       onProgress={(workout, startedAt) =>
@@ -165,13 +175,17 @@ export function Workout({
       }
       onDiscard={clearActiveSession}
       onFinish={async (log) => {
-        if (!db) throw new Error("Workouts aren't open yet.");
+        if (!db) {
+          throw new Error("Workouts aren't open yet.");
+        }
         const key = await db.saveLogEntry(log);
         clearActiveSession();
         return key;
       }}
       onSaveTemplate={async (exercises) => {
-        if (!db) throw new Error("Workouts aren't open yet.");
+        if (!db) {
+          throw new Error("Workouts aren't open yet.");
+        }
         await db.saveWorkoutTemplate(state.workout.id, exercises);
       }}
     />

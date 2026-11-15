@@ -14,7 +14,11 @@ export interface AppProps {
   navigate?: (to: string) => void;
 }
 
-export function App({ id = "", finished = false, navigate }: AppProps) {
+export function App({
+  id = "",
+  finished = false,
+  navigate,
+}: AppProps): React.JSX.Element {
   return (
     <Workout id={id} mode="view" finished={finished} navigate={navigate} />
   );

@@ -69,7 +69,7 @@ export function ExerciseCard({
   onRemoveSet,
   onRemoveExercise,
   children,
-}: ExerciseCardProps) {
+}: ExerciseCardProps): React.JSX.Element {
   const [opened, setOpened] = useState(false);
   const bodyId = useId();
   const showEditing = !readOnly && editing;

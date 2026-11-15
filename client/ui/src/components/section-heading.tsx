@@ -19,7 +19,7 @@ export function SectionHeading({
   flush = false,
   className,
   ...props
-}: SectionHeadingProps) {
+}: SectionHeadingProps): React.JSX.Element {
   const Tag = level === 1 ? "h1" : "h2";
   return (
     <Tag

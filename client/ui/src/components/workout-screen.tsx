@@ -85,7 +85,7 @@ export function WorkoutScreen({
   previous,
   onRated,
   navigate,
-}: WorkoutScreenProps) {
+}: WorkoutScreenProps): React.JSX.Element {
   const isView = mode === "view";
   const [workout, rawDispatch] = useReducer(reducer, initial);
   const timer = useTimer(
@@ -119,12 +119,16 @@ export function WorkoutScreen({
   const onRatedRef = useRef(onRated);
   onRatedRef.current = onRated;
   useEffect(() => {
-    if (isView && workout !== initial) void onRatedRef.current?.(workout);
+    if (isView && workout !== initial) {
+      void onRatedRef.current?.(workout);
+    }
   }, [workout, initial, isView]);
 
   // A resumed workout picks its clock straight back up.
   useEffect(() => {
-    if (resumedAt && !initial.isComplete) timer.play();
+    if (resumedAt && !initial.isComplete) {
+      timer.play();
+    }
     // Mount only: the timer object changes every render.
   }, []);
 
@@ -173,7 +177,9 @@ export function WorkoutScreen({
 
   // Screen readers hear each step of the set the main button is driving.
   useEffect(() => {
-    if (!activeSet || !activeExercise || !timer.isRunning) return;
+    if (!activeSet || !activeExercise || !timer.isRunning) {
+      return;
+    }
     const where = `${activeExercise.name}, set ${activeSetNumber}`;
     const what = {
       [SetStage.Idle]: "up next",
@@ -184,8 +190,10 @@ export function WorkoutScreen({
     setAnnouncement(`${where}: ${what}`);
   }, [activeSet?.id, activeSet?.stage, timer.isRunning]);
 
-  const startWorkout = () => {
-    if (!firstWithSets) return;
+  const startWorkout = (): void => {
+    if (!firstWithSets) {
+      return;
+    }
     startedAt.current = Date.now();
     timer.play();
     rawDispatch({
@@ -198,7 +206,7 @@ export function WorkoutScreen({
     rawDispatch({ type: "UPDATE_SET_STAGE", payload: { now: Date.now() } });
   };
 
-  const finish = async () => {
+  const finish = async (): Promise<void> => {
     setIsFinishing(true);
     setFinishError(null);
     try {
@@ -206,7 +214,9 @@ export function WorkoutScreen({
       timer.pause();
       rawDispatch({ type: "COMPLETE_WORKOUT" });
       setDialog(null);
-      if (typeof key === "number") navigate?.(`/workouts/${key}?finished=true`);
+      if (typeof key === "number") {
+        navigate?.(`/workouts/${key}?finished=true`);
+      }
     } catch {
       // The run stays exactly as it was; nothing is lost by trying again.
       setFinishError(
@@ -217,15 +227,17 @@ export function WorkoutScreen({
     }
   };
 
-  const discard = () => {
+  const discard = (): void => {
     timer.pause();
     onDiscard?.();
     setDialog(null);
     navigate?.("/");
   };
 
-  const saveTemplate = async () => {
-    if (!onSaveTemplate) return;
+  const saveTemplate = async (): Promise<void> => {
+    if (!onSaveTemplate) {
+      return;
+    }
     try {
       await onSaveTemplate(normalizeExercises(workout));
       setTemplateStatus("Saved. Next time starts from this plan.");
@@ -236,8 +248,10 @@ export function WorkoutScreen({
 
   // The main button names the set it moves on and what happens next, so a glance
   // between sets is enough; the active card's ring says which exercise.
-  const stageButton = () => {
-    if (!activeSet || !activeExercise) return null;
+  const stageButton = (): React.JSX.Element | null => {
+    if (!activeSet || !activeExercise) {
+      return null;
+    }
     const n = activeSetNumber;
     const stages = {
       [SetStage.Idle]: {
@@ -273,7 +287,9 @@ export function WorkoutScreen({
           // The button changes meaning where the thumb already is; a sweaty
           // double tap must not turn "Set done" into "End rest" as well.
           const now = Date.now();
-          if (now - lastStageTap.current < STAGE_TAP_GUARD_MS) return;
+          if (now - lastStageTap.current < STAGE_TAP_GUARD_MS) {
+            return;
+          }
           lastStageTap.current = now;
           rawDispatch({ type: "UPDATE_SET_STAGE", payload: { now } });
         }}
@@ -288,7 +304,7 @@ export function WorkoutScreen({
     );
   };
 
-  const actions = () => {
+  const actions = (): React.JSX.Element | null => {
     if (isView) {
       const again = reuseHref && (
         <Button
@@ -297,8 +313,11 @@ export function WorkoutScreen({
           variant={finished ? "ghost" : "solid"}
           onClick={(event) => {
             const handler = linkClickHandler(reuseHref, navigate);
-            if (handler) handler(event);
-            else window.location.assign(reuseHref);
+            if (handler) {
+              handler(event);
+            } else {
+              window.location.assign(reuseHref);
+            }
           }}
         >
           Do this again
@@ -312,8 +331,11 @@ export function WorkoutScreen({
             tone="success"
             icon={<Check size={20} />}
             onClick={() => {
-              if (navigate) navigate("/");
-              else window.location.assign("/");
+              if (navigate) {
+                navigate("/");
+              } else {
+                window.location.assign("/");
+              }
             }}
           >
             Done
@@ -323,7 +345,9 @@ export function WorkoutScreen({
         again || null
       );
     }
-    if (workout.isComplete) return null;
+    if (workout.isComplete) {
+      return null;
+    }
     if (timer.isRunning) {
       return (
         <>

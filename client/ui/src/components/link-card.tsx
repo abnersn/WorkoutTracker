@@ -29,7 +29,7 @@ export function LinkCard({
   onRemove,
   navigate,
   className,
-}: LinkCardProps) {
+}: LinkCardProps): React.JSX.Element {
   return (
     <div
       className={cn(

@@ -13,7 +13,9 @@ const EVENT = "workoutTracker:weightUnit";
 export function readUnit(): WeightUnit {
   try {
     const stored = window.localStorage.getItem(KEY);
-    if (stored === "kg" || stored === "lb") return stored;
+    if (stored === "kg" || stored === "lb") {
+      return stored;
+    }
   } catch {
     // Storage blocked: fall through to the locale's unit.
   }
@@ -33,7 +35,7 @@ export function useWeightUnit(): [WeightUnit, (unit: WeightUnit) => void] {
   const [unit, setUnitState] = useState<WeightUnit>(readUnit);
 
   useEffect(() => {
-    const sync = () => setUnitState(readUnit());
+    const sync = (): void => setUnitState(readUnit());
     window.addEventListener(EVENT, sync);
     window.addEventListener("storage", sync);
     return () => {

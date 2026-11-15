@@ -2,6 +2,16 @@
   "lsp": {
     "tailwindcss-language-server": {
       "settings": { "classFunctions": ["cn"] }
+    },
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "preferences": { "includePackageJsonAutoImports": "on" }
+        },
+        "javascript": {
+          "preferences": { "includePackageJsonAutoImports": "on" }
+        }
+      }
     }
   },
   "tab_size": 2,
@@ -12,15 +22,27 @@
     "JavaScript": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on"
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.eslint": true }
     },
-    "JSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "JSX": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.eslint": true }
+    },
     "TypeScript": {
       "tab_size": 2,
       "formatter": "prettier",
-      "format_on_save": "on"
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.eslint": true }
     },
-    "TSX": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
+    "TSX": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "format_on_save": "on",
+      "code_actions_on_format": { "source.fixAll.eslint": true }
+    },
     "JSON": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "JSONC": { "tab_size": 2, "formatter": "prettier", "format_on_save": "on" },
     "CSS": {

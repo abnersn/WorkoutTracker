@@ -7,7 +7,7 @@ export function Skeleton({
 }: {
   tone?: Tone;
   className?: string;
-}) {
+}): React.JSX.Element {
   return (
     <div
       aria-hidden="true"
@@ -31,7 +31,7 @@ function Placeholder({
   label,
   className,
   children,
-}: PlaceholderProps & { children: React.ReactNode }) {
+}: PlaceholderProps & { children: React.ReactNode }): React.JSX.Element {
   return (
     <div role="status" aria-busy="true" className={className}>
       <span className="sr-only">{label}</span>
@@ -55,7 +55,7 @@ export function CardListSkeleton({
   rows?: number;
   /** Include the section heading; the remotes draw their own, the shell cannot. */
   withHeading?: boolean;
-}) {
+}): React.JSX.Element {
   return (
     <Placeholder label={label}>
       {withHeading && (
@@ -90,7 +90,11 @@ export function CardListSkeleton({
  * rows. Shared by the shell's loading fallback and the screens' own data loading,
  * so the hand-off between the two is invisible.
  */
-export function WorkoutScreenSkeleton({ label }: { label: string }) {
+export function WorkoutScreenSkeleton({
+  label,
+}: {
+  label: string;
+}): React.JSX.Element {
   return (
     <Placeholder label={label} className="flex flex-1 flex-col">
       <div aria-hidden="true" className="flex items-center gap-2 px-4 pt-6">

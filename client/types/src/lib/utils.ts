@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, ElementType } from "react";
+import { type ComponentPropsWithoutRef, type ElementType } from "react";
 
 /**
  * Helper type to make components that have an "as" prop typesafe

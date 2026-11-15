@@ -2,7 +2,7 @@
  * Motion tokens live in theme.css. The Web Animations API cannot take `var()` in
  * its options, so components resolve them here from the document root.
  */
-export const cssToken = (name: string) =>
+export const cssToken = (name: string): string =>
   typeof document === "undefined"
     ? ""
     : getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -17,7 +17,7 @@ export function easingToken(name: string): string {
   return cssToken(name) || "ease-out";
 }
 
-export function prefersReducedMotion() {
+export function prefersReducedMotion(): boolean {
   return (
     typeof window !== "undefined" &&
     !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches

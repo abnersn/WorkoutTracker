@@ -6,7 +6,7 @@ import { App } from "./App";
 const LOG_KEY = 9001;
 
 // The view reads IndexedDB, which Storybook's browser has: seed one finished workout.
-async function seedLog() {
+async function seedLog(): Promise<void> {
   const db = await openDB("workoutTracker", 1, {
     upgrade(db) {
       db.createObjectStore("workouts", { keyPath: "id" });

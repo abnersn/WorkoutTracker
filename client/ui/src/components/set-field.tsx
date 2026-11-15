@@ -63,7 +63,7 @@ export function SetField({
   quiet = false,
   tick = true,
   decimal = false,
-}: SetFieldProps) {
+}: SetFieldProps): React.JSX.Element {
   const id = useId();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -76,7 +76,9 @@ export function SetField({
     const before = previous.current;
     previous.current = value;
     const el = inputRef.current;
-    if (!el || !tick || isEditing || before === value || !el.animate) return;
+    if (!el || !tick || isEditing || before === value || !el.animate) {
+      return;
+    }
     if (prefersReducedMotion()) {
       el.animate([{ opacity: 0.35 }, { opacity: 1 }], {
         duration: msToken("--duration-quick"),
@@ -140,14 +142,18 @@ export function SetField({
           tabIndex={readOnly ? -1 : undefined}
           value={isEditing ? draft : format(value)}
           onFocus={(ev) => {
-            if (readOnly) return;
+            if (readOnly) {
+              return;
+            }
             setDraft(String(value));
             setIsEditing(true);
             onEditingChange?.(true);
             ev.currentTarget.select();
           }}
           onBlur={() => {
-            if (!isEditing) return;
+            if (!isEditing) {
+              return;
+            }
             setIsEditing(false);
             onEditingChange?.(false);
           }}
@@ -156,7 +162,9 @@ export function SetField({
             onChange?.(parseFieldValue(ev.target.value, decimal));
           }}
           onKeyDown={(ev) => {
-            if (ev.key === "Enter") ev.currentTarget.blur();
+            if (ev.key === "Enter") {
+              ev.currentTarget.blur();
+            }
           }}
           className={cn(
             "block w-full min-w-0 self-stretch bg-transparent outline-none",

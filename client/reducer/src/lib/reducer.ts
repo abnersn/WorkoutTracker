@@ -3,6 +3,7 @@ import {
   type Exercise,
   type Workout,
   type WorkoutAction,
+  type WorkoutSet,
 } from "@workout-tracker/types";
 import { genId } from "@workout-tracker/utils";
 
@@ -24,12 +25,14 @@ function getNextStageFor(stage: SetStage): SetStage {
 }
 
 /** The set the lifter is lifting or resting after, if any. */
-function setInProgress(workout: Workout) {
+function setInProgress(workout: Workout): WorkoutSet | undefined {
   for (const exercise of workout.exercises) {
     const set = exercise.sets.find(
       (s) => s.stage === SetStage.Active || s.stage === SetStage.Resting,
     );
-    if (set) return set;
+    if (set) {
+      return set;
+    }
   }
   return undefined;
 }
@@ -49,7 +52,9 @@ function nextIncompleteSet(
   for (let i = 0; i < count; i++) {
     const exercise = workout.exercises[(start + i) % count];
     const set = exercise.sets.find((s) => s.stage !== SetStage.Complete);
-    if (set) return { exerciseId: exercise.id, setId: set.id };
+    if (set) {
+      return { exerciseId: exercise.id, setId: set.id };
+    }
   }
   return null;
 }

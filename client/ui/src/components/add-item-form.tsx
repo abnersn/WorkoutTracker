@@ -16,13 +16,15 @@ export function AddItemForm({
   placeholder,
   onSubmit,
   className,
-}: AddItemFormProps) {
+}: AddItemFormProps): React.JSX.Element {
   const [value, setValue] = useState("");
 
-  const handleSubmit = (ev: FormEvent) => {
+  const handleSubmit = (ev: FormEvent): void => {
     ev.preventDefault();
     const name = value.trim();
-    if (!name) return;
+    if (!name) {
+      return;
+    }
     onSubmit(name);
     setValue("");
   };

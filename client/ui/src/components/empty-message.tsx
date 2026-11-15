@@ -7,6 +7,6 @@ export function EmptyMessage({
 }: {
   className?: string;
   children: ReactNode;
-}) {
+}): React.JSX.Element {
   return <p className={cn("text-sm text-indigo-700", className)}>{children}</p>;
 }

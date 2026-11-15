@@ -12,7 +12,7 @@ const row = (
     key,
     ...extra
   }: { key?: string } & Partial<ComponentProps<typeof SetRow>> = {},
-) => (
+): React.JSX.Element => (
   <SetRow
     key={key}
     stage={stage}

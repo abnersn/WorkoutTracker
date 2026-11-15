@@ -1,6 +1,6 @@
 import type { ElementType } from "react";
 import { cn } from "./tone";
-import { PolymorphicProps } from "@workout-tracker/types/utils";
+import { type PolymorphicProps } from "@workout-tracker/types/utils";
 
 export type TextLabelProps<T extends ElementType = "p"> = PolymorphicProps<
   T,
@@ -14,7 +14,7 @@ export function TextLabel<T extends ElementType = "p">({
   as,
   className,
   ...props
-}: TextLabelProps<T>) {
+}: TextLabelProps<T>): React.JSX.Element {
   const Tag: ElementType = as ?? "p";
   return (
     <Tag

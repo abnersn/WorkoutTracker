@@ -19,7 +19,7 @@ export function StatusMessage({
   action,
   navigate,
   busy = false,
-}: StatusMessageProps) {
+}: StatusMessageProps): React.JSX.Element {
   return (
     <section
       role={busy ? "status" : "alert"}

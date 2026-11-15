@@ -3,7 +3,16 @@ import { Container } from "./container";
 import { SetStage, type Workout } from "@workout-tracker/types";
 import { WorkoutScreen } from "./workout-screen";
 
-const sets = (stage: SetStage, id: string) =>
+const sets = (
+  stage: SetStage,
+  id: string,
+): {
+  id: string;
+  stage: SetStage;
+  defaultReps: number;
+  defaultWeight: number;
+  defaultRestTime: number;
+}[] =>
   [1, 2, 3].map((n) => ({
     id: `${id}-${n}`,
     stage,

@@ -15,7 +15,7 @@ export function Card({
   isActive = false,
   className,
   ...props
-}: CardProps) {
+}: CardProps): React.JSX.Element {
   return (
     <div
       className={cn(

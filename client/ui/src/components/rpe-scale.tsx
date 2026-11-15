@@ -38,7 +38,7 @@ export function RpeScale({
   onChange,
   readOnly = false,
   defaultExpanded = false,
-}: RpeScaleProps) {
+}: RpeScaleProps): React.JSX.Element {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const panelId = useId();
   const rated = value !== undefined;
@@ -87,7 +87,9 @@ export function RpeScale({
         onChange={(ev) => onChange?.(Number(ev.target.value))}
         // A tap on the thumb itself fires no change; it still counts as a rating.
         onPointerUp={() => {
-          if (!rated && !readOnly) onChange?.(shown);
+          if (!rated && !readOnly) {
+            onChange?.(shown);
+          }
         }}
         className={cn("rpe-range", !rated && "rpe-range-unrated")}
         style={{ "--rpe-color": color } as CSSProperties}

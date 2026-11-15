@@ -17,7 +17,7 @@ export function Badge({
   caption,
   className,
   children,
-}: BadgeProps) {
+}: BadgeProps): React.JSX.Element {
   return (
     <div
       className={cn(

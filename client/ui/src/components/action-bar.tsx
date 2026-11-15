@@ -12,7 +12,7 @@ export function ActionBar({
   notice,
   children,
   ...props
-}: ActionBarProps) {
+}: ActionBarProps): React.JSX.Element {
   return (
     <div className="sticky bottom-0 mt-auto border-t border-indigo-200 bg-white">
       {notice}

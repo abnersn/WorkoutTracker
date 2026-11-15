@@ -25,7 +25,7 @@ export function WorkoutSummary({
   workout,
   previous,
   finished = false,
-}: WorkoutSummaryProps) {
+}: WorkoutSummaryProps): React.JSX.Element {
   const [unit] = useWeightUnit();
   // Volume is tallied in kg; shown in the lifter's unit.
   const { logged, volume: volumeKg } = tallyWorkout(workout);

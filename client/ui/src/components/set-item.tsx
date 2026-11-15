@@ -51,7 +51,7 @@ export function SetItem({
   isOnly,
   readOnly,
   dispatch,
-}: SetItemProps) {
+}: SetItemProps): React.JSX.Element {
   const { notify } = useNotification();
   const [weightUnit] = useWeightUnit();
   const { stage } = set;
@@ -111,13 +111,13 @@ export function SetItem({
     }
   }, [stage, restTimer.value, notify]);
 
-  const activate = () =>
+  const activate = (): void =>
     dispatch({
       type: "UPDATE_ACTIVE_SET",
       payload: { exerciseId, setId: set.id },
     });
 
-  const onChange = (field: SetFieldName, value: number) => {
+  const onChange = (field: SetFieldName, value: number): void => {
     if (field === "rest" && stage === SetStage.Resting) {
       // Mid-rest, ±15s changes this rest only. The planned rest stays as it was;
       // the start stamp shifts so a reload still lands on the adjusted countdown.
@@ -135,10 +135,14 @@ export function SetItem({
           },
         });
       }
-      if (value > 0) notified.current = false;
+      if (value > 0) {
+        notified.current = false;
+      }
       return;
     }
-    if (field === "rest") restTimer.set(value);
+    if (field === "rest") {
+      restTimer.set(value);
+    }
     // Weights come in as the lifter's unit and are stored in kg.
     const stored =
       field === "weight" ? fromDisplayWeight(value, weightUnit) : value;

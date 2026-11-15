@@ -18,13 +18,15 @@ export function Dialog({
   onClose,
   children,
   actions,
-}: DialogProps) {
+}: DialogProps): React.JSX.Element {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) {
+      return;
+    }
     if (open && !el.open) {
       el.showModal();
       // showModal() focuses the first button, which may be the destructive one.
@@ -32,7 +34,9 @@ export function Dialog({
       // to first focus with data-autofocus.
       el.querySelector<HTMLElement>("[data-autofocus]")?.focus();
     }
-    if (!open && el.open) el.close();
+    if (!open && el.open) {
+      el.close();
+    }
   }, [open]);
 
   return (
@@ -44,7 +48,9 @@ export function Dialog({
         onClose();
       }}
       onClick={(ev) => {
-        if (ev.target === ev.currentTarget) onClose();
+        if (ev.target === ev.currentTarget) {
+          onClose();
+        }
       }}
       className="m-auto w-[min(26rem,calc(100vw-3rem))] rounded-dialog border border-indigo-200 bg-white p-0 text-indigo-800 shadow-xl backdrop:bg-slate-900/40"
     >
