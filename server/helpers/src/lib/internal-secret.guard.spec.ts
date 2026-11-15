@@ -1,6 +1,6 @@
 import { Metadata } from "@grpc/grpc-js";
 import { type ExecutionContext } from "@nestjs/common";
-import { UnauthenticatedError } from "./errors";
+import { PermissionDeniedError } from "./errors";
 import {
   INTERNAL_SECRET_METADATA,
   InternalSecretGuard,
@@ -31,6 +31,6 @@ describe("InternalSecretGuard", () => {
     ["a prefix of the secret", contextWith(SECRET.slice(1))],
     ["sent twice", contextWith(SECRET, SECRET)],
   ])("rejects a secret that is %s", (_, context) => {
-    expect(() => guard.canActivate(context)).toThrow(UnauthenticatedError);
+    expect(() => guard.canActivate(context)).toThrow(PermissionDeniedError);
   });
 });

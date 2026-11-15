@@ -1,4 +1,5 @@
 import { status } from "@grpc/grpc-js";
+import { FILTER_CATCH_EXCEPTIONS } from "@nestjs/common/constants";
 import { errors } from "@workout-tracker/helpers";
 import { Error as MongooseError, Types } from "mongoose";
 import { firstValueFrom } from "rxjs";
@@ -12,6 +13,11 @@ const cases: [string, () => Error, status][] = [
     "UnauthenticatedError",
     () => new errors.UnauthenticatedError("who?"),
     status.UNAUTHENTICATED,
+  ],
+  [
+    "PermissionDeniedError",
+    () => new errors.PermissionDeniedError("no"),
+    status.PERMISSION_DENIED,
   ],
   [
     "InvalidArgumentError",
@@ -30,13 +36,22 @@ const cases: [string, () => Error, status][] = [
   ],
   [
     "mongoose DocumentNotFoundError",
-    () => new MongooseError.DocumentNotFoundError("no document found for query"),
+    () =>
+      new MongooseError.DocumentNotFoundError("no document found for query"),
     status.NOT_FOUND,
   ],
 ];
 
 describe("WorkoutsErrorsFilter", () => {
   const filter = new WorkoutsErrorsFilter();
+
+  // @Catch decides which errors reach the filter at all; a class in the
+  // code map but missing here is never mapped at runtime.
+  it.each(cases)("is registered with @Catch for %s", (_, make) => {
+    const caught: unknown[] =
+      Reflect.getMetadata(FILTER_CATCH_EXCEPTIONS, WorkoutsErrorsFilter) ?? [];
+    expect(caught).toContain(make().constructor);
+  });
 
   it.each(cases)("maps %s to gRPC code %s", async (_, make, code) => {
     const error = make();

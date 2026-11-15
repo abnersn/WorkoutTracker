@@ -27,6 +27,18 @@ async function bootstrap(): Promise<void> {
   );
   app.enableShutdownHooks();
   await app.listen();
+  // Set when Nx waits for this server to be ready
+  if (process.env.NX_READY_SIGNAL_SOCKET) {
+    try {
+      // Function keeps TypeScript and bundlers from rewriting or bundling the import
+      const load = new Function("s", "return import(s)") as (
+        s: string,
+      ) => Promise<{ emitReadySignal(server?: unknown): boolean }>;
+      (await load("@nx/js/ready-signal")).emitReadySignal();
+    } catch {
+      // @nx/js isn't installed
+    }
+  }
 }
 
 bootstrap();

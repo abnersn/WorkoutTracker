@@ -36,7 +36,8 @@ import { WorkoutsService } from "./workouts.service";
     ]),
   ],
   controllers: [WorkoutsGrpcController],
-  providers: [WorkoutsService,
+  providers: [
+    WorkoutsService,
     {
       // Rejects any call without the shared INTERNAL_SECRET.
       provide: APP_GUARD,

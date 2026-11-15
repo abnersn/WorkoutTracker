@@ -14,7 +14,7 @@ import { Payload } from "@nestjs/microservices";
 import { z } from "zod";
 import { ZodPipe } from "@workout-tracker/helpers";
 
-const email = z.string().trim().toLowerCase().pipe(z.email());
+const email = z.string().trim().toLowerCase().max(254).pipe(z.email());
 
 export const createUserSchema = z.object({
   email,

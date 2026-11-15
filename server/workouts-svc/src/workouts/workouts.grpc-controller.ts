@@ -2,8 +2,6 @@ import { Controller, UseFilters } from "@nestjs/common";
 import type { Metadata } from "@grpc/grpc-js";
 import { Ctx, Payload } from "@nestjs/microservices";
 import {
-  type CreateLogRequest,
-  type CreateWorkoutRequest,
   type DeleteLogRequest,
   type DeleteWorkoutRequest,
   type GetLastRunsRequest,
@@ -16,17 +14,12 @@ import {
   type ListWorkoutsResponse,
   type LogEntry,
   SetStage,
-  type UpdateLogRequest,
-  type UpdateWorkoutRequest,
   type Workout,
   type WorkoutsServiceController,
   WorkoutsServiceControllerMethods,
 } from "@workout-tracker/proto";
-import {
-  toLogId,
-  toWorkoutId,
-  ZodPipe,
-} from "@workout-tracker/helpers";
+import { ZodPipe } from "@workout-tracker/helpers";
+import { toLogId, toWorkoutId } from "./ids";
 import { z } from "zod";
 import { WorkoutsService } from "./workouts.service";
 import { WorkoutsErrorsFilter } from "./workouts-errors.filter";
@@ -109,17 +102,19 @@ export class WorkoutsGrpcController implements WorkoutsServiceController {
   }
 
   createWorkout(
-    @Payload(new ZodPipe(createWorkoutSchema)) req: CreateWorkoutRequest,
+    @Payload(new ZodPipe(createWorkoutSchema))
+    req: z.output<typeof createWorkoutSchema>,
     @Ctx() metadata: Metadata,
   ): Promise<Workout> {
-    return this.workouts.createWorkout(userIdFrom(metadata), req.workout as Workout);
+    return this.workouts.createWorkout(userIdFrom(metadata), req.workout);
   }
 
   updateWorkout(
-    @Payload(new ZodPipe(updateWorkoutSchema)) req: UpdateWorkoutRequest,
+    @Payload(new ZodPipe(updateWorkoutSchema))
+    req: z.output<typeof updateWorkoutSchema>,
     @Ctx() metadata: Metadata,
   ): Promise<Workout> {
-    const workout = req.workout as Workout;
+    const workout = req.workout;
     return this.workouts.updateWorkout(
       userIdFrom(metadata),
       toWorkoutId(workout.id),
@@ -131,7 +126,10 @@ export class WorkoutsGrpcController implements WorkoutsServiceController {
     @Payload(new ZodPipe(byIdSchema)) req: DeleteWorkoutRequest,
     @Ctx() metadata: Metadata,
   ): Promise<void> {
-    return this.workouts.deleteWorkout(userIdFrom(metadata), toWorkoutId(req.id));
+    return this.workouts.deleteWorkout(
+      userIdFrom(metadata),
+      toWorkoutId(req.id),
+    );
   }
 
   async listLogs(
@@ -149,10 +147,11 @@ export class WorkoutsGrpcController implements WorkoutsServiceController {
   }
 
   createLog(
-    @Payload(new ZodPipe(createLogSchema)) req: CreateLogRequest,
+    @Payload(new ZodPipe(createLogSchema))
+    req: z.output<typeof createLogSchema>,
     @Ctx() metadata: Metadata,
   ): Promise<LogEntry> {
-    const log = req.log as LogEntry;
+    const log = req.log;
     return this.workouts.createLog(
       userIdFrom(metadata),
       toWorkoutId(log.workoutId),
@@ -161,10 +160,11 @@ export class WorkoutsGrpcController implements WorkoutsServiceController {
   }
 
   updateLog(
-    @Payload(new ZodPipe(updateLogSchema)) req: UpdateLogRequest,
+    @Payload(new ZodPipe(updateLogSchema))
+    req: z.output<typeof updateLogSchema>,
     @Ctx() metadata: Metadata,
   ): Promise<LogEntry> {
-    const log = req.log as LogEntry;
+    const log = req.log;
     return this.workouts.updateLog(userIdFrom(metadata), toLogId(log.id), log);
   }
 

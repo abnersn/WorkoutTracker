@@ -1,4 +1,4 @@
-import { validateEnv } from "./database-env-validator";
+import { validateEnv } from "./service-env";
 
 describe("validateEnv", () => {
   const MONGODB_URI = "mongodb://localhost:27017/users";
@@ -24,7 +24,9 @@ describe("validateEnv", () => {
 
   it("accepts mongodb+srv URIs", () => {
     const uri = "mongodb+srv://cluster.example.net/users";
-    expect(validateEnv({ ...required, MONGODB_URI: uri }).MONGODB_URI).toBe(uri);
+    expect(validateEnv({ ...required, MONGODB_URI: uri }).MONGODB_URI).toBe(
+      uri,
+    );
   });
 
   it("rejects a missing MONGODB_URI", () => {
@@ -36,9 +38,7 @@ describe("validateEnv", () => {
   it("rejects a non-MongoDB URI", () => {
     expect(() =>
       validateEnv({ ...required, MONGODB_URI: "postgres://x" }),
-    ).toThrow(
-      "must be a MongoDB connection string",
-    );
+    ).toThrow("must be a MongoDB connection string");
   });
 
   it.each([
@@ -61,8 +61,8 @@ describe("validateEnv", () => {
     ["missing", undefined],
     ["shorter than 32 characters", "s".repeat(31)],
   ])("rejects an INTERNAL_SECRET that is %s", (_, secret) => {
-    expect(() =>
-      validateEnv({ ...required, INTERNAL_SECRET: secret }),
-    ).toThrow(/INTERNAL_SECRET/);
+    expect(() => validateEnv({ ...required, INTERNAL_SECRET: secret })).toThrow(
+      /INTERNAL_SECRET/,
+    );
   });
 });

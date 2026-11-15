@@ -8,6 +8,7 @@ type ErrorClass = new (...args: never[]) => Error;
 const codes = new Map<ErrorClass, status>([
   [errors.NotFoundError, status.NOT_FOUND],
   [errors.UnauthenticatedError, status.UNAUTHENTICATED],
+  [errors.PermissionDeniedError, status.PERMISSION_DENIED],
   [errors.InvalidArgumentError, status.INVALID_ARGUMENT],
   [MongooseError.ValidationError, status.INVALID_ARGUMENT],
   // The document changed (VersionError) or was deleted
@@ -16,14 +17,8 @@ const codes = new Map<ErrorClass, status>([
   [MongooseError.DocumentNotFoundError, status.NOT_FOUND],
 ]);
 
-@Catch(
-  errors.NotFoundError,
-  errors.UnauthenticatedError,
-  errors.InvalidArgumentError,
-  MongooseError.ValidationError,
-  MongooseError.VersionError,
-  MongooseError.DocumentNotFoundError,
-)
+// Derived from the map so a mapped class can't be left out of @Catch.
+@Catch(...codes.keys())
 export class WorkoutsErrorsFilter implements RpcExceptionFilter<Error> {
   catch(error: Error): Observable<never> {
     const code = codes.get(error.constructor as ErrorClass) ?? status.INTERNAL;

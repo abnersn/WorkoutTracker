@@ -1,10 +1,6 @@
 import { type Model, Types } from "mongoose";
-import {
-  errors,
-  toLogId,
-  toUserId,
-  toWorkoutId,
-} from "@workout-tracker/helpers";
+import { errors } from "@workout-tracker/helpers";
+import { toLogId, toUserId, toWorkoutId } from "./ids";
 import { type LogEntry, SetStage, type Workout } from "@workout-tracker/proto";
 import { type LogEntryRecord, type WorkoutRecord } from "./workout.schema";
 import { WorkoutsService } from "./workouts.service";
@@ -72,7 +68,10 @@ type FakeModel = {
 // stored document, and queries resolve to whatever each test queues.
 function fakeModel(): FakeModel {
   const exec = jest.fn();
-  const query = { sort: jest.fn(() => query), exec };
+  const query: { sort: jest.Mock; exec: jest.Mock } = {
+    sort: jest.fn(() => query),
+    exec,
+  };
   return {
     exec,
     model: {
@@ -250,10 +249,7 @@ describe("WorkoutsService", () => {
         "an active set without an active exercise",
         { activeExerciseId: undefined },
       ],
-      [
-        "an active set from another exercise",
-        { activeSetId: OTHER_SET_ID },
-      ],
+      ["an active set from another exercise", { activeSetId: OTHER_SET_ID }],
       [
         "an active exercise that isn't in the log",
         { activeExerciseId: "64b0000000000000000000e9" },

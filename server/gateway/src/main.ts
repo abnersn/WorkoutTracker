@@ -1,17 +1,14 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
 import { Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app/app.module";
+import { Env } from "./app/env";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = "api";
-  app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
+  const port = app.get<ConfigService<Env, true>>(ConfigService).get("PORT", {
+    infer: true,
+  });
   await app.listen(port);
   // Set when Nx waits for this server to be ready
   if (process.env.NX_READY_SIGNAL_SOCKET) {
@@ -25,9 +22,7 @@ async function bootstrap(): Promise<void> {
       // @nx/js isn't installed
     }
   }
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
+  Logger.log(`🚀 Application is running on: http://localhost:${port}/graphql`);
 }
 
 bootstrap();

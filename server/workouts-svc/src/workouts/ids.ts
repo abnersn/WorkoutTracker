@@ -14,7 +14,8 @@ export type WorkoutId = Id<"Workout">;
 export type LogId = Id<"Log">;
 
 // Expects a valid ObjectId string; validate it first (the controllers do).
-export const toUserId = (id: string): UserId => new Types.ObjectId(id) as UserId;
+export const toUserId = (id: string): UserId =>
+  new Types.ObjectId(id) as UserId;
 export const toWorkoutId = (id: string): WorkoutId =>
   new Types.ObjectId(id) as WorkoutId;
 export const toLogId = (id: string): LogId => new Types.ObjectId(id) as LogId;

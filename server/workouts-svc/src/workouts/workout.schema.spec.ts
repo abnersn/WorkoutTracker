@@ -47,8 +47,10 @@ describe("workout schemas", () => {
   });
 
   it("indexes logs for the getLastRuns lookup", () => {
-    expect(LogEntrySchema.indexes().map(([fields]) => fields)).toContainEqual(
-      { userId: 1, workoutId: 1, date: -1 },
-    );
+    expect(LogEntrySchema.indexes().map(([fields]) => fields)).toContainEqual({
+      userId: 1,
+      workoutId: 1,
+      date: -1,
+    });
   });
 });

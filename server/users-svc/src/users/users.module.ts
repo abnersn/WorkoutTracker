@@ -28,7 +28,8 @@ import {
     MongooseModule.forFeature([{ name: UserRecord.name, schema: UserSchema }]),
   ],
   controllers: [UsersGrpcController],
-  providers: [UsersService,
+  providers: [
+    UsersService,
     {
       // Rejects any call without the shared INTERNAL_SECRET.
       provide: APP_GUARD,

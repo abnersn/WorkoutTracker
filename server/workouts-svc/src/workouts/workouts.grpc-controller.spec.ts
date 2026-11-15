@@ -14,9 +14,8 @@ import {
   errors,
   INTERNAL_SECRET_METADATA,
   InternalSecretGuard,
-  toUserId,
-  toWorkoutId,
 } from "@workout-tracker/helpers";
+import { toUserId, toWorkoutId } from "./ids";
 import { WorkoutsGrpcController } from "./workouts.grpc-controller";
 import { WorkoutsService } from "./workouts.service";
 import { USER_ID_METADATA } from "./user-id";
@@ -141,13 +140,13 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
     it.each([
       ["missing", withSecret()],
       ["wrong", withSecret("t".repeat(32))],
-    ])("returns UNAUTHENTICATED when it is %s", async (_, metadata) => {
+    ])("returns PERMISSION_DENIED when it is %s", async (_, metadata) => {
       const err = await client
         .call("ListWorkouts")({}, metadata)
         .catch((e: grpc.ServiceError) => e);
 
       expect((err as grpc.ServiceError).code).toBe(
-        grpc.status.UNAUTHENTICATED,
+        grpc.status.PERMISSION_DENIED,
       );
       expect(service.listWorkouts).not.toHaveBeenCalled();
     });
@@ -178,13 +177,13 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
       ["missing", asUser()],
       ["not an ObjectId", asUser("someone")],
       ["sent twice", asUser(USER_ID, USER_ID)],
-    ])("returns UNAUTHENTICATED when it is %s", async (_, metadata) => {
+    ])("returns PERMISSION_DENIED when it is %s", async (_, metadata) => {
       const err = await client
         .call("ListLogs")({}, metadata)
         .catch((e: grpc.ServiceError) => e);
 
       expect((err as grpc.ServiceError).code).toBe(
-        grpc.status.UNAUTHENTICATED,
+        grpc.status.PERMISSION_DENIED,
       );
       expect(service.listLogs).not.toHaveBeenCalled();
     });

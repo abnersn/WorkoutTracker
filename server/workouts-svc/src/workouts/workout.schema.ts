@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { SchemaTypes, type Types } from "mongoose";
 import { SetStage } from "@workout-tracker/proto";
-import type { LogId, UserId, WorkoutId } from "@workout-tracker/helpers";
+import type { LogId, UserId, WorkoutId } from "./ids";
 
 export const SET_STAGES = [
   SetStage.IDLE,

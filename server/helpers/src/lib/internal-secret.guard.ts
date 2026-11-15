@@ -1,10 +1,10 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import type { Metadata } from "@grpc/grpc-js";
 import { type CanActivate, type ExecutionContext } from "@nestjs/common";
-import { UnauthenticatedError } from "./errors";
+import { createHash, timingSafeEqual } from "node:crypto";
+import { PermissionDeniedError } from "./errors";
 
 // Every call between services carries the shared INTERNAL_SECRET in this
-// metadata key, so only our own services (the gateway, later) can call a
+// metadata key, so only our own services can call a
 // service, even if its port is reachable.
 export const INTERNAL_SECRET_METADATA = "x-internal-secret";
 
@@ -32,7 +32,7 @@ export class InternalSecretGuard implements CanActivate {
       typeof value !== "string" ||
       !timingSafeEqual(digest(value), this.expected)
     ) {
-      throw new UnauthenticatedError("missing or invalid internal secret");
+      throw new PermissionDeniedError("missing or invalid internal secret");
     }
     return true;
   }

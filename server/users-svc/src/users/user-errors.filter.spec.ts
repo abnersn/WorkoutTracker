@@ -5,21 +5,43 @@ import { firstValueFrom } from "rxjs";
 import { errors } from "@workout-tracker/helpers";
 import { UsersErrorsFilter } from "./user-errors.filter";
 
-const { EmailTakenError, InvalidArgumentError, InvalidCredentialError } = errors;
+const { EmailTakenError, InvalidArgumentError, InvalidCredentialError } =
+  errors;
 
 function validationError(): MongooseError.ValidationError {
   const err = new MongooseError.ValidationError();
   err.addError(
     "email",
-    new MongooseError.ValidatorError({ message: "Path `email` is required.", path: "email" }),
+    new MongooseError.ValidatorError({
+      message: "Path `email` is required.",
+      path: "email",
+    }),
   );
   return err;
 }
 
 const cases: [string, () => Error, status][] = [
   ["EmailTakenError", () => new EmailTakenError(), status.ALREADY_EXISTS],
-  ["InvalidCredentialError", () => new InvalidCredentialError(), status.UNAUTHENTICATED],
-  ["InvalidArgumentError", () => new InvalidArgumentError("email: bad"), status.INVALID_ARGUMENT],
+  [
+    "InvalidCredentialError",
+    () => new InvalidCredentialError(),
+    status.UNAUTHENTICATED,
+  ],
+  [
+    "UnauthenticatedError",
+    () => new errors.UnauthenticatedError("who?"),
+    status.UNAUTHENTICATED,
+  ],
+  [
+    "PermissionDeniedError",
+    () => new errors.PermissionDeniedError("no"),
+    status.PERMISSION_DENIED,
+  ],
+  [
+    "InvalidArgumentError",
+    () => new InvalidArgumentError("email: bad"),
+    status.INVALID_ARGUMENT,
+  ],
   ["mongoose ValidationError", validationError, status.INVALID_ARGUMENT],
 ];
 
@@ -35,7 +57,9 @@ describe("UsersErrorsFilter", () => {
   });
 
   it("falls back to INTERNAL for an unmapped error", async () => {
-    await expect(firstValueFrom(filter.catch(new Error("boom")))).rejects.toEqual({
+    await expect(
+      firstValueFrom(filter.catch(new Error("boom"))),
+    ).rejects.toEqual({
       code: status.INTERNAL,
       message: "boom",
     });

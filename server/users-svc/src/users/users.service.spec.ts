@@ -78,7 +78,9 @@ describe("UsersService", () => {
         passwordHash: expect.stringMatching(/^\$argon2/),
       });
       expect(saved).not.toHaveProperty("password");
-      await expect(argon2.verify(saved.passwordHash, "secret123")).resolves.toBe(true);
+      await expect(
+        argon2.verify(saved.passwordHash, "secret123"),
+      ).resolves.toBe(true);
     });
 
     it("does not leak the password hash in the returned user", async () => {
@@ -91,9 +93,13 @@ describe("UsersService", () => {
 
     it("turns a duplicate key error (11000) into EmailTakenError", async () => {
       const { service, model } = setup();
-      model.create.mockRejectedValue(Object.assign(new Error("E11000"), { code: 11000 }));
+      model.create.mockRejectedValue(
+        Object.assign(new Error("E11000"), { code: 11000 }),
+      );
 
-      await expect(service.createUser(input)).rejects.toBeInstanceOf(EmailTakenError);
+      await expect(service.createUser(input)).rejects.toBeInstanceOf(
+        EmailTakenError,
+      );
     });
 
     it("rethrows any other database error unchanged", async () => {
@@ -115,10 +121,12 @@ describe("UsersService", () => {
       const { service, model, select, findOneExec } = setup();
       findOneExec.mockResolvedValue(doc({ passwordHash }));
 
-      await expect(service.verifyCredentials(" SOMEONE@example.com", "secret123")).resolves.toEqual(
-        expectedUser,
-      );
-      expect(model.findOne).toHaveBeenCalledWith({ email: "someone@example.com" });
+      await expect(
+        service.verifyCredentials(" SOMEONE@example.com", "secret123"),
+      ).resolves.toEqual(expectedUser);
+      expect(model.findOne).toHaveBeenCalledWith({
+        email: "someone@example.com",
+      });
       // passwordHash is select:false in the schema, so it must be opted in
       expect(select).toHaveBeenCalledWith("+passwordHash");
     });
@@ -127,9 +135,9 @@ describe("UsersService", () => {
       const { service, findOneExec } = setup();
       findOneExec.mockResolvedValue(doc({ passwordHash }));
 
-      await expect(service.verifyCredentials("someone@example.com", "wrong")).rejects.toBeInstanceOf(
-        InvalidCredentialError,
-      );
+      await expect(
+        service.verifyCredentials("someone@example.com", "wrong"),
+      ).rejects.toBeInstanceOf(InvalidCredentialError);
     });
 
     it("rejects an unknown email with the same error, after still running argon2", async () => {
@@ -138,9 +146,9 @@ describe("UsersService", () => {
       const verify = argon2.verify as jest.Mock;
       verify.mockClear();
 
-      await expect(service.verifyCredentials("ghost@example.com", "secret123")).rejects.toBeInstanceOf(
-        InvalidCredentialError,
-      );
+      await expect(
+        service.verifyCredentials("ghost@example.com", "secret123"),
+      ).rejects.toBeInstanceOf(InvalidCredentialError);
       // the decoy hash keeps timing similar so emails can't be enumerated
       expect(verify).toHaveBeenCalledTimes(1);
     });
@@ -150,7 +158,10 @@ describe("UsersService", () => {
       findOneExec.mockResolvedValue(null);
 
       await expect(
-        service.verifyCredentials("ghost@example.com", "no account has this password"),
+        service.verifyCredentials(
+          "ghost@example.com",
+          "no account has this password",
+        ),
       ).rejects.toBeInstanceOf(InvalidCredentialError);
     });
   });
@@ -160,7 +171,9 @@ describe("UsersService", () => {
       const { service, model, findExec } = setup();
       findExec.mockResolvedValue([doc()]);
 
-      await expect(service.getUsers([ID, "bogus", ""])).resolves.toEqual([expectedUser]);
+      await expect(service.getUsers([ID, "bogus", ""])).resolves.toEqual([
+        expectedUser,
+      ]);
       expect(model.find).toHaveBeenCalledWith({ _id: { $in: [ID] } });
     });
 

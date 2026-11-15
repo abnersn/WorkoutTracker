@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
-export const normalizeEmail = (email: string) : string => email.trim().toLowerCase();
+export const normalizeEmail = (email: string): string =>
+  email.trim().toLowerCase();
 
 @Schema({
   collection: "users",

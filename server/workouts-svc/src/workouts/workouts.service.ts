@@ -11,12 +11,8 @@ import {
   type Workout,
   type WorkoutSet,
 } from "@workout-tracker/proto";
-import {
-  errors,
-  type LogId,
-  type UserId,
-  type WorkoutId,
-} from "@workout-tracker/helpers";
+import { errors } from "@workout-tracker/helpers";
+import { type LogId, type UserId, type WorkoutId } from "./ids";
 import {
   type ExerciseRecord,
   type WorkoutBody,
