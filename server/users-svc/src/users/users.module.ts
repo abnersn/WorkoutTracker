@@ -4,12 +4,13 @@ import { UserRecord, UserSchema } from "./user.schema";
 import { UsersGrpcController } from "./users.grpc-controller";
 import { UsersService } from "./users.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { type Env, validateEnv } from "./env";
+import { type Env, validateEnv } from "@workout-tracker/helpers";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvFile: true,
       validate: validateEnv,
     }),
     MongooseModule.forRootAsync({

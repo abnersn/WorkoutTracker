@@ -11,3 +11,7 @@ export class InvalidCredentialError extends Error {
 }
 
 export class InvalidArgumentError extends Error {}
+
+export class NotFoundError extends Error {}
+
+export class UnauthenticatedError extends Error {}

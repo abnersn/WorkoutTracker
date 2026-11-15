@@ -4,17 +4,17 @@ import {
   type Model,
 } from "mongoose";
 import { normalizeEmail, UserRecord } from "./user.schema";
-import { fromDate, type User } from "@workout-tracker/proto";
+import {
+  type CreateUserRequest,
+  fromDate,
+  type User,
+} from "@workout-tracker/proto";
 import { Injectable } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { InjectModel } from "@nestjs/mongoose";
-import { EmailTakenError, InvalidCredentialError } from "./errors";
+import { errors } from "@workout-tracker/helpers";
 
-type NewUser = {
-  email: string;
-  password: string;
-  displayName: string;
-};
+const { EmailTakenError, InvalidCredentialError } = errors;
 
 const isDuplicateKey = (err: unknown): boolean =>
   (err as { code?: unknown } | null)?.code === 11000;
@@ -37,7 +37,11 @@ export class UsersService {
     private readonly users: Model<UserRecord>,
   ) {}
 
-  async create({ email, password, displayName }: NewUser): Promise<User> {
+  async createUser({
+    email,
+    password,
+    displayName,
+  }: CreateUserRequest): Promise<User> {
     const passwordHash = await argon2.hash(password);
     try {
       const doc = await this.users.create({
@@ -54,7 +58,7 @@ export class UsersService {
     }
   }
 
-  async verify(email: string, password: string): Promise<User> {
+  async verifyCredentials(email: string, password: string): Promise<User> {
     const user = await this.users
       .findOne({ email: normalizeEmail(email) })
       .select("+passwordHash")
@@ -67,7 +71,7 @@ export class UsersService {
     return toUser(user);
   }
 
-  async getMany(ids: string[]): Promise<User[]> {
+  async getUsers(ids: string[]): Promise<User[]> {
     const valid = ids.filter((id) => isObjectIdOrHexString(id));
     const docs = await this.users.find({ _id: { $in: valid } }).exec();
     return docs.map(toUser);

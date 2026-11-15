@@ -1,8 +1,10 @@
 import * as argon2 from "argon2";
 import { type Model } from "mongoose";
-import { EmailTakenError, InvalidCredentialError } from "./errors";
+import { errors } from "@workout-tracker/helpers";
 import { type UserRecord } from "./user.schema";
 import { UsersService } from "./users.service";
+
+const { EmailTakenError, InvalidCredentialError } = errors;
 
 // Namespace imports can't be spied on, so wrap verify in a pass-through mock.
 jest.mock("argon2", () => {
@@ -56,7 +58,7 @@ function setup(): {
 }
 
 describe("UsersService", () => {
-  describe("create", () => {
+  describe("createUser", () => {
     const input = {
       email: "  Someone@Example.COM ",
       password: "secret123",
@@ -67,7 +69,7 @@ describe("UsersService", () => {
       const { service, model } = setup();
       model.create.mockResolvedValue(doc());
 
-      await expect(service.create(input)).resolves.toEqual(expectedUser);
+      await expect(service.createUser(input)).resolves.toEqual(expectedUser);
 
       const saved = model.create.mock.calls[0][0];
       expect(saved).toEqual({
@@ -83,7 +85,7 @@ describe("UsersService", () => {
       const { service, model } = setup();
       model.create.mockResolvedValue(doc({ passwordHash: "$argon2id$..." }));
 
-      const user = await service.create(input);
+      const user = await service.createUser(input);
       expect(user).not.toHaveProperty("passwordHash");
     });
 
@@ -91,7 +93,7 @@ describe("UsersService", () => {
       const { service, model } = setup();
       model.create.mockRejectedValue(Object.assign(new Error("E11000"), { code: 11000 }));
 
-      await expect(service.create(input)).rejects.toBeInstanceOf(EmailTakenError);
+      await expect(service.createUser(input)).rejects.toBeInstanceOf(EmailTakenError);
     });
 
     it("rethrows any other database error unchanged", async () => {
@@ -99,11 +101,11 @@ describe("UsersService", () => {
       const dbError = new Error("connection lost");
       model.create.mockRejectedValue(dbError);
 
-      await expect(service.create(input)).rejects.toBe(dbError);
+      await expect(service.createUser(input)).rejects.toBe(dbError);
     });
   });
 
-  describe("verify", () => {
+  describe("verifyCredentials", () => {
     let passwordHash: string;
     beforeAll(async () => {
       passwordHash = await argon2.hash("secret123");
@@ -113,7 +115,7 @@ describe("UsersService", () => {
       const { service, model, select, findOneExec } = setup();
       findOneExec.mockResolvedValue(doc({ passwordHash }));
 
-      await expect(service.verify(" SOMEONE@example.com", "secret123")).resolves.toEqual(
+      await expect(service.verifyCredentials(" SOMEONE@example.com", "secret123")).resolves.toEqual(
         expectedUser,
       );
       expect(model.findOne).toHaveBeenCalledWith({ email: "someone@example.com" });
@@ -125,7 +127,7 @@ describe("UsersService", () => {
       const { service, findOneExec } = setup();
       findOneExec.mockResolvedValue(doc({ passwordHash }));
 
-      await expect(service.verify("someone@example.com", "wrong")).rejects.toBeInstanceOf(
+      await expect(service.verifyCredentials("someone@example.com", "wrong")).rejects.toBeInstanceOf(
         InvalidCredentialError,
       );
     });
@@ -136,7 +138,7 @@ describe("UsersService", () => {
       const verify = argon2.verify as jest.Mock;
       verify.mockClear();
 
-      await expect(service.verify("ghost@example.com", "secret123")).rejects.toBeInstanceOf(
+      await expect(service.verifyCredentials("ghost@example.com", "secret123")).rejects.toBeInstanceOf(
         InvalidCredentialError,
       );
       // the decoy hash keeps timing similar so emails can't be enumerated
@@ -148,17 +150,17 @@ describe("UsersService", () => {
       findOneExec.mockResolvedValue(null);
 
       await expect(
-        service.verify("ghost@example.com", "no account has this password"),
+        service.verifyCredentials("ghost@example.com", "no account has this password"),
       ).rejects.toBeInstanceOf(InvalidCredentialError);
     });
   });
 
-  describe("getMany", () => {
+  describe("getUsers", () => {
     it("queries only valid ObjectIds and maps the results", async () => {
       const { service, model, findExec } = setup();
       findExec.mockResolvedValue([doc()]);
 
-      await expect(service.getMany([ID, "bogus", ""])).resolves.toEqual([expectedUser]);
+      await expect(service.getUsers([ID, "bogus", ""])).resolves.toEqual([expectedUser]);
       expect(model.find).toHaveBeenCalledWith({ _id: { $in: [ID] } });
     });
 
@@ -166,7 +168,7 @@ describe("UsersService", () => {
       const { service, findExec } = setup();
       findExec.mockResolvedValue([]);
 
-      await expect(service.getMany(["bogus"])).resolves.toEqual([]);
+      await expect(service.getUsers(["bogus"])).resolves.toEqual([]);
     });
   });
 });

@@ -140,6 +140,24 @@ export interface ListLogsResponse {
   logs: LogEntry[];
 }
 
+/**
+ * The newest log date of each requested workout, for the gateway's
+ * lastRunAt DataLoader. Workouts that were never run, or that aren't the
+ * caller's, are left out of the response.
+ */
+export interface GetLastRunsRequest {
+  workoutIds: string[];
+}
+
+export interface LastRun {
+  workoutId: string;
+  lastRunAt: Timestamp | undefined;
+}
+
+export interface GetLastRunsResponse {
+  lastRuns: LastRun[];
+}
+
 export const WORKOUTS_V1_PACKAGE_NAME = "workouts.v1";
 
 export interface WorkoutsServiceClient {
@@ -162,6 +180,8 @@ export interface WorkoutsServiceClient {
   updateLog(request: UpdateLogRequest, metadata?: Metadata): Observable<LogEntry>;
 
   deleteLog(request: DeleteLogRequest, metadata?: Metadata): Observable<Empty>;
+
+  getLastRuns(request: GetLastRunsRequest, metadata?: Metadata): Observable<GetLastRunsResponse>;
 }
 
 export interface WorkoutsServiceController {
@@ -190,6 +210,11 @@ export interface WorkoutsServiceController {
   updateLog(request: UpdateLogRequest, metadata?: Metadata): Promise<LogEntry> | Observable<LogEntry> | LogEntry;
 
   deleteLog(request: DeleteLogRequest, metadata?: Metadata): void | Promise<void>;
+
+  getLastRuns(
+    request: GetLastRunsRequest,
+    metadata?: Metadata,
+  ): Promise<GetLastRunsResponse> | Observable<GetLastRunsResponse> | GetLastRunsResponse;
 }
 
 export function WorkoutsServiceControllerMethods() {
@@ -205,6 +230,7 @@ export function WorkoutsServiceControllerMethods() {
       "getLog",
       "updateLog",
       "deleteLog",
+      "getLastRuns",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

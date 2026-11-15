@@ -1,25 +1,21 @@
 import { Catch, type RpcExceptionFilter } from "@nestjs/common";
-import {
-  EmailTakenError,
-  InvalidArgumentError,
-  InvalidCredentialError,
-} from "./errors";
+import { errors } from "@workout-tracker/helpers";
 import { type Observable, throwError } from "rxjs";
 import { status } from "@grpc/grpc-js";
 import { Error as MongooseError } from "mongoose";
 
 type ErrorClass = new (...args: never[]) => Error;
 const codes = new Map<ErrorClass, status>([
-  [EmailTakenError, status.ALREADY_EXISTS],
-  [InvalidCredentialError, status.UNAUTHENTICATED],
-  [InvalidArgumentError, status.INVALID_ARGUMENT],
+  [errors.EmailTakenError, status.ALREADY_EXISTS],
+  [errors.InvalidCredentialError, status.UNAUTHENTICATED],
+  [errors.InvalidArgumentError, status.INVALID_ARGUMENT],
   [MongooseError.ValidationError, status.INVALID_ARGUMENT],
 ]);
 
 @Catch(
-  EmailTakenError,
-  InvalidCredentialError,
-  InvalidArgumentError,
+  errors.EmailTakenError,
+  errors.InvalidCredentialError,
+  errors.InvalidArgumentError,
   MongooseError.ValidationError,
 )
 export class UsersErrorsFilter implements RpcExceptionFilter<Error> {

@@ -73,6 +73,7 @@ service WorkoutsService {
   rpc GetLog(GetLogRequest) returns (LogEntry);
   rpc UpdateLog(UpdateLogRequest) returns (LogEntry);
   rpc DeleteLog(DeleteLogRequest) returns (google.protobuf.Empty);
+  rpc GetLastRuns(GetLastRunsRequest) returns (GetLastRunsResponse);
 }
 
 message ListWorkoutsRequest {}
@@ -106,4 +107,18 @@ message DeleteLogRequest {
 message ListLogsRequest {}
 message ListLogsResponse {
   repeated LogEntry logs = 1;
+}
+
+// The newest log date of each requested workout, for the gateway's
+// lastRunAt DataLoader. Workouts that were never run, or that aren't the
+// caller's, are left out of the response.
+message GetLastRunsRequest {
+  repeated string workout_ids = 1;
+}
+message LastRun {
+  string workout_id = 1;
+  google.protobuf.Timestamp last_run_at = 2;
+}
+message GetLastRunsResponse {
+  repeated LastRun last_runs = 1;
 }

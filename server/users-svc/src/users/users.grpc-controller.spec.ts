@@ -8,9 +8,11 @@ import { type MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { Test } from "@nestjs/testing";
 import { protoLoaderOptions, usersGrpcOptions } from "@workout-tracker/proto";
 import { Error as MongooseError } from "mongoose";
-import { EmailTakenError, InvalidCredentialError } from "./errors";
+import { errors } from "@workout-tracker/helpers";
 import { UsersGrpcController } from "./users.grpc-controller";
 import { UsersService } from "./users.service";
+
+const { EmailTakenError, InvalidCredentialError } = errors;
 
 const PROTO_DIR = join(__dirname, "../../../proto/protos");
 
@@ -61,7 +63,11 @@ function makeClient(url: string): Client {
 describe("UsersGrpcController (over gRPC)", () => {
   let app: INestMicroservice;
   let client: Client;
-  const service = { create: jest.fn(), verify: jest.fn(), getMany: jest.fn() };
+  const service = {
+    createUser: jest.fn(),
+    verifyCredentials: jest.fn(),
+    getUsers: jest.fn(),
+  };
 
   beforeAll(async () => {
     const url = `127.0.0.1:${await freePort()}`;
@@ -93,10 +99,10 @@ describe("UsersGrpcController (over gRPC)", () => {
     };
 
     it("passes the validated, normalized request to the service", async () => {
-      service.create.mockResolvedValue(user);
+      service.createUser.mockResolvedValue(user);
 
       await expect(client.createUser(req)).resolves.toEqual(user);
-      expect(service.create).toHaveBeenCalledWith({
+      expect(service.createUser).toHaveBeenCalledWith({
         email: "someone@example.com",
         password: "secret123",
         displayName: "Someone",
@@ -110,11 +116,11 @@ describe("UsersGrpcController (over gRPC)", () => {
         code: grpc.status.INVALID_ARGUMENT,
         details: expect.stringContaining("email"),
       });
-      expect(service.create).not.toHaveBeenCalled();
+      expect(service.createUser).not.toHaveBeenCalled();
     });
 
     it("returns ALREADY_EXISTS when the email is taken", async () => {
-      service.create.mockRejectedValue(new EmailTakenError());
+      service.createUser.mockRejectedValue(new EmailTakenError());
 
       await expect(client.createUser(req)).rejects.toMatchObject({
         code: grpc.status.ALREADY_EXISTS,
@@ -123,7 +129,7 @@ describe("UsersGrpcController (over gRPC)", () => {
     });
 
     it("returns INVALID_ARGUMENT for a mongoose ValidationError", async () => {
-      service.create.mockRejectedValue(new MongooseError.ValidationError());
+      service.createUser.mockRejectedValue(new MongooseError.ValidationError());
 
       await expect(client.createUser(req)).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
@@ -131,7 +137,7 @@ describe("UsersGrpcController (over gRPC)", () => {
     });
 
     it("does not leak details of unexpected errors", async () => {
-      service.create.mockRejectedValue(
+      service.createUser.mockRejectedValue(
         new Error("connection string with secrets"),
       );
 
@@ -145,7 +151,7 @@ describe("UsersGrpcController (over gRPC)", () => {
 
   describe("VerifyCredentials", () => {
     it("returns the user for valid credentials", async () => {
-      service.verify.mockResolvedValue(user);
+      service.verifyCredentials.mockResolvedValue(user);
 
       await expect(
         client.verifyCredentials({
@@ -153,14 +159,14 @@ describe("UsersGrpcController (over gRPC)", () => {
           password: "secret123",
         }),
       ).resolves.toEqual(user);
-      expect(service.verify).toHaveBeenCalledWith(
+      expect(service.verifyCredentials).toHaveBeenCalledWith(
         "someone@example.com",
         "secret123",
       );
     });
 
     it("returns UNAUTHENTICATED for bad credentials", async () => {
-      service.verify.mockRejectedValue(new InvalidCredentialError());
+      service.verifyCredentials.mockRejectedValue(new InvalidCredentialError());
 
       await expect(
         client.verifyCredentials({
@@ -176,12 +182,12 @@ describe("UsersGrpcController (over gRPC)", () => {
 
   describe("GetUsers", () => {
     it("wraps the service result in { users }", async () => {
-      service.getMany.mockResolvedValue([user]);
+      service.getUsers.mockResolvedValue([user]);
 
       await expect(client.getUsers({ ids: [user.id] })).resolves.toEqual({
         users: [user],
       });
-      expect(service.getMany).toHaveBeenCalledWith([user.id]);
+      expect(service.getUsers).toHaveBeenCalledWith([user.id]);
     });
 
     it("rejects more than 100 ids", async () => {
@@ -190,7 +196,7 @@ describe("UsersGrpcController (over gRPC)", () => {
       await expect(client.getUsers({ ids })).rejects.toMatchObject({
         code: grpc.status.INVALID_ARGUMENT,
       });
-      expect(service.getMany).not.toHaveBeenCalled();
+      expect(service.getUsers).not.toHaveBeenCalled();
     });
   });
 });

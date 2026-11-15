@@ -1,10 +1,12 @@
-import { InvalidArgumentError } from "./errors";
+import { errors } from "@workout-tracker/helpers";
 import {
   createUserSchema,
   getUsersSchema,
   verifyCredentialsSchema,
 } from "./users.grpc-controller";
-import { ZodPipe } from "./zod.pipe";
+import { ZodPipe } from "@workout-tracker/helpers";
+
+const { InvalidArgumentError } = errors;
 
 describe("ZodPipe", () => {
   describe("with createUserSchema", () => {

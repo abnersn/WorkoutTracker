@@ -2,12 +2,10 @@ import { status } from "@grpc/grpc-js";
 import { FILTER_CATCH_EXCEPTIONS } from "@nestjs/common/constants";
 import { Error as MongooseError } from "mongoose";
 import { firstValueFrom } from "rxjs";
-import {
-  EmailTakenError,
-  InvalidArgumentError,
-  InvalidCredentialError,
-} from "./errors";
+import { errors } from "@workout-tracker/helpers";
 import { UsersErrorsFilter } from "./user-errors.filter";
+
+const { EmailTakenError, InvalidArgumentError, InvalidCredentialError } = errors;
 
 function validationError(): MongooseError.ValidationError {
   const err = new MongooseError.ValidationError();

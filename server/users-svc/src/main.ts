@@ -5,7 +5,7 @@ import {
   Transport,
 } from "@nestjs/microservices";
 import { ConfigService } from "@nestjs/config";
-import { type Env } from "./users/env";
+import { type Env } from "@workout-tracker/helpers";
 import { usersGrpcOptions } from "@workout-tracker/proto";
 import { join } from "node:path";
 
