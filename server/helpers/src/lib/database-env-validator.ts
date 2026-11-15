@@ -6,6 +6,8 @@ const envSchema = z.object({
     .regex(/^mongodb(\+srv)?:\/\//, "must be a MongoDB connection string"),
   MONGODB_MAX_POOL_SIZE: z.coerce.number().int().min(1).default(10),
   GRPC_URL: z.string().trim().min(1, "must be a host:port to listen on"),
+  // Shared by every service; see InternalSecretGuard.
+  INTERNAL_SECRET: z.string().min(32, "must be at least 32 characters"),
 });
 
 export type Env = z.infer<typeof envSchema>;

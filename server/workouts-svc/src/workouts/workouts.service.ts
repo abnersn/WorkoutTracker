@@ -6,6 +6,7 @@ import {
   fromDate,
   type LastRun,
   type LogEntry,
+  SetStage,
   toDate,
   type Workout,
   type WorkoutSet,
@@ -63,7 +64,6 @@ function toLog(doc: LogEntryRecord): LogEntry {
   return {
     ...toWorkout(doc),
     workoutId: doc.workoutId.toString(),
-    persistenceKey: doc.persistenceKey,
   };
 }
 
@@ -81,56 +81,85 @@ function assertUnique(ids: Types.ObjectId[], label: string): void {
   }
 }
 
-function findId(
-  id: string | undefined,
-  ids: Types.ObjectId[],
-  field: string,
-): Types.ObjectId | undefined {
-  if (id === undefined) {
-    return undefined;
+type ActiveIds = Pick<WorkoutFields, "activeExerciseId" | "activeSetId">;
+type ExerciseFields = WorkoutFields["exercises"][number];
+
+// The client can have an active exercise with no active set, but an active
+// set always sits in the active exercise.
+function activeIds(
+  workout: Workout | LogEntry,
+  exercises: ExerciseFields[],
+): ActiveIds {
+  const { activeExerciseId, activeSetId } = workout;
+  if (activeExerciseId === undefined) {
+    if (activeSetId !== undefined) {
+      throw new errors.InvalidArgumentError(
+        "activeSetId needs an activeExerciseId",
+      );
+    }
+    return { activeExerciseId: undefined, activeSetId: undefined };
   }
-  const match = ids.find((candidate) => candidate.equals(id));
-  if (!match) {
+  const exercise = exercises.find((candidate) =>
+    candidate._id.equals(activeExerciseId),
+  );
+  if (!exercise) {
     throw new errors.InvalidArgumentError(
-      `${field} ${id} is not in this workout`,
+      `activeExerciseId ${activeExerciseId} is not in this workout`,
     );
   }
-  return match;
+  if (activeSetId === undefined) {
+    return { activeExerciseId: exercise._id, activeSetId: undefined };
+  }
+  const set = exercise.sets.find((candidate) =>
+    candidate._id.equals(activeSetId),
+  );
+  if (!set) {
+    throw new errors.InvalidArgumentError(
+      `activeSetId ${activeSetId} is not in exercise ${activeExerciseId}`,
+    );
+  }
+  return { activeExerciseId: exercise._id, activeSetId: set._id };
 }
+
+// A saved workout is a template: progress only means something while it is
+// being run, in a log. So for templates the server ignores the client's
+// stage, restStartedAt, isComplete and active ids, and stores a fresh,
+// not-started state instead.
+type Kind = "template" | "run";
 
 // Every key is written, even when undefined, so doc.set() on update also
 // clears optional fields the client dropped.
-function toFields(workout: Workout | LogEntry): WorkoutFields {
+function toFields(workout: Workout | LogEntry, kind: Kind): WorkoutFields {
+  const run = kind === "run";
   const exercises = workout.exercises.map((exercise) => ({
     _id: toObjectId(exercise.id),
     name: exercise.name,
     rpe: exercise.rpe,
     sets: exercise.sets.map((set) => ({
       _id: toObjectId(set.id),
-      stage: set.stage,
+      stage: run ? set.stage : SetStage.IDLE,
       defaultReps: set.defaultReps,
       defaultWeight: set.defaultWeight,
       defaultRestTime: set.defaultRestTime,
-      restStartedAt: set.restStartedAt,
+      restStartedAt: run ? set.restStartedAt : undefined,
     })),
   }));
-  const exerciseIds = exercises.map((exercise) => exercise._id);
-  const setIds = exercises.flatMap((exercise) =>
-    exercise.sets.map((set) => set._id),
+  assertUnique(
+    exercises.map((exercise) => exercise._id),
+    "exercise",
   );
-  assertUnique(exerciseIds, "exercise");
-  assertUnique(setIds, "set");
+  assertUnique(
+    exercises.flatMap((exercise) => exercise.sets.map((set) => set._id)),
+    "set",
+  );
   return {
     name: workout.name,
     date: toDate(workout.date),
     duration: workout.duration,
-    isComplete: workout.isComplete,
-    activeSetId: findId(workout.activeSetId, setIds, "activeSetId"),
-    activeExerciseId: findId(
-      workout.activeExerciseId,
-      exerciseIds,
-      "activeExerciseId",
-    ),
+    isComplete: run && workout.isComplete,
+    ...(run
+      ? activeIds(workout, exercises)
+      : { activeExerciseId: undefined, activeSetId: undefined }),
     exercises,
   };
 }
@@ -184,7 +213,10 @@ export class WorkoutsService {
   }
 
   async createWorkout(userId: UserId, workout: Workout): Promise<Workout> {
-    const doc = await this.workouts.create({ ...toFields(workout), userId });
+    const doc = await this.workouts.create({
+      ...toFields(workout, "template"),
+      userId,
+    });
     return toWorkout(doc);
   }
 
@@ -194,7 +226,7 @@ export class WorkoutsService {
     workout: Workout,
   ): Promise<Workout> {
     const doc = await findOrThrow(this.workouts, id, userId, "workout");
-    doc.set(toFields(workout));
+    doc.set(toFields(workout, "template"));
     await doc.save();
     return toWorkout(doc);
   }
@@ -225,10 +257,9 @@ export class WorkoutsService {
       "workout",
     );
     const doc = await this.logs.create({
-      ...toFields(log),
+      ...toFields(log, "run"),
       userId: workout.userId,
       workoutId: workout._id,
-      persistenceKey: log.persistenceKey,
     });
     return toLog(doc);
   }
@@ -237,7 +268,7 @@ export class WorkoutsService {
   // was run from, even after that workout is deleted.
   async updateLog(userId: UserId, id: LogId, log: LogEntry): Promise<LogEntry> {
     const doc = await findOrThrow(this.logs, id, userId, "log");
-    doc.set({ ...toFields(log), persistenceKey: log.persistenceKey });
+    doc.set(toFields(log, "run"));
     await doc.save();
     return toLog(doc);
   }

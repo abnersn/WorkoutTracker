@@ -85,6 +85,9 @@ export abstract class WorkoutBody {
     createdAt: true,
     updatedAt: true,
   },
+  // save() only applies if the document is still at the version it was
+  // loaded at; otherwise it throws a VersionError (ABORTED over gRPC).
+  optimisticConcurrency: true,
 })
 export class WorkoutRecord extends WorkoutBody {
   _id!: WorkoutId;
@@ -99,6 +102,9 @@ WorkoutSchema.index({ userId: 1, createdAt: 1 });
     createdAt: true,
     updatedAt: true,
   },
+  // save() only applies if the document is still at the version it was
+  // loaded at; otherwise it throws a VersionError (ABORTED over gRPC).
+  optimisticConcurrency: true,
 })
 export class LogEntryRecord extends WorkoutBody {
   _id!: LogId;
@@ -110,9 +116,6 @@ export class LogEntryRecord extends WorkoutBody {
     ref: WorkoutRecord.name,
   })
   workoutId!: WorkoutId;
-
-  @Prop()
-  persistenceKey?: number;
 }
 
 export const LogEntrySchema = SchemaFactory.createForClass(LogEntryRecord);

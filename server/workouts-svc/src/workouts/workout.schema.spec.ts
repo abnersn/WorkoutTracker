@@ -21,7 +21,7 @@ describe("workout schemas", () => {
 
   it("gives logs every WorkoutBody field plus their own", () => {
     expect(Object.keys(LogEntrySchema.paths)).toEqual(
-      expect.arrayContaining([...shared, "workoutId", "persistenceKey"]),
+      expect.arrayContaining([...shared, "workoutId"]),
     );
   });
 
@@ -33,6 +33,17 @@ describe("workout schemas", () => {
     expect(path.instance).toBe("ObjectId");
     expect(path.isRequired).toBe(true);
     expect(path.options.immutable).toBe(true);
+  });
+
+  it("no longer stores persistenceKey", () => {
+    expect(LogEntrySchema.paths).not.toHaveProperty("persistenceKey");
+  });
+
+  it.each([
+    ["workouts", WorkoutSchema],
+    ["logs", LogEntrySchema],
+  ])("uses optimistic concurrency for %s", (_, schema) => {
+    expect(schema.get("optimisticConcurrency")).toBe(true);
   });
 
   it("indexes logs for the getLastRuns lookup", () => {

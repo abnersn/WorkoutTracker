@@ -69,10 +69,7 @@ const workoutSchema = z.object({
   exercises: z.array(exerciseSchema).max(100),
 });
 
-const logEntrySchema = workoutSchema.extend({
-  workoutId: objectId,
-  persistenceKey: z.number().int().optional(),
-});
+const logEntrySchema = workoutSchema.extend({ workoutId: objectId });
 
 const byIdSchema = z.object({ id: objectId });
 

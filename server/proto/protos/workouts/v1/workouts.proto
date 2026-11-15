@@ -46,9 +46,9 @@ message Workout {
   repeated Exercise exercises = 8;
 }
 
-// Mirrors LogEntry in client/types: a Workout (Workout & { workoutId,
-// persistenceKey }) whose `id` identifies the log and `workout_id` the
-// workout it was run from.
+// Mirrors LogEntry in client/types: a Workout (Workout & { workoutId })
+// whose `id` identifies the log and `workout_id` the workout it was run
+// from.
 message LogEntry {
   string id = 1;
   string name = 2;
@@ -59,7 +59,9 @@ message LogEntry {
   optional string active_exercise_id = 7;
   repeated Exercise exercises = 8;
   string workout_id = 9;
-  optional int32 persistence_key = 10;
+  // Was persistence_key, an IndexedDB leftover; ids are the server's now.
+  reserved 10;
+  reserved "persistence_key";
 }
 
 service WorkoutsService {

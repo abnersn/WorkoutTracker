@@ -1,7 +1,12 @@
 import { Module } from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { type Env, validateEnv } from "@workout-tracker/helpers";
+import {
+  type Env,
+  InternalSecretGuard,
+  validateEnv,
+} from "@workout-tracker/helpers";
 import {
   LogEntryRecord,
   LogEntrySchema,
@@ -31,6 +36,14 @@ import { WorkoutsService } from "./workouts.service";
     ]),
   ],
   controllers: [WorkoutsGrpcController],
-  providers: [WorkoutsService],
+  providers: [WorkoutsService,
+    {
+      // Rejects any call without the shared INTERNAL_SECRET.
+      provide: APP_GUARD,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) =>
+        new InternalSecretGuard(config.get("INTERNAL_SECRET")),
+    },
+  ],
 })
 export class WorkoutsModule {}

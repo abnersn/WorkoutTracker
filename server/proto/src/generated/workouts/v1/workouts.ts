@@ -72,9 +72,9 @@ export interface Workout {
 }
 
 /**
- * Mirrors LogEntry in client/types: a Workout (Workout & { workoutId,
- * persistenceKey }) whose `id` identifies the log and `workout_id` the
- * workout it was run from.
+ * Mirrors LogEntry in client/types: a Workout (Workout & { workoutId })
+ * whose `id` identifies the log and `workout_id` the workout it was run
+ * from.
  */
 export interface LogEntry {
   id: string;
@@ -89,7 +89,6 @@ export interface LogEntry {
   activeExerciseId?: string | undefined;
   exercises: Exercise[];
   workoutId: string;
-  persistenceKey?: number | undefined;
 }
 
 export interface ListWorkoutsRequest {

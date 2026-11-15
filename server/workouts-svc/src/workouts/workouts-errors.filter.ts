@@ -10,6 +10,10 @@ const codes = new Map<ErrorClass, status>([
   [errors.UnauthenticatedError, status.UNAUTHENTICATED],
   [errors.InvalidArgumentError, status.INVALID_ARGUMENT],
   [MongooseError.ValidationError, status.INVALID_ARGUMENT],
+  // The document changed (VersionError) or was deleted
+  // (DocumentNotFoundError) between findOrThrow() and save().
+  [MongooseError.VersionError, status.ABORTED],
+  [MongooseError.DocumentNotFoundError, status.NOT_FOUND],
 ]);
 
 @Catch(
@@ -17,6 +21,8 @@ const codes = new Map<ErrorClass, status>([
   errors.UnauthenticatedError,
   errors.InvalidArgumentError,
   MongooseError.ValidationError,
+  MongooseError.VersionError,
+  MongooseError.DocumentNotFoundError,
 )
 export class WorkoutsErrorsFilter implements RpcExceptionFilter<Error> {
   catch(error: Error): Observable<never> {

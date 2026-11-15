@@ -8,6 +8,7 @@ type ErrorClass = new (...args: never[]) => Error;
 const codes = new Map<ErrorClass, status>([
   [errors.EmailTakenError, status.ALREADY_EXISTS],
   [errors.InvalidCredentialError, status.UNAUTHENTICATED],
+  [errors.UnauthenticatedError, status.UNAUTHENTICATED],
   [errors.InvalidArgumentError, status.INVALID_ARGUMENT],
   [MongooseError.ValidationError, status.INVALID_ARGUMENT],
 ]);
@@ -15,6 +16,7 @@ const codes = new Map<ErrorClass, status>([
 @Catch(
   errors.EmailTakenError,
   errors.InvalidCredentialError,
+  errors.UnauthenticatedError,
   errors.InvalidArgumentError,
   MongooseError.ValidationError,
 )

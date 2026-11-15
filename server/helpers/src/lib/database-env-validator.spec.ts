@@ -3,13 +3,15 @@ import { validateEnv } from "./database-env-validator";
 describe("validateEnv", () => {
   const MONGODB_URI = "mongodb://localhost:27017/users";
   const GRPC_URL = "0.0.0.0:50051";
-  const required = { MONGODB_URI, GRPC_URL };
+  const INTERNAL_SECRET = "s".repeat(32);
+  const required = { MONGODB_URI, GRPC_URL, INTERNAL_SECRET };
 
   it("applies defaults when only the required vars are set", () => {
     expect(validateEnv(required)).toEqual({
       MONGODB_URI,
       MONGODB_MAX_POOL_SIZE: 10,
       GRPC_URL,
+      INTERNAL_SECRET,
     });
   });
 
@@ -54,4 +56,13 @@ describe("validateEnv", () => {
       ).toThrow(/MONGODB_MAX_POOL_SIZE/);
     },
   );
+
+  it.each([
+    ["missing", undefined],
+    ["shorter than 32 characters", "s".repeat(31)],
+  ])("rejects an INTERNAL_SECRET that is %s", (_, secret) => {
+    expect(() =>
+      validateEnv({ ...required, INTERNAL_SECRET: secret }),
+    ).toThrow(/INTERNAL_SECRET/);
+  });
 });

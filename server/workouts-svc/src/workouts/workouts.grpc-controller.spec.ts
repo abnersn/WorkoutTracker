@@ -9,12 +9,20 @@ import {
   protoLoaderOptions,
   workoutsGrpcOptions,
 } from "@workout-tracker/proto";
-import { errors, toUserId, toWorkoutId } from "@workout-tracker/helpers";
+import { APP_GUARD } from "@nestjs/core";
+import {
+  errors,
+  INTERNAL_SECRET_METADATA,
+  InternalSecretGuard,
+  toUserId,
+  toWorkoutId,
+} from "@workout-tracker/helpers";
 import { WorkoutsGrpcController } from "./workouts.grpc-controller";
 import { WorkoutsService } from "./workouts.service";
 import { USER_ID_METADATA } from "./user-id";
 
 const PROTO_DIR = join(__dirname, "../../../proto/protos");
+const SECRET = "s".repeat(32);
 const USER_ID = "64b000000000000000000001";
 const WORKOUT_ID = "64b0000000000000000000aa";
 
@@ -67,8 +75,10 @@ function makeClient(url: string): Client {
   };
 }
 
+// What the gateway will send: the internal secret plus the caller's id.
 function asUser(...ids: string[]): grpc.Metadata {
   const metadata = new grpc.Metadata();
+  metadata.add(INTERNAL_SECRET_METADATA, SECRET);
   for (const id of ids) {
     metadata.add(USER_ID_METADATA, id);
   }
@@ -96,7 +106,11 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
     const url = `127.0.0.1:${await freePort()}`;
     const moduleRef = await Test.createTestingModule({
       controllers: [WorkoutsGrpcController],
-      providers: [{ provide: WorkoutsService, useValue: service }],
+      providers: [
+        { provide: WorkoutsService, useValue: service },
+        // Registered as in WorkoutsModule, so the guard runs over real gRPC.
+        { provide: APP_GUARD, useValue: new InternalSecretGuard(SECRET) },
+      ],
     }).compile();
     app = moduleRef.createNestMicroservice<MicroserviceOptions>({
       transport: Transport.GRPC,
@@ -113,6 +127,31 @@ describe("WorkoutsGrpcController (over gRPC)", () => {
   });
 
   beforeEach(() => jest.resetAllMocks());
+
+  describe(`${INTERNAL_SECRET_METADATA} metadata`, () => {
+    const withSecret = (secret?: string): grpc.Metadata => {
+      const metadata = new grpc.Metadata();
+      if (secret !== undefined) {
+        metadata.add(INTERNAL_SECRET_METADATA, secret);
+      }
+      metadata.add(USER_ID_METADATA, USER_ID);
+      return metadata;
+    };
+
+    it.each([
+      ["missing", withSecret()],
+      ["wrong", withSecret("t".repeat(32))],
+    ])("returns UNAUTHENTICATED when it is %s", async (_, metadata) => {
+      const err = await client
+        .call("ListWorkouts")({}, metadata)
+        .catch((e: grpc.ServiceError) => e);
+
+      expect((err as grpc.ServiceError).code).toBe(
+        grpc.status.UNAUTHENTICATED,
+      );
+      expect(service.listWorkouts).not.toHaveBeenCalled();
+    });
+  });
 
   describe(`${USER_ID_METADATA} metadata`, () => {
     it("passes the caller's id to the service on a list call", async () => {
