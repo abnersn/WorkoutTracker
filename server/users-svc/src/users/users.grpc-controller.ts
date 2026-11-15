@@ -10,6 +10,26 @@ import {
 } from "@workout-tracker/proto";
 import { type UsersService } from "./users.service";
 import { UsersErrorsFilter } from "./user-errors.filter";
+import { Payload } from "@nestjs/microservices";
+import { z } from "zod";
+import { ZodPipe } from "./zod.pipe";
+
+const email = z.string().trim().toLowerCase().pipe(z.email());
+
+export const createUserSchema = z.object({
+  email,
+  password: z.string().min(8).max(128), // the max limits argon2 work
+  displayName: z.string().trim().min(1).max(60),
+});
+
+export const verifyCredentialsSchema = z.object({
+  email,
+  password: z.string().min(1).max(128),
+});
+
+export const getUsersSchema = z.object({
+  ids: z.array(z.string()).max(100),
+});
 
 @Controller()
 @UsersServiceControllerMethods()
@@ -17,15 +37,23 @@ import { UsersErrorsFilter } from "./user-errors.filter";
 export class UsersGrpcController implements UsersServiceController {
   constructor(private readonly users: UsersService) {}
 
-  createUser(req: CreateUserRequest): Promise<User> {
+  createUser(
+    @Payload(new ZodPipe(createUserSchema))
+    req: CreateUserRequest,
+  ): Promise<User> {
     return this.users.create(req);
   }
 
-  verifyCredentials(req: VerifyCredentialsRequest): Promise<User> {
+  verifyCredentials(
+    @Payload(new ZodPipe(verifyCredentialsSchema))
+    req: VerifyCredentialsRequest,
+  ): Promise<User> {
     return this.users.verify(req.email, req.password);
   }
 
-  async getUsers(req: GetUsersRequest): Promise<GetUsersResponse> {
+  async getUsers(
+    @Payload(new ZodPipe(getUsersSchema)) req: GetUsersRequest,
+  ): Promise<GetUsersResponse> {
     return { users: await this.users.getMany(req.ids) };
   }
 }

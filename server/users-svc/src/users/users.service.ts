@@ -1,4 +1,8 @@
-import { type HydratedDocument, isObjectIdOrHexString, type Model } from "mongoose";
+import {
+  type HydratedDocument,
+  isObjectIdOrHexString,
+  type Model,
+} from "mongoose";
 import { normalizeEmail, UserRecord } from "./user.schema";
 import { fromDate, type User } from "@workout-tracker/proto";
 import { Injectable } from "@nestjs/common";
@@ -12,7 +16,7 @@ type NewUser = {
   displayName: string;
 };
 
-const isDuplicateKey = (err: unknown) : boolean =>
+const isDuplicateKey = (err: unknown): boolean =>
   (err as { code?: unknown } | null)?.code === 11000;
 
 function toUser(doc: HydratedDocument<UserRecord>): User {

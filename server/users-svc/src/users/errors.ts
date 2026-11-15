@@ -9,3 +9,5 @@ export class InvalidCredentialError extends Error {
     super("Invalid email or password");
   }
 }
+
+export class InvalidArgumentError extends Error {}
