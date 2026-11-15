@@ -68,7 +68,8 @@ export function AuthForm({
   return (
     <form
       onSubmit={onSubmit}
-      className={cn(toneClass.neutral, "flex flex-col gap-4 px-4 py-6")}
+      // my-auto: centred in the shell's full-height column.
+      className={cn(toneClass.neutral, "my-auto flex flex-col gap-4 px-4 py-6")}
     >
       <SectionHeading level={1} flush>
         {title}

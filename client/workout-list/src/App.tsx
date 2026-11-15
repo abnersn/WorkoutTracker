@@ -8,9 +8,11 @@ import "./styles.css";
 
 export interface AppProps {
   navigate?: (to: string) => void;
+  /** The host's account actions, placed beside the page title. */
+  titleAction?: React.ReactNode;
 }
 
-export function App({ navigate }: AppProps): React.JSX.Element {
+export function App({ navigate, titleAction }: AppProps): React.JSX.Element {
   const { workouts, createWorkout, deleteWorkout } = useWorkouts();
   // Read once: a workout left running (refresh, Back, phone locked) is offered back first.
   const [session] = useState(loadActiveSession);
@@ -28,6 +30,7 @@ export function App({ navigate }: AppProps): React.JSX.Element {
       onAdd={createWorkout}
       onRemove={deleteWorkout}
       navigate={navigate}
+      titleAction={titleAction}
     />
   );
 }

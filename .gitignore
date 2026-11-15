@@ -11,6 +11,8 @@ dist
 tmp
 out-tsc
 @mf-types
+# Module Federation build diagnostics (machine-specific paths)
+.mf
 
 # dependencies
 node_modules

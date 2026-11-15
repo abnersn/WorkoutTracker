@@ -12,15 +12,24 @@ export interface AppProps {
   /** Opened straight after finishing: celebrate and allow a late RPE. */
   finished?: boolean;
   navigate?: (to: string) => void;
+  /** The host's account actions, placed beside the page title. */
+  titleAction?: React.ReactNode;
 }
 
 export function App({
   id = "",
   finished = false,
   navigate,
+  titleAction,
 }: AppProps): React.JSX.Element {
   return (
-    <Workout id={id} mode="view" finished={finished} navigate={navigate} />
+    <Workout
+      id={id}
+      mode="view"
+      finished={finished}
+      navigate={navigate}
+      titleAction={titleAction}
+    />
   );
 }
 

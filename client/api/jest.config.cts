@@ -7,4 +7,6 @@ module.exports = {
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
   coverageDirectory: "../../coverage/client/api",
+  // No specs yet; an empty run shouldn't fail `nx run-many -t test`.
+  passWithNoTests: true,
 };

@@ -19,10 +19,27 @@ export default [
             // Shared module-federation deps, imported by each app's rspack config.
             "^.*/module-federation\\.shared\\.mjs$",
           ],
+          // A project without tags matches none of these, so it can't import
+          // anything: every project must carry a scope and a type.
           depConstraints: [
+            // client/ and server/ never import each other.
             {
-              sourceTag: "*",
-              onlyDependOnLibsWithTags: ["*"],
+              sourceTag: "scope:client",
+              onlyDependOnLibsWithTags: ["scope:client"],
+            },
+            {
+              sourceTag: "scope:server",
+              onlyDependOnLibsWithTags: ["scope:server"],
+            },
+            // Apps are never imported: the shell loads remotes through Module
+            // Federation, and the servers talk over gRPC.
+            {
+              sourceTag: "type:app",
+              onlyDependOnLibsWithTags: ["type:lib"],
+            },
+            {
+              sourceTag: "type:lib",
+              onlyDependOnLibsWithTags: ["type:lib"],
             },
           ],
         },

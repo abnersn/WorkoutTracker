@@ -1,0 +1,45 @@
+name: Verify
+
+# Runs on every pull request and push to main, and as the first job of
+# deploy.yml, so nothing ships without passing it.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - run: npm ci
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Lint, type-check and test
+        run: npx nx run-many -t lint typecheck test
+
+      - name: Build
+        run: npx nx run-many -t build
+
+      # The generated proto and GraphQL code is committed; it must match its
+      # sources, or the gateway, services and client disagree on the wire.
+      - name: Generated code is up to date
+        run: |
+          npx nx run-many -t codegen --skip-nx-cache
+          git diff --exit-code -- server/proto/src/generated client/api/src/gql
+
+      - name: Lint the protos
+        working-directory: server/proto
+        run: npx buf lint

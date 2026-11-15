@@ -15,7 +15,7 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/server/gateway/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/dist/server/gateway/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
@@ -33,7 +33,7 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/server/users-svc/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/dist/server/users-svc/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
@@ -51,7 +51,7 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/server/workouts-svc/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/dist/server/workouts-svc/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     }

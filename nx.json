@@ -71,7 +71,8 @@
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
       }
-    }
+    },
+    "./tools/nx/typecheck-plugin.js"
   ],
   "generators": {
     "@nx/react": {

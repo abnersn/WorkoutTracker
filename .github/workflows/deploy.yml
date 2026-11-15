@@ -1,24 +1,38 @@
-name: Deploy servers to Cloud Run
+name: Deploy
 
-# Same tags as deploy-client.yml, so one tag releases the whole stack.
+# A staging-* tag deploys staging (services suffixed -staging); a v* tag
+# deploys production. Tier by tier: verify, then the services and the gateway,
+# then the front ends, so a new front end never calls an old gateway.
 on:
   push:
     tags:
-      - "staging-*" # -> staging (services suffixed -staging)
-      - "v*" # -> production
+      - "staging-*"
+      - "v*"
+
+# One deploy per environment at a time; a newer tag waits instead of
+# cancelling a deploy halfway.
+concurrency:
+  group: deploy-${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  deploy:
+  verify:
+    uses: ./.github/workflows/verify.yml
+
+  server:
+    needs: verify
     runs-on: ubuntu-latest
     # Per-environment values (vars.CORS_ORIGINS) live in the GitHub
     # environment; shared ones (project, region, accounts) in repo variables.
     environment: ${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
-    concurrency:
-      group: deploy-server-${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
-      cancel-in-progress: false
     permissions:
       contents: read
       id-token: write # Workload Identity Federation
+    outputs:
+      gateway_url: ${{ steps.gateway.outputs.url }}
     env:
       APP_ENV: ${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
       SUFFIX: ${{ startsWith(github.ref_name, 'staging-') && '-staging' || '' }}
@@ -76,15 +90,20 @@ jobs:
               --role roles/run.invoker >/dev/null
           done
 
-      # Public: deployed last, so it never points at a service that isn't up.
+      # Public: deployed after the services, so it never points at one that
+      # isn't up.
       - name: Deploy the gateway
+        id: gateway
         env:
           CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
         run: |
-          grpc_url() {
-            url=$(gcloud run services describe "$1$SUFFIX" \
+          service_url() {
+            gcloud run services describe "$1$SUFFIX" \
               --project "$PROJECT" --region "$REGION" \
-              --format 'value(status.url)')
+              --format 'value(status.url)'
+          }
+          grpc_url() {
+            url=$(service_url "$1")
             echo "${url#https://}:443"
           }
           # "^@^" makes @ the separator, since CORS_ORIGINS contains commas.
@@ -95,3 +114,25 @@ jobs:
             --service-account "$GATEWAY_SA" \
             --set-env-vars "^@^APP_ENV=$APP_ENV@GRPC_AUTH=google-id-token@USERS_GRPC_URL=$(grpc_url users-svc)@WORKOUTS_GRPC_URL=$(grpc_url workouts-svc)@CORS_ORIGINS=$CORS_ORIGINS" \
             --set-secrets "JWT_SECRET=jwt-secret-$APP_ENV:latest"
+          echo "url=$(service_url gateway)" >> "$GITHUB_OUTPUT"
+
+  client:
+    needs: server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - run: npm ci
+
+      # Zephyr maps the tag to its staging or production environment. The
+      # shell bakes in the URL of the gateway deployed just before it.
+      - name: Deploy front ends to Zephyr
+        run: npx nx deploy shell
+        env:
+          ZE_CI_TOKEN: ${{ secrets.ZEPHYR_CI_TOKEN }}
+          GATEWAY_URL: ${{ needs.server.outputs.gateway_url }}

@@ -28,6 +28,8 @@ export interface WorkoutProps {
   /** View mode, straight after finishing. */
   finished?: boolean;
   navigate?: (to: string) => void;
+  /** Shown at the end of the title row, e.g. the host's "Sign out". */
+  titleAction?: React.ReactNode;
 }
 
 /** Loads a workout and shows it. Used by workout-new and workout-view. */
@@ -37,6 +39,7 @@ export function Workout({
   fromLogs = false,
   finished = false,
   navigate,
+  titleAction,
 }: WorkoutProps): React.JSX.Element {
   const isView = mode === "view";
   // Read once on mount. An unfinished run of this workout is picked back up;
@@ -105,6 +108,7 @@ export function Workout({
       workout={workout}
       mode={mode}
       navigate={navigate}
+      titleAction={titleAction}
       startedAt={resumed?.startedAt}
       replacing={
         otherSession && {

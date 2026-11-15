@@ -21,6 +21,12 @@ const NAME = "shell";
 // `NODE_ENV=...` prefix.
 export default defineConfig((_env, argv) => {
   const isDev = argv.mode !== "production";
+  // The `deploy` target is the only one that enables Zephyr. A deployed shell
+  // that quietly called http://localhost:3000 would fail for every visitor.
+  const deploying = process.env.ZE_DISABLED === "false";
+  if (deploying && !process.env.GATEWAY_URL) {
+    throw new Error("GATEWAY_URL must be set to deploy the shell");
+  }
   return withZephyr()({
     context: __dirname,
     entry: { main: "./src/index.ts" },
@@ -102,6 +108,10 @@ export default defineConfig((_env, argv) => {
           auth: "auth@http://localhost:8105/remoteEntry.js",
         },
         shared: sharedDependencies,
+        // App.tsx types each remote's props itself, so the remotes' generated
+        // types aren't used. Fetching them only raced the remotes' startup
+        // under `npm run dev` ("Failed to download types archive").
+        dts: { consumeTypes: false },
       }),
       new NxReadySignalPlugin(),
     ].filter(Boolean),

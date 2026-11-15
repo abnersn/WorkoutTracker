@@ -40,7 +40,8 @@
       },
       "options": {
         "buildTarget": "workouts-svc:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "port": 9231
       },
       "configurations": {
         "development": {

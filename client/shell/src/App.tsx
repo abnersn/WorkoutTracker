@@ -83,16 +83,24 @@ interface NavigateProps {
   navigate: (to: string) => void;
 }
 
+// A page-owning remote places the shell's account actions in its title row.
+interface TitleActionProps {
+  titleAction?: ReactNode;
+}
+
 const ProviderWorkoutView = lazyProvider<
-  { id: string; finished?: boolean } & NavigateProps
+  { id: string; finished?: boolean } & NavigateProps & TitleActionProps
 >("workoutView", "App");
 const ProviderWorkoutHistory = lazyProvider<NavigateProps>(
   "workoutHistory",
   "App",
 );
-const ProviderWorkoutList = lazyProvider<NavigateProps>("workoutList", "App");
+const ProviderWorkoutList = lazyProvider<NavigateProps & TitleActionProps>(
+  "workoutList",
+  "App",
+);
 const ProviderWorkoutNew = lazyProvider<
-  { id?: string; fromLogs?: boolean } & NavigateProps
+  { id?: string; fromLogs?: boolean } & NavigateProps & TitleActionProps
 >("workoutNew", "App");
 const ProviderAuth = lazyProvider<
   { screen: AuthScreen; redirectTo: string } & NavigateProps
@@ -146,22 +154,18 @@ function HomeRoute(): React.JSX.Element {
     document.title = "Workout Tracker";
   }, []);
   return (
-    <div className="flex flex-1 flex-col pb-8">
-      {/* Account actions belong to the shell; only home offers them, so a
-          mid-workout tap can't sign anyone out. */}
-      <header className="flex justify-end px-4 pt-2">
-        <SignOutButton />
-      </header>
-      {/* The two sections are flex items of one column, so the space between
-          them comes from `gap`, not from margins on either remote. */}
-      <div className="flex flex-1 flex-col gap-6">
-        <ProviderBoundary name="workoutList">
-          <ProviderWorkoutList navigate={navigate} />
-        </ProviderBoundary>
-        <ProviderBoundary name="workoutHistory">
-          <ProviderWorkoutHistory navigate={navigate} />
-        </ProviderBoundary>
-      </div>
+    // The two sections are flex items of one column, so the space between them
+    // comes from `gap`, not from margins on either remote.
+    <div className="flex flex-1 flex-col gap-6 pb-8">
+      <ProviderBoundary name="workoutList">
+        <ProviderWorkoutList
+          navigate={navigate}
+          titleAction={<SignOutButton />}
+        />
+      </ProviderBoundary>
+      <ProviderBoundary name="workoutHistory">
+        <ProviderWorkoutHistory navigate={navigate} />
+      </ProviderBoundary>
     </div>
   );
 }
@@ -176,6 +180,7 @@ function WorkoutNewRoute(): React.JSX.Element {
         id={params.get("id") ?? ""}
         fromLogs={params.get("fromLogs") === "true"}
         navigate={navigate}
+        titleAction={<SignOutButton />}
       />
     </ProviderBoundary>
   );
@@ -194,6 +199,7 @@ function WorkoutViewRoute(): React.JSX.Element {
         id={id}
         finished={params.get("finished") === "true"}
         navigate={navigate}
+        titleAction={<SignOutButton />}
       />
     </ProviderBoundary>
   );

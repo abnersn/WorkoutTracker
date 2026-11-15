@@ -15,7 +15,8 @@
       },
       "readyWhen": {
         "signal": true
-      }
+      },
+      "dependsOn": ["shell:serve"]
     },
     "build": {
       "executor": "nx:run-commands",

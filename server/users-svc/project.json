@@ -40,7 +40,8 @@
       },
       "options": {
         "buildTarget": "users-svc:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "port": 9230
       },
       "configurations": {
         "development": {

@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   BellRing,
   Check,
@@ -68,6 +75,8 @@ export interface WorkoutScreenProps {
   onRated?: (workout: Workout) => Promise<void>;
   /** Client-side navigation supplied by the host. */
   navigate?: (to: string) => void;
+  /** Shown at the end of the title row, e.g. the host's "Sign out". */
+  titleAction?: ReactNode;
 }
 
 type Undo = { message: string; previous: Workout };
@@ -91,6 +100,7 @@ export function WorkoutScreen({
   previous,
   onRated,
   navigate,
+  titleAction,
 }: WorkoutScreenProps): React.JSX.Element {
   const isView = mode === "view";
   const [workout, rawDispatch] = useReducer(reducer, initial);
@@ -102,9 +112,9 @@ export function WorkoutScreen({
   const lastStageTap = useRef(0);
   const { requestNotificationPermission, hasAskedPermission } =
     useNotification();
-  const [dialog, setDialog] = useState<
-    "finish" | "discard" | "replace" | null
-  >(null);
+  const [dialog, setDialog] = useState<"finish" | "discard" | "replace" | null>(
+    null,
+  );
   const [finishError, setFinishError] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
@@ -461,6 +471,7 @@ export function WorkoutScreen({
               Save plan
             </Button>
           )}
+        {titleAction}
       </header>
       {templateStatus && (
         <p role="status" className="px-4 pt-2 text-sm text-indigo-700">

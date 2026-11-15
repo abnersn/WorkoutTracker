@@ -6,3 +6,9 @@ coverage
 .angular
 package-lock.json
 server/proto/src/generated
+# Generated: GraphQL codegen output, and the schema the gateway writes in dev
+client/api/src/gql
+server/gateway/src/schema.gql
+# Tool state
+.mf
+.impeccable

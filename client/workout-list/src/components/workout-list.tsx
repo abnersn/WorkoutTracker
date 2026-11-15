@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Play } from "lucide-react";
 import {
   AddItemForm,
@@ -90,6 +90,8 @@ export interface WorkoutListProps {
   onAdd: (name: string) => void;
   onRemove: (id: string) => void;
   navigate?: (to: string) => void;
+  /** Shown at the end of the title row, e.g. the host's "Sign out". */
+  titleAction?: ReactNode;
 }
 
 /** The saved workouts: open one to start it, add a new one, or delete one. */
@@ -99,6 +101,7 @@ export function WorkoutList({
   onAdd,
   onRemove,
   navigate,
+  titleAction,
 }: WorkoutListProps): React.JSX.Element {
   const [pendingRemoval, setPendingRemoval] = useState<SavedWorkout | null>(
     null,
@@ -127,9 +130,17 @@ export function WorkoutList({
           </span>
         </a>
       )}
-      <SectionHeading id="workouts-heading" level={1}>
-        Workout plans
-      </SectionHeading>
+      <div className="flex items-center gap-2 px-4 pt-6">
+        <SectionHeading
+          id="workouts-heading"
+          level={1}
+          flush
+          className="min-w-0 flex-1"
+        >
+          Workout plans
+        </SectionHeading>
+        {titleAction}
+      </div>
       {workouts === null ? (
         <CardListSkeleton label="Loading your workouts" />
       ) : workouts.length > 0 ? (

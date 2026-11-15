@@ -1,7 +1,35 @@
 import { status } from "@grpc/grpc-js";
+import { HttpException } from "@nestjs/common";
+import { ThrottlerException } from "@nestjs/throttler";
 import { ValidationError } from "class-validator";
+import { GraphQLError } from "graphql";
+import { GrpcErrorFilter } from "./grpc-error-filter";
 import { toGraphQLError } from "./to-graphql-error";
 import { toValidationGraphQLError } from "./validation-error";
+
+describe("GrpcErrorFilter", () => {
+  const filter = new GrpcErrorFilter();
+
+  it("turns a rate-limit rejection into TOO_MANY_REQUESTS", () => {
+    const err = filter.catch(new ThrottlerException()) as GraphQLError;
+    expect(err).toBeInstanceOf(GraphQLError);
+    expect(err.extensions).toEqual({ code: "TOO_MANY_REQUESTS" });
+    expect(err.message).not.toMatch(/Throttler/);
+  });
+
+  it("maps gRPC errors", () => {
+    const err = filter.catch({
+      code: status.NOT_FOUND,
+      details: "Workout not found",
+    }) as GraphQLError;
+    expect(err.extensions).toEqual({ code: "NOT_FOUND" });
+  });
+
+  it("passes anything else through to Nest's own handling", () => {
+    const other = new HttpException("nope", 400);
+    expect(filter.catch(other)).toBe(other);
+  });
+});
 
 const issue = (
   property: string,
