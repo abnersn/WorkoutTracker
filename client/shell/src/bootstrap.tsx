@@ -1,6 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ApolloProvider } from "@apollo/client/react";
+import { createApolloClient } from "@workout-tracker/api";
+import { AuthProvider } from "@workout-tracker/auth-state";
 import { App } from "./App";
+
+// One client and one auth state for the whole app; remotes reach both
+// through the shared singletons.
+const apolloClient = createApolloClient(GATEWAY_URL);
 
 const container = document.getElementById("root");
 if (!container) {
@@ -9,6 +16,10 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <ApolloProvider client={apolloClient}>
+        <App />
+      </ApolloProvider>
+    </AuthProvider>
   </StrictMode>,
 );

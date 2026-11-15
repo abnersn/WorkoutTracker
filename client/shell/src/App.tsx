@@ -1,20 +1,24 @@
-import { Component, Suspense, useEffect, type ReactNode } from "react";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router";
 import {
   Button,
   CardListSkeleton,
   Container,
   WorkoutScreenSkeleton,
 } from "@workout-tracker/ui";
+import { Component, Suspense, useEffect, type ReactNode } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+  type Location,
+} from "react-router";
+import { type AuthScreen, useAuth } from "@workout-tracker/auth-state";
 import { lazyProvider } from "./mf";
+import { RequireAuth } from "./require-auth";
 import "./styles.css";
 
 // ProviderBoundary catches the lazy() rejection that fires when a provider's
@@ -60,6 +64,7 @@ const SECTION_LABELS: Record<string, string> = {
   workoutHistory: "Your history",
   workoutNew: "This workout",
   workoutView: "This session",
+  auth: "Sign-in",
 };
 
 // Shaped like each remote's loaded screen, so nothing jumps when it arrives.
@@ -88,6 +93,50 @@ const ProviderWorkoutList = lazyProvider<NavigateProps>("workoutList", "App");
 const ProviderWorkoutNew = lazyProvider<
   { id?: string; fromLogs?: boolean } & NavigateProps
 >("workoutNew", "App");
+const ProviderAuth = lazyProvider<
+  { screen: AuthScreen; redirectTo: string } & NavigateProps
+>("auth", "App");
+
+// The route RequireAuth turned away (its `state.from`), or home when the
+// visitor came here directly.
+function returnPath(state: unknown): string {
+  const from = (state as { from?: Location } | null)?.from;
+  return from ? from.pathname + from.search + from.hash : "/";
+}
+
+const AUTH_TITLES: Record<AuthScreen, string> = {
+  "sign-in": "Sign in",
+  "sign-up": "Sign up",
+};
+
+// auth/sign-in and auth/sign-up: once signed in, go back to the route the
+// guard turned away. Someone already signed in goes there directly.
+function AuthRoute({ screen }: { screen: AuthScreen }): React.JSX.Element {
+  const { token } = useAuth();
+  const routerNavigate = useNavigate();
+  const { state } = useLocation();
+  const redirectTo = returnPath(state);
+  // Keep `state.from` when moving between sign-in and sign-up, so the
+  // return route survives the switch.
+  const navigate = (to: string): void => {
+    void routerNavigate(to, { state });
+  };
+  useEffect(() => {
+    document.title = `${AUTH_TITLES[screen]} · Workout Tracker`;
+  }, [screen]);
+  if (token) {
+    return <Navigate to={redirectTo} replace />;
+  }
+  return (
+    <ProviderBoundary name="auth">
+      <ProviderAuth
+        screen={screen}
+        redirectTo={redirectTo}
+        navigate={navigate}
+      />
+    </ProviderBoundary>
+  );
+}
 
 // "/": the saved workouts above the history.
 function HomeRoute(): React.JSX.Element {
@@ -148,9 +197,19 @@ export function App(): React.JSX.Element {
       <Container>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
           <Routes>
-            <Route index element={<HomeRoute />} />
-            <Route path="workouts/new" element={<WorkoutNewRoute />} />
-            <Route path="workouts/:id" element={<WorkoutViewRoute />} />
+            <Route element={<RequireAuth />}>
+              <Route index element={<HomeRoute />} />
+              <Route path="workouts/new" element={<WorkoutNewRoute />} />
+              <Route path="workouts/:id" element={<WorkoutViewRoute />} />
+            </Route>
+            <Route
+              path="auth/sign-in"
+              element={<AuthRoute screen="sign-in" />}
+            />
+            <Route
+              path="auth/sign-up"
+              element={<AuthRoute screen="sign-up" />}
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

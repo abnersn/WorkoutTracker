@@ -91,7 +91,7 @@ Each line reads: folder (kind): what it holds. Projects with end-to-end tests sa
 
 - `client/`: React front end
   - `shell/` (host): layout, routes and the sign-in guard; loads every remote. _Unit and e2e tests._
-  - `auth/` (remote): sign-up and sign-in screens
+  - `auth/` (remote, port 8105): sign-up and sign-in screens
   - `workout-list/` (remote, port 8104): saved workouts, with add and delete
   - `workout-new/` (remote, port 8103): build, run, finish and save a workout as a template; renders `ui`'s `Workout`
   - `workout-view/` (remote, port 8101): a finished workout, read-only; renders `ui`'s `Workout` with `mode="view"`

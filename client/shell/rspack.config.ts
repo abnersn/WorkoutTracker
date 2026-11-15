@@ -82,6 +82,13 @@ export default defineConfig((_env, argv) => {
     plugins: [
       isDev && new ReactRefreshRspackPlugin(),
       new rspack.HtmlRspackPlugin({ template: "./index.html" }),
+      // The gateway's origin, baked in at build time. Defaults to the local
+      // gateway (PORT in server/gateway/.env.serve).
+      new rspack.DefinePlugin({
+        GATEWAY_URL: JSON.stringify(
+          process.env.GATEWAY_URL ?? "http://localhost:3000",
+        ),
+      }),
       new ModuleFederationPlugin({
         name: NAME,
         // Declared at build time so Zephyr can rewrite these localhost URLs to
@@ -92,6 +99,7 @@ export default defineConfig((_env, argv) => {
           workoutHistory: "workoutHistory@http://localhost:8102/remoteEntry.js",
           workoutNew: "workoutNew@http://localhost:8103/remoteEntry.js",
           workoutList: "workoutList@http://localhost:8104/remoteEntry.js",
+          auth: "auth@http://localhost:8105/remoteEntry.js",
         },
         shared: sharedDependencies,
       }),
