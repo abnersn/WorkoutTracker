@@ -23,8 +23,10 @@ const config: StorybookConfig = {
   // the workflow passes the site's address as STORYBOOK_SITE_URL. Without it
   // (local runs and plain builds) the host stands alone.
   refs: (_config, { configType }) => {
-    const site = process.env.STORYBOOK_SITE_URL?.replace(/\/$/, "");
-    if (configType !== "PRODUCTION" || !site) return {};
+    const site = process.env["STORYBOOK_SITE_URL"]?.replace(/\/$/, "");
+    if (configType !== "PRODUCTION" || !site) {
+      return {};
+    }
     return Object.fromEntries(
       ["workout-new", "workout-view", "workout-list", "workout-history"].map(
         (name) => [name, { title: name, url: `${site}/${name}/` }],

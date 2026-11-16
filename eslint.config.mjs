@@ -5,7 +5,7 @@ export default [
   ...nx.configs["flat/typescript"],
   ...nx.configs["flat/javascript"],
   {
-    ignores: ["**/dist", "**/out-tsc", "**/@mf-types"],
+    ignores: ["**/dist", "**/out-tsc", "**/@mf-types", "**/storybook-static"],
   },
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],

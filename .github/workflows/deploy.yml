@@ -129,10 +129,12 @@ jobs:
 
       - run: npm ci
 
-      # Zephyr maps the tag to its staging or production environment. The
+      # ZE_ENV labels the build, and a Zephyr tag with the condition
+      # "environment is staging|production" picks it up (see DEPLOY.md). The
       # shell bakes in the URL of the gateway deployed just before it.
       - name: Deploy front ends to Zephyr
         run: npx nx deploy shell
         env:
           ZE_CI_TOKEN: ${{ secrets.ZEPHYR_CI_TOKEN }}
+          ZE_ENV: ${{ startsWith(github.ref_name, 'staging-') && 'staging' || 'production' }}
           GATEWAY_URL: ${{ needs.server.outputs.gateway_url }}
