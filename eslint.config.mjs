@@ -128,7 +128,7 @@ export default [
       "**/rspack.config.ts",
       "**/codegen.ts",
       // Module-federation app modules: consumers load these via lazy(), which needs a default export.
-      "client/*/src/App.tsx",
+      "client/apps/*/src/App.tsx",
       "**/jest.config.cts",
       // Storybook's CSF format requires a default export (the meta object).
       "**/*.stories.ts",

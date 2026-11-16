@@ -38,8 +38,8 @@ jobs:
       - name: Generated code is up to date
         run: |
           npx nx run-many -t codegen --skip-nx-cache
-          git diff --exit-code -- server/proto/src/generated client/api/src/gql
+          git diff --exit-code -- server/libs/proto/src/generated client/libs/api/src/gql
 
       - name: Lint the protos
-        working-directory: server/proto
+        working-directory: server/libs/proto
         run: npx buf lint

@@ -124,14 +124,14 @@ Pushing a `staging-*` tag deploys staging, and a `v*` tag deploys production. Th
 
 **Browse it live: https://abnersn.github.io/WorkoutTracker/** (rebuilt from `main` on every push).
 
-The shared UI lives in `client/ui`. It holds the building blocks every remote uses, so a button looks and behaves the same on every screen no matter which micro-frontend renders it.
+The shared UI lives in `client/libs/ui`. It holds the building blocks every remote uses, so a button looks and behaves the same on every screen no matter which micro-frontend renders it.
 
 - **Primitives:** `Button`, `Card`, `Badge`, `Dialog`, `Container`, `TextLabel`, `SectionHeading`, `EmptyMessage`, `AddItemForm`, `Skeleton`, plus the `tone` and `motion` helpers.
 - **The workout screen:** `Workout` and its exercise, set, stepper and RPE pieces. Both `workout-new` and `workout-view` render it, which is why a remote never needs to load another remote.
 - **One theme:** `src/theme.css` is the Tailwind 4 theme that every remote imports.
 - **Narrow exports:** a library exposes only what's in its `src/index.ts`. Of the workout screen, only `Workout` is public.
 
-Every component has a story next to it (`button.tsx`, `button.stories.tsx`), and the `a11y` addon checks each one for accessibility problems. Remotes get their own Storybook for the views they own, such as the saved-workout card or the history list. The `workout-new` and `workout-view` stories run against a mock Apollo client from `client/api`, so you can work on those screens without starting the backend.
+Every component has a story next to it (`button.tsx`, `button.stories.tsx`), and the `a11y` addon checks each one for accessibility problems. Remotes get their own Storybook for the views they own, such as the saved-workout card or the history list. The `workout-new` and `workout-view` stories run against a mock Apollo client from `client/libs/api`, so you can work on those screens without starting the backend.
 
 The published site is one view. The `ui` Storybook is the host, and the four remote Storybooks (`workout-new`, `workout-view`, `workout-list`, `workout-history`) show up in its sidebar through [Storybook composition](https://storybook.js.org/docs/sharing/storybook-composition). Each is still a separate build, so a remote's docs stay with the remote.
 
@@ -157,7 +157,7 @@ No cloud account is needed to run locally. Zephyr is only switched on for the `d
 npm install
 
 # 2. Give the gateway a JWT secret (32+ characters; this file is gitignored)
-echo "JWT_SECRET=$(openssl rand -hex 32)" > server/gateway/.env.development.local
+echo "JWT_SECRET=$(openssl rand -hex 32)" > server/apps/gateway/.env.development.local
 
 # 3. Start MongoDB in Docker, then every app in the workspace
 npm run dev
@@ -181,52 +181,56 @@ Debuggers listen on 9229 (gateway), 9230 (users-svc) and 9231 (workouts-svc). Th
 
 There are three: `development`, `staging` and `production`. The Nx configuration name picks one, and `npm run dev:staging` runs local processes against staging's database. Env files come in layers:
 
-| File                               | Committed | Holds                                                 |
-| ---------------------------------- | --------- | ----------------------------------------------------- |
-| `.env.<config>` (root)             | yes       | `APP_ENV`                                             |
-| `server/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI` |
-| `server/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`        |
-| `server/<app>/.env.<config>.local` | no        | secrets: `JWT_SECRET`, a hosted `MONGODB_URI`         |
+| File                                    | Committed | Holds                                                 |
+| --------------------------------------- | --------- | ----------------------------------------------------- |
+| `.env.<config>` (root)                  | yes       | `APP_ENV`                                             |
+| `server/apps/<app>/.env.<config>`       | yes       | per-environment values, such as the dev `MONGODB_URI` |
+| `server/apps/<app>/.env.serve`          | yes       | local ports, gRPC addresses and `CORS_ORIGINS`        |
+| `server/apps/<app>/.env.<config>.local` | no        | secrets: `JWT_SECRET`, a hosted `MONGODB_URI`         |
 
 ## Tour of the repo
 
-Two top-level folders, `client/` and `server/`. They never import each other. Anything both sides need, like an input limit, gets its own copy on each side, and the server's copy is the one that's enforced.
+Two top-level folders, `client/` and `server/`, each split into `apps/` (things that run) and `libs/` (code they share). `client/` and `server/` never import each other. Anything both sides need, like an input limit, gets its own copy on each side, and the server's copy is the one that's enforced.
 
 ```text
 client/
-  shell/            host app: layout, routes, sign-in guard (:8100)
-  auth/             remote: sign up and sign in (:8105)
-  workout-list/     remote: saved workouts (:8104)
-  workout-new/      remote: build, run and save a workout (:8103)
-  workout-view/     remote: a finished workout, read-only (:8101)
-  workout-history/  remote: completed workouts (:8102)
-  ui/               component library with Storybook, plus the shared Workout screen
-  hooks/            useTimer, useNotification, and data hooks that hide GraphQL
-  api/              Apollo Client, generated GraphQL types, mountApp
-  auth-state/       token storage and AuthProvider, shared by every remote
-  reducer/          the workout state machine
-  types/            Workout, Exercise, Set, WorkoutLog
-  utils/            time and date formatting, small helpers
+  apps/
+    shell/            host app: layout, routes, sign-in guard (:8100)
+    auth/             remote: sign up and sign in (:8105)
+    workout-list/     remote: saved workouts (:8104)
+    workout-new/      remote: build, run and save a workout (:8103)
+    workout-view/     remote: a finished workout, read-only (:8101)
+    workout-history/  remote: completed workouts (:8102)
+  libs/
+    ui/               component library with Storybook, plus the shared Workout screen
+    hooks/            useTimer, useNotification, and data hooks that hide GraphQL
+    api/              Apollo Client, generated GraphQL types, mountApp
+    auth-state/       token storage and AuthProvider, shared by every remote
+    reducer/          the workout state machine
+    types/            Workout, Exercise, Set, WorkoutLog
+    utils/            time and date formatting, small helpers
 
 server/
-  gateway/          GraphQL BFF: auth, guards, DataLoaders, error mapping
-  users-svc/        users collection, argon2 hashing, gRPC
-  workouts-svc/     workouts and logs, gRPC
-  proto/            .proto contracts, buf config, generated code
-  helpers/          env validation, error helpers shared by the servers
+  apps/
+    gateway/          GraphQL BFF: auth, guards, DataLoaders, error mapping
+    users-svc/        users collection, argon2 hashing, gRPC
+    workouts-svc/     workouts and logs, gRPC
+  libs/
+    proto/            .proto contracts, buf config, generated code
+    helpers/          env validation, error helpers shared by the servers
 
 tools/
-  docker/           one Dockerfile that runs any of the three servers
-  nx/               a local Nx plugin that adds a typecheck target
-.github/workflows/  verify.yml (every PR) and deploy.yml (tags)
+  docker/             one Dockerfile that runs any of the three servers
+  nx/                 a local Nx plugin that adds a typecheck target
+.github/workflows/    verify.yml (every PR) and deploy.yml (tags)
 ```
 
 Good places to start poking around:
 
-- `client/shell/rspack.config.ts` and `client/shell/src/mf.ts` for how remotes are wired in.
-- `client/reducer/src/lib/reducer.ts` for the workout state machine.
-- `server/proto/protos/` for the contracts between the gateway and services.
-- `server/gateway/src/workouts/` for a resolver, a gRPC client and a DataLoader side by side.
+- `client/apps/shell/rspack.config.ts` and `client/apps/shell/src/mf.ts` for how remotes are wired in.
+- `client/libs/reducer/src/lib/reducer.ts` for the workout state machine.
+- `server/libs/proto/protos/` for the contracts between the gateway and services.
+- `server/apps/gateway/src/workouts/` for a resolver, a gRPC client and a DataLoader side by side.
 - `.github/workflows/deploy.yml` for the tier-by-tier deploy.
 
 Libraries are imported as `@workout-tracker/<name>`. Remotes are never imported, only loaded by the shell at runtime.

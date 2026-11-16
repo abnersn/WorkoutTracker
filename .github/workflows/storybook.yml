@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
 
       # One view: the ui Storybook is the host, and the other four load inside
-      # it through Storybook's composition (refs in client/ui/.storybook).
+      # it through Storybook's composition (refs in client/libs/ui/.storybook).
       # Refs need absolute URLs, so the host is built knowing the site address.
       - name: Build every Storybook
         run: |
@@ -42,9 +42,9 @@ jobs:
       # The host sits at the site root, each remote in its own folder.
       - name: Assemble the site
         run: |
-          cp -r client/ui/storybook-static site
+          cp -r client/libs/ui/storybook-static site
           for project in workout-list workout-new workout-view workout-history; do
-            cp -r "client/$project/storybook-static" "site/$project"
+            cp -r "client/apps/$project/storybook-static" "site/$project"
           done
 
       - uses: actions/upload-pages-artifact@v3

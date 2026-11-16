@@ -1,0 +1,48 @@
+{
+  "name": "shell",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "client/apps/shell/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:client"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "rspack serve --mode=development",
+        "cwd": "client/apps/shell",
+        "env": { "ZE_DISABLED": "true" }
+      },
+      "readyWhen": {
+        "signal": true
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default", { "env": "GATEWAY_URL" }],
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/apps/shell",
+        "env": { "ZE_DISABLED": "true" }
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "rspack build --mode=production",
+        "cwd": "client/apps/shell",
+        "env": { "ZE_DISABLED": "false" }
+      },
+      "dependsOn": [
+        "workout-new:deploy",
+        "workout-view:deploy",
+        "workout-list:deploy",
+        "workout-history:deploy",
+        "auth:deploy"
+      ]
+    }
+  }
+}

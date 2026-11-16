@@ -5,10 +5,10 @@ coverage
 .nx
 .angular
 package-lock.json
-server/proto/src/generated
+server/libs/proto/src/generated
 # Generated: GraphQL codegen output, and the schema the gateway writes in dev
-client/api/src/gql
-server/gateway/src/schema.gql
+client/libs/api/src/gql
+server/apps/gateway/src/schema.gql
 # Tool state
 .mf
 .impeccable

@@ -20,8 +20,8 @@ Undecided as a product claim. The user named the architecture as the differentia
 
 ## Operating Context
 
-- Nx monorepo: `client/` (React, shell host plus remotes: auth, workouts, history, pairing, train-together) and `server/` (gateway, users-svc, workouts-svc).
-- Component library in `client/ui` documented in Storybook; styling via Tailwind 4 theme at `client/ui/src/theme.css`.
+- Nx monorepo: `client/` (React, shell host plus remotes: auth, workouts, history, pairing, train-together) and `server/` (gateway, users-svc, workouts-svc), each split into `apps/` and `libs/`.
+- Component library in `client/libs/ui` documented in Storybook; styling via Tailwind 4 theme at `client/libs/ui/src/theme.css`.
 - Data starts in IndexedDB (Day 1) and moves to GraphQL/Atlas behind a `WorkoutRepository` interface.
 - Auth is email + password with JWT; no roles, every query scoped to its owner.
 

@@ -310,7 +310,7 @@ Print the six IDs this checkout will produce:
 ```sh
 REPO_ID=$(gh repo view --json nameWithOwner --jq '.nameWithOwner | ascii_downcase | split("/") | "\(.[1]).\(.[0])"')
 for app in shell auth workout-list workout-new workout-view workout-history; do
-  echo "$(node -p "require('./client/$app/package.json').name").$REPO_ID"
+  echo "$(node -p "require('./client/apps/$app/package.json').name").$REPO_ID"
 done
 ```
 
@@ -325,7 +325,7 @@ Things that follow from this:
   to be made again.
 - **A fork deploys under the fork owner's ID**, never over yours.
 - The shell finds its remotes by app name: the `zephyr:dependencies` block in
-  `client/shell/package.json` lists `workout-view`, `workout-list` and the
+  `client/apps/shell/package.json` lists `workout-view`, `workout-list` and the
   rest, and Zephyr looks them up in the same repository and owner. Rename a
   remote and that block must change with it.
 - The build needs a git remote and at least one commit. A checkout without
@@ -539,7 +539,7 @@ git tag v1.2.0        && git push origin v1.2.0          # ship main to producti
   policies → keep the 5 most recent versions).
 - **Deploy staging and production from the same commit one after the other,
   not at once from different commits.** The shell picks up the newest build of
-  each remote (`@*` in `client/shell/package.json`), so two different commits
+  each remote (`@*` in `client/apps/shell/package.json`), so two different commits
   deploying side by side could mix remotes.
 - **Not verified here:** the Zephyr dashboard labels in step 7 follow the
   current docs (<https://docs.zephyr-cloud.io/features/tags-environments>) and

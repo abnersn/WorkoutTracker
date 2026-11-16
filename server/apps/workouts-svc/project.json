@@ -1,0 +1,64 @@
+{
+  "name": "workouts-svc",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "server/apps/workouts-svc/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:server"],
+  "targets": {
+    "prune-lockfile": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "executor": "@nx/js:prune-lockfile",
+      "outputs": [
+        "{workspaceRoot}/dist/server/workouts-svc/package.json",
+        "{workspaceRoot}/dist/server/workouts-svc/package-lock.json"
+      ],
+      "options": {
+        "buildTarget": "build"
+      }
+    },
+    "copy-workspace-modules": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "outputs": ["{workspaceRoot}/dist/server/workouts-svc/workspace_modules"],
+      "executor": "@nx/js:copy-workspace-modules",
+      "options": {
+        "buildTarget": "build"
+      }
+    },
+    "prune": {
+      "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
+      "executor": "nx:noop"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "readyWhen": {
+        "signal": true
+      },
+      "options": {
+        "buildTarget": "workouts-svc:build",
+        "runBuildTargetDependencies": false,
+        "port": 9231
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "workouts-svc:build:development"
+        },
+        "staging": {
+          "buildTarget": "workouts-svc:build:production"
+        },
+        "production": {
+          "buildTarget": "workouts-svc:build:production"
+        }
+      }
+    },
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
+    }
+  }
+}
