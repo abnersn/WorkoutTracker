@@ -4,6 +4,14 @@ A workout app where you build routines, run them set by set with a rest timer an
 
 **Stack:** Nx monorepo · React 19 · Module Federation (Rspack) on Zephyr Cloud · NestJS GraphQL gateway · NestJS gRPC services · MongoDB Atlas · Cloud Run
 
+## Demo video
+
+
+https://github.com/user-attachments/assets/96c0f3eb-dcfe-41d6-bad0-7281bee6d53c
+
+
+
+
 ## What you get
 
 - Sign up and sign in with email and password.
