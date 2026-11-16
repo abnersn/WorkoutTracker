@@ -233,6 +233,8 @@ Libraries are imported as `@workout-tracker/<name>`. Remotes are never imported,
 
 ## Deploying your own copy
 
+**The full step-by-step guide is in [DEPLOY.md](DEPLOY.md).** What follows is the short version.
+
 You'll need a GCP project, a MongoDB Atlas cluster and a Zephyr Cloud account. One-time setup for `deploy.yml`:
 
 - An Artifact Registry Docker repository named `workout-tracker` in `GCP_REGION`.
