@@ -3,6 +3,9 @@
 How to take this repo from "runs on my machine" to a staging and a production
 environment, each on a URL that stays the same between deploys.
 
+This guide starts from nothing: no cloud accounts, no tokens, no settings in
+GitHub. Skip a step only if you are sure it is already done.
+
 ## What ends up where
 
 | Piece                            | Runs on            | Fixed URL                                        |
@@ -10,86 +13,78 @@ environment, each on a URL that stays the same between deploys.
 | Shell + 5 remotes                | Zephyr Cloud       | One Zephyr **environment** URL per environment   |
 | Gateway (GraphQL)                | Cloud Run, public  | `https://gateway[-staging]-….run.app`            |
 | `users-svc`, `workouts-svc`      | Cloud Run, private | Internal only; the gateway looks them up         |
-| `users` and `workouts` databases | MongoDB Atlas      | Connection strings, kept in Secret Manager       |
+| `users` and `workouts` databases | MongoDB Atlas      | One cluster, shared by staging and production    |
 | Pipeline (`.github/workflows/`)  | GitHub Actions     | `staging-*` tag → staging, `v*` tag → production |
 
-Every Zephyr build gets a new per-version URL
-(`…-66-shell-workouttracker-…-ze.zephyrcloud.app`). That one changes on every
-deploy. The fixed address is the **environment URL** you create in step 7; it
-always serves the newest build of that environment.
-
-## Where things stand today
-
-Checked on 2026-11-16:
-
-- **Zephyr:** the account exists, the six apps exist
-  (`shell.workouttracker.abnersn` and the remotes), and the `ZEPHYR_CI_TOKEN`
-  repository secret is set. No tags or environments yet, so there is no fixed
-  URL.
-- **GitHub:** no repository variables, and no `staging` or `production`
-  environments. The `Verify` workflow is failing on `main`, and `deploy.yml`
-  runs it first, so no tag can deploy until the fixes in step 1 are pushed.
-- **GCP and Atlas:** nothing set up. The current `deploy.yml` (with the Cloud
-  Run job) has never run; earlier tags only deployed the front end.
+Every Zephyr build gets a new per-version URL, with a build number and a hash
+in it. That one changes on every deploy. The fixed address is the
+**environment URL** you create in step 7; it always serves the newest build of
+that environment.
 
 ## The order, and why
 
-1. **Commit the repo fixes** so the pipeline can pass at all.
+1. **Check the repo**, because `deploy.yml` runs every check first and stops
+   if one fails.
 2. **MongoDB Atlas**, because the services refuse to boot without a database.
 3. **GCP**, because the secrets, images and services live there.
-4. **GitHub variables**, which point the pipeline at what steps 2 and 3 made.
-5. **First staging deploy.** The pipeline itself goes services → gateway →
+4. **Zephyr account, application ID and CI token**, so the pipeline is allowed
+   to upload the front ends and you know where they will show up.
+5. **GitHub variables and secrets**, which point the pipeline at what steps 2
+   to 4 made.
+6. **First staging deploy.** The pipeline itself goes services → gateway →
    front ends, so a new UI never calls an old gateway.
-6. **Zephyr tag and environment**, which need a build from step 5 to point at.
+7. **Zephyr tag and environment**, which need a build from step 6 to point at.
    This produces the fixed front-end URL.
-7. **CORS**, because the gateway only answers origins it knows, and the origin
-   is the URL from step 6.
-8. **Production**, repeating 5 to 7 once staging works.
+8. **CORS**, because the gateway only answers origins it knows, and the origin
+   is the URL from step 7.
+9. **Production**, repeating 6 to 8 once staging works.
 
 Staging goes first on purpose: every mistake in the setup shows up there.
 
 ## Tools to install
 
-| Tool                 | Needed for                   | Status on this machine                                                |
-| -------------------- | ---------------------------- | --------------------------------------------------------------------- |
-| `git`, Node 22+, npm | Tagging, local checks        | Installed                                                             |
-| `gh` (GitHub CLI)    | Variables and environments   | Installed and signed in as `abnersn`                                  |
-| `gcloud`             | All GCP setup                | **Missing.** Install: <https://cloud.google.com/sdk/docs/install#rpm> |
-| `openssl`            | Generating secrets           | Ships with Fedora                                                     |
-| `mongosh`            | Optional: testing Atlas URIs | Optional                                                              |
+| Tool              | Needed for                   | Install                                       |
+| ----------------- | ---------------------------- | --------------------------------------------- |
+| `git`             | Tagging                      | <https://git-scm.com/downloads>               |
+| Node 22+ and npm  | Local checks                 | <https://nodejs.org>                          |
+| `gh` (GitHub CLI) | Variables, secrets, runs     | <https://cli.github.com>                      |
+| `gcloud`          | All GCP setup                | <https://cloud.google.com/sdk/docs/install>   |
+| `openssl`         | Generating secrets           | Ships with most Linux distributions and macOS |
+| `mongosh`         | Optional: testing Atlas URIs | <https://www.mongodb.com/docs/mongodb-shell/> |
 
 Docker is not needed for deploying. CI builds the images.
 
-After installing `gcloud`:
+Sign both CLIs in, and install the repo's dependencies:
 
 ```sh
+gh auth login
 gcloud auth login
+npm install
 ```
 
-## Step 1: Commit the repo fixes
+The repo must be on GitHub, with you as an admin (you will create variables,
+secrets and environments). Check which repo the commands will act on:
 
-Three small changes make the repo deployable. They are in the working tree and
-need to reach `main` before any tag is pushed:
+```sh
+gh repo view --json nameWithOwner --jq .nameWithOwner
+```
 
-- `client/ui/.storybook/main.ts`: the lint error and type error that were
-  failing `Verify`.
-- `.github/workflows/deploy.yml`: the front-end build now gets
-  `ZE_ENV=staging` or `ZE_ENV=production`. Without it, a staging build and
-  a production build look the same to Zephyr, and step 6 has nothing to tell
-  them apart by.
-- `eslint.config.mjs`: ignores `storybook-static`, so a local Storybook
-  build no longer breaks `nx lint`.
+## Step 1: Check the repo
 
-Check, commit, push, and wait for `Verify` to go green:
+`deploy.yml` starts with the `Verify` workflow, so a tag deploys nothing
+unless these pass. Run them on the commit you plan to deploy:
 
 ```sh
 npm run format:check
 npx nx run-many -t lint typecheck test
+npx nx run-many -t build
+```
 
-git add -A
-git commit -m "Make the repo deployable"
-git push
-gh run watch
+Fix anything that fails, push to `main`, and confirm the `Verify` run on
+GitHub is green:
+
+```sh
+gh run list --workflow Verify --limit 1
 ```
 
 ## Step 2: MongoDB Atlas
@@ -97,9 +92,20 @@ gh run watch
 Sign up at <https://www.mongodb.com/cloud/atlas/register> (Google or GitHub
 sign-in works). The free M0 tier is enough.
 
-Atlas allows one free cluster per project, so create **two projects**:
-`workout-tracker-staging` and `workout-tracker-production`. Do the following in
-each.
+**Staging and production share one database.** There is one Atlas project, one
+cluster, and one `users` and one `workouts` database, and both environments
+connect to them. What that means in practice:
+
+- An account created on staging exists on production, and the other way
+  round. Workouts and history are the same on both.
+- Staging is for trying new **code**, not for throwaway **data**. Anything a
+  staging build writes, changes or deletes is real.
+- A staging build that changes how documents are stored changes them for
+  production too, while production still runs the old code. Keep data changes
+  backwards compatible, or ship them to both environments together.
+- `npm run dev:staging` on your machine also talks to this database.
+
+Create **one project**, `workout-tracker`, and do the following in it.
 
 1. **Create a cluster.** Tier **M0 (Free)**, provider **Google Cloud**, and the
    region closest to the Cloud Run region you will use in step 3 (Iowa for
@@ -121,7 +127,7 @@ each.
    protection.
 4. **Connect → Drivers** and copy the host (`cluster0.xxxxx.mongodb.net`).
 
-Build the two connection strings per environment. The database name in the
+Build the two connection strings. The database name in the
 path matters; the services use it as their database.
 
 ```text
@@ -129,7 +135,7 @@ mongodb+srv://users-svc:<password>@<host>/users?retryWrites=true&w=majority
 mongodb+srv://workouts-svc:<password>@<host>/workouts?retryWrites=true&w=majority
 ```
 
-You now have four strings (two environments × two services). Keep them in a
+You now have two strings, one per service, used by both environments. Keep them in a
 password manager; step 3 puts them in Secret Manager. They never go in the
 repo or in GitHub.
 
@@ -145,7 +151,7 @@ must be globally unique.
 ```sh
 export PROJECT_ID=workout-tracker-CHANGEME
 export REGION=us-central1
-export REPO=abnersn/WorkoutTracker
+export REPO=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
 ```
 
 ### 3a. Project, billing, APIs
@@ -206,38 +212,39 @@ done
 
 ### 3d. Secrets
 
-Six secrets, three per environment. The names are fixed by `deploy.yml`.
+Six secrets, three per environment. The names are fixed by `deploy.yml`,
+which looks up `<name>-staging` or `<name>-production`, so both sets must
+exist even though the database strings in them are identical.
 
 | Secret                       | Value                                 | Read by       |
 | ---------------------------- | ------------------------------------- | ------------- |
-| `jwt-secret-<env>`           | Random, 32+ characters                | `wt-gateway`  |
+| `jwt-secret-<env>`           | Random, 32+ characters, one per env   | `wt-gateway`  |
 | `users-mongodb-uri-<env>`    | The `users-svc` string from step 2    | `wt-services` |
 | `workouts-mongodb-uri-<env>` | The `workouts-svc` string from step 2 | `wt-services` |
 
-`<env>` is `staging` or `production`. Run this block once per environment,
-pasting that environment's Atlas strings. `read -s` keeps them out of your
-shell history, and `printf '%s'` avoids a trailing newline, which would break
-the connection string.
+Run this block once. It asks for the two Atlas strings and stores each under
+both environments. `read -s` keeps them out of your shell history, and
+`printf '%s'` avoids a trailing newline, which would break the connection
+string.
 
 ```sh
-ENV=staging   # then again with ENV=production
+read -rs "USERS_URI?users-svc URI: "; echo
+read -rs "WORKOUTS_URI?workouts-svc URI: "; echo
 
-openssl rand -hex 32 | tr -d '\n' |
-  gcloud secrets create "jwt-secret-$ENV" --data-file=-
+for ENV in staging production; do
+  openssl rand -hex 32 | tr -d '\n' |
+    gcloud secrets create "jwt-secret-$ENV" --data-file=-
+  printf '%s' "$USERS_URI" |
+    gcloud secrets create "users-mongodb-uri-$ENV" --data-file=-
+  printf '%s' "$WORKOUTS_URI" |
+    gcloud secrets create "workouts-mongodb-uri-$ENV" --data-file=-
 
-read -rs "USERS_URI?users-svc URI for $ENV: "; echo
-printf '%s' "$USERS_URI" |
-  gcloud secrets create "users-mongodb-uri-$ENV" --data-file=-
-
-read -rs "WORKOUTS_URI?workouts-svc URI for $ENV: "; echo
-printf '%s' "$WORKOUTS_URI" |
-  gcloud secrets create "workouts-mongodb-uri-$ENV" --data-file=-
-
-gcloud secrets add-iam-policy-binding "jwt-secret-$ENV" \
-  --member="serviceAccount:$GATEWAY_SA" --role=roles/secretmanager.secretAccessor
-for s in users workouts; do
-  gcloud secrets add-iam-policy-binding "$s-mongodb-uri-$ENV" \
-    --member="serviceAccount:$SERVICES_SA" --role=roles/secretmanager.secretAccessor
+  gcloud secrets add-iam-policy-binding "jwt-secret-$ENV" \
+    --member="serviceAccount:$GATEWAY_SA" --role=roles/secretmanager.secretAccessor
+  for s in users workouts; do
+    gcloud secrets add-iam-policy-binding "$s-mongodb-uri-$ENV" \
+      --member="serviceAccount:$SERVICES_SA" --role=roles/secretmanager.secretAccessor
+  done
 done
 
 unset USERS_URI WORKOUTS_URI
@@ -245,8 +252,9 @@ unset USERS_URI WORKOUTS_URI
 
 (`read "VAR?prompt"` is zsh syntax. In bash, use `read -rsp "prompt" VAR`.)
 
-Staging and production get different JWT secrets, so a staging token is
-worthless against production.
+Staging and production still get different JWT secrets. The accounts are the
+same, but a token issued by one gateway is refused by the other, so you sign
+in separately on each URL.
 
 ### 3e. Let GitHub Actions sign in without a key
 
@@ -273,12 +281,71 @@ export WIF_PROVIDER="projects/$PROJECT_NUMBER/locations/global/workloadIdentityP
 The repository name in the condition is case-sensitive. If the repo is ever
 renamed or moved, both the condition and the binding must be updated.
 
-## Step 4: GitHub variables and environments
+## Step 4: Zephyr account, application ID and CI token
 
-Nothing here is secret, so these are **variables**, not secrets. Same terminal
+### 4a. Sign up
+
+Create an account at <https://app.zephyr-cloud.io>, signing in **with the
+GitHub account that will push the release tags**. Zephyr matches the person
+who triggered a CI run to a Zephyr user through that link. If you signed up
+another way, connect GitHub afterwards on the **Git Providers** page.
+
+### 4b. Know your application IDs
+
+You don't create applications in Zephyr. The first upload creates them, and
+Zephyr works out each one's ID from the repo:
+
+```text
+<app name>.<repository>.<owner>          all lowercase
+```
+
+| Part         | Comes from                                      | In this repo            |
+| ------------ | ----------------------------------------------- | ----------------------- |
+| `app name`   | `name` in the app's own `package.json`          | `shell`, `auth`, …      |
+| `repository` | The repository name in `git remote origin`      | e.g. `workouttracker`   |
+| `owner`      | The user or organization in `git remote origin` | your GitHub user or org |
+
+Print the six IDs this checkout will produce:
+
+```sh
+REPO_ID=$(gh repo view --json nameWithOwner --jq '.nameWithOwner | ascii_downcase | split("/") | "\(.[1]).\(.[0])"')
+for app in shell auth workout-list workout-new workout-view workout-history; do
+  echo "$(node -p "require('./client/$app/package.json').name").$REPO_ID"
+done
+```
+
+Write down the shell's ID (`shell.<repository>.<owner>`). It is the
+application you open in step 7, and it is part of every front-end URL.
+
+Things that follow from this:
+
+- **Renaming or moving the repository, or changing a `name` in a
+  `package.json`, changes the ID.** Zephyr then treats it as a brand-new
+  application with new URLs, and the tags and environments from step 7 have
+  to be made again.
+- **A fork deploys under the fork owner's ID**, never over yours.
+- The shell finds its remotes by app name: the `zephyr:dependencies` block in
+  `client/shell/package.json` lists `workout-view`, `workout-list` and the
+  rest, and Zephyr looks them up in the same repository and owner. Rename a
+  remote and that block must change with it.
+- The build needs a git remote and at least one commit. A checkout without
+  `origin` can't be given an ID.
+
+### 4c. Create the CI token
+
+In the Zephyr dashboard: **Settings → Tokens → CI Tokens**, generate a token,
+and copy it straight away. It is shown once. Step 5 stores it in GitHub; don't
+put it anywhere else.
+
+## Step 5: GitHub variables, secrets and environments
+
+Everything here except the Zephyr token is a **variable**, not a secret. Same terminal
 session as step 3, so the exports are still set.
 
 ```sh
+# Prompts for the token from step 4c, so it never lands in shell history.
+gh secret set ZEPHYR_CI_TOKEN
+
 gh variable set GCP_PROJECT_ID   --body "$PROJECT_ID"
 gh variable set GCP_REGION       --body "$REGION"
 gh variable set GCP_WIF_PROVIDER --body "$WIF_PROVIDER"
@@ -289,7 +356,7 @@ gh variable set GCP_SERVICES_SA  --body "$SERVICES_SA"
 gh api -X PUT "repos/$REPO/environments/staging"
 gh api -X PUT "repos/$REPO/environments/production"
 
-# Placeholders. The real origins don't exist until step 7.
+# Placeholders. The real origins don't exist until step 8.
 gh variable set CORS_ORIGINS --env staging    --body "http://localhost:8100"
 gh variable set CORS_ORIGINS --env production --body "http://localhost:8100"
 ```
@@ -301,7 +368,7 @@ Where every setting lives, for reference:
 
 | Setting                                              | Kind                | Where                                |
 | ---------------------------------------------------- | ------------------- | ------------------------------------ |
-| `ZEPHYR_CI_TOKEN`                                    | Secret              | GitHub repository secret (done)      |
+| `ZEPHYR_CI_TOKEN`                                    | Secret              | GitHub repository secret             |
 | `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WIF_PROVIDER`   | Variable            | GitHub repository variables          |
 | `GCP_DEPLOY_SA`, `GCP_GATEWAY_SA`, `GCP_SERVICES_SA` | Variable            | GitHub repository variables          |
 | `CORS_ORIGINS`                                       | Variable            | GitHub environments, one value each  |
@@ -310,10 +377,10 @@ Where every setting lives, for reference:
 
 `ZEPHYR_CI_TOKEN` must stay a _repository_ secret. The `client` job doesn't
 run in a GitHub environment, so it can't see environment secrets. If the token
-ever needs replacing: Zephyr dashboard → **Settings → Tokens → CI Tokens**,
-then `gh secret set ZEPHYR_CI_TOKEN`.
+ever needs replacing, repeat step 4c and run `gh secret set ZEPHYR_CI_TOKEN`
+again.
 
-## Step 5: First staging deploy
+## Step 6: First staging deploy
 
 ```sh
 git checkout main && git pull
@@ -337,20 +404,20 @@ curl -s -X POST "$(gcloud run services describe gateway-staging --region "$REGIO
   -H 'content-type: application/json' -d '{"query":"{__typename}"}'
 ```
 
-The front end is uploaded but not usable yet: it has no fixed URL (step 6) and
-the gateway doesn't accept its origin (step 7).
+The front end is uploaded but not usable yet: it has no fixed URL (step 7) and
+the gateway doesn't accept its origin (step 8).
 
 If the run fails, see [Troubleshooting](#troubleshooting).
 
-## Step 6: Zephyr tag and environment
+## Step 7: Zephyr tag and environment
 
 This is what creates the fixed front-end URL. Only the **shell** needs it. The
 shell is the one app the browser opens, and each shell build already pins the
 exact remote versions that were deployed alongside it.
 
-Sign in at <https://app.zephyr-cloud.io> with the GitHub account that pushes
-the tags (it must be linked under **Git Providers**, which it already is), and
-open the `shell` application in the `workouttracker` project.
+In the Zephyr dashboard (<https://app.zephyr-cloud.io>), open the application
+whose ID is the shell's from step 4b. It only appears after the first upload,
+which step 6 just did.
 
 1. **DevOps → Tags → New Tag.** Name it `staging`. **Add Condition** →
    **Environment** is `staging`. Save. The tag now follows the newest shell
@@ -358,19 +425,19 @@ open the `shell` application in the `workouttracker` project.
 2. **DevOps → Environments** → create an environment named `staging`, based on
    the **tag** `staging` (not on a fixed version).
 3. Copy the environment's URL. It looks like
-   `https://staging-shell-workouttracker-abnersn-<hash>-ze.zephyrcloud.app`.
+   `https://staging-shell-<repository>-<owner>-<hash>-ze.zephyrcloud.app`.
 
 Because the environment follows a tag, each later `staging-*` deploy shows up
 at the same URL with no further clicks. An environment based on a fixed
 version would not update by itself.
 
-## Step 7: Point CORS at the fixed URL
+## Step 8: Point CORS at the fixed URL
 
 The value is a bare origin: no path, no trailing slash. Staging also keeps
 `localhost:8100` so `npm run dev:staging` works.
 
 ```sh
-STAGING_URL=https://staging-shell-…-ze.zephyrcloud.app   # from step 6
+STAGING_URL=https://staging-shell-…-ze.zephyrcloud.app   # from step 7
 
 gh variable set CORS_ORIGINS --env staging --body "$STAGING_URL,http://localhost:8100"
 ```
@@ -385,7 +452,7 @@ gh run watch
 
 Open the staging URL, create an account, build a workout. Staging is done.
 
-## Step 8: Production
+## Step 9: Production
 
 Same three moves, with `production` in place of `staging`.
 
@@ -438,7 +505,13 @@ git tag v1.2.0        && git push origin v1.2.0          # ship main to producti
 - **Rotate a secret:**
   `printf '%s' "$NEW" | gcloud secrets versions add jwt-secret-production --data-file=-`,
   then deploy. Services read `latest` only when a new revision starts.
-  Rotating a JWT secret signs everyone out.
+  Rotating a JWT secret signs everyone out. A new database password goes in
+  both the `-staging` and `-production` secret, and both environments need a
+  deploy.
+- **Give staging its own data later:** create a second Atlas project and
+  cluster with the same two users, put its strings in the two `-staging`
+  secrets with `gcloud secrets versions add`, and push a `staging-*` tag.
+  Nothing in the code or the workflow changes.
 
 ## Troubleshooting
 
@@ -468,8 +541,8 @@ git tag v1.2.0        && git push origin v1.2.0          # ship main to producti
   not at once from different commits.** The shell picks up the newest build of
   each remote (`@*` in `client/shell/package.json`), so two different commits
   deploying side by side could mix remotes.
-- **Not verified here:** the Zephyr dashboard labels in step 6 follow the
+- **Not verified here:** the Zephyr dashboard labels in step 7 follow the
   current docs (<https://docs.zephyr-cloud.io/features/tags-environments>) and
   may be worded slightly differently on screen. If the dashboard won't create
-  an environment for a tag that has no builds yet, that is why step 6 comes
-  after step 5.
+  an environment for a tag that has no builds yet, that is why step 7 comes
+  after step 6.
